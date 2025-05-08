@@ -349,6 +349,61 @@ def get_positions():
             'success': False,
             'message': f'Error: {str(e)}'
         })
+
+@app.route('/api/change_mode', methods=['POST'])
+def change_trading_mode():
+    """API endpoint para cambiar entre modo papel y real"""
+    global trading_bot
+    
+    data = request.json
+    new_mode = data.get('mode', 'paper')
+    confirmed = data.get('confirm', False)
+    
+    # Solo permitir 'paper' o 'live'
+    if new_mode not in ['paper', 'live']:
+        return jsonify({"success": False, "message": "Invalid mode. Use 'paper' or 'live'"})
+    
+    if not trading_bot:
+        if not initialize_bot():
+            return jsonify({
+                'success': False,
+                'message': 'Bot not initialized'
+            })
+    
+    # Si está intentando cambiar a modo real, verificar requisitos
+    if new_mode == 'live':
+        # Verificar credenciales API válidas
+        if not trading_bot.verify_api_credentials():
+            return jsonify({
+                "success": False, 
+                "message": "Credenciales API inválidas. Verifique sus claves API de OKX."
+            })
+        
+        # Verificar requisitos de rendimiento
+        if not confirmed:
+            # Verificar requisitos solo si no está confirmado
+            performance_ok, performance_message = trading_bot.verify_performance_requirements()
+            if not performance_ok:
+                return jsonify({
+                    "success": False,
+                    "needs_confirmation": True,
+                    "message": f"ADVERTENCIA: {performance_message}\n\nEl trading con fondos reales implica un riesgo significativo de pérdida financiera."
+                })
+    
+    # Cambiar modo
+    try:
+        trading_bot.set_trading_mode(new_mode)
+        mode_display = "Trading Real" if new_mode == "live" else "Paper Trading"
+        return jsonify({
+            "success": True, 
+            "message": f"Modo cambiado a {mode_display}"
+        })
+    except Exception as e:
+        logger.error(f"Error al cambiar modo de trading: {e}")
+        return jsonify({
+            "success": False, 
+            "message": f"Error al cambiar modo: {str(e)}"
+        })
         
 # API endpoints para el sistema de reporte de errores
 @app.route('/api/errors/recent', methods=['GET'])

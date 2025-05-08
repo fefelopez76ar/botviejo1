@@ -108,6 +108,14 @@ function setupEventHandlers() {
         });
     }
     
+    // Mode selection change handler
+    const modeSelect = document.getElementById('modeSelect');
+    if (modeSelect) {
+        modeSelect.addEventListener('change', function() {
+            updateTradingMode();
+        });
+    }
+    
     // Confirm start button in modal
     const confirmStartBtn = document.getElementById('confirmStartBtn');
     if (confirmStartBtn) {
