@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Add your description here"
 requires-python = ">=3.11"
 dependencies = [
+    "anthropic>=0.51.0",
     "backtrader>=1.9.78.123",
     "ccxt>=4.4.78",
     "email-validator>=2.2.0",

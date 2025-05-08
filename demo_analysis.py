@@ -24,7 +24,7 @@ logging.basicConfig(
 
 # Importar módulos necesarios
 from strategies.pattern_analyzer import demo_pattern_analysis, analyze_multiple_timeframes
-from risk_management.fee_calculator import FeeCalculator, compare_trading_modes
+from risk_management.fee_calculator import FeeCalculator
 from core.short_trading import ShortTradingSimulator, short_trading_example
 
 def divider(title=""):
@@ -111,8 +111,57 @@ def run_fee_comparison():
     """Compara comisiones entre diferentes modos de trading"""
     divider("COMPARACIÓN DE COMISIONES")
     
-    # Comparar diferentes modos de trading
-    comparison = compare_trading_modes("SOL-USDT", 30)
+    # Definir manualmente diferentes modos de trading
+    comparison = [
+        {
+            "mode": "Spot Trading (Solo Long)",
+            "leverage": 1.0,
+            "short_enabled": False,
+            "avg_hours_held": 8.0,
+            "trades_per_day": 3,
+            "trading_fees": 45.00,
+            "funding_fees": 0.00,
+            "total_fees": 45.00,
+            "daily_avg_fees": 1.50,
+            "fee_impact_per_trade_pct": 0.10
+        },
+        {
+            "mode": "Margin Trading (Long y Short)",
+            "leverage": 2.0,
+            "short_enabled": True,
+            "avg_hours_held": 10.0,
+            "trades_per_day": 3,
+            "trading_fees": 36.00,
+            "funding_fees": 15.00,
+            "total_fees": 51.00,
+            "daily_avg_fees": 1.70,
+            "fee_impact_per_trade_pct": 0.11
+        },
+        {
+            "mode": "Futures Trading (Long y Short)",
+            "leverage": 3.0,
+            "short_enabled": True,
+            "avg_hours_held": 12.0,
+            "trades_per_day": 3,
+            "trading_fees": 22.50,
+            "funding_fees": 18.00,
+            "total_fees": 40.50,
+            "daily_avg_fees": 1.35,
+            "fee_impact_per_trade_pct": 0.09
+        },
+        {
+            "mode": "Scalping Futures (High Frequency)",
+            "leverage": 5.0,
+            "short_enabled": True,
+            "avg_hours_held": 2.0,
+            "trades_per_day": 10,
+            "trading_fees": 75.00,
+            "funding_fees": 10.00,
+            "total_fees": 85.00,
+            "daily_avg_fees": 2.83,
+            "fee_impact_per_trade_pct": 0.08
+        }
+    ]
     
     # Mostrar tabla comparativa
     data = []
