@@ -128,6 +128,36 @@ def battle_arena():
     """Battle Arena page route"""
     return render_template('battle_arena.html')
 
+@app.route('/error-management')
+def error_management():
+    """Error Management page route"""
+    # Importar error reporter
+    from core.error_reporter import get_error_reporter
+    reporter = get_error_reporter()
+    
+    # Obtener errores recientes y organizarlos por estado
+    recent_errors = reporter.get_recent_errors()
+    
+    # Obtener errores fijos y soluciones disponibles
+    fixed_errors = [err for err in recent_errors if err.get('status') == 'fixed']
+    available_fixes = []
+    
+    # En un sistema real, obtendríamos las soluciones disponibles del servidor
+    # Para esta implementación, simulamos algunas soluciones
+    for err in recent_errors:
+        if err.get('status') == 'fixed':
+            available_fixes.append({
+                'error_id': err.get('error_id'),
+                'error_type': err.get('error_type'),
+                'fix_type': 'code_update',
+                'description': 'Actualización de código para solucionar este error'
+            })
+    
+    return render_template('error_management.html', 
+                         recent_errors=recent_errors,
+                         fixed_errors=fixed_errors,
+                         available_fixes=available_fixes)
+
 @app.route('/api/bot/start', methods=['POST'])
 def start_bot():
     """API endpoint to start the bot"""

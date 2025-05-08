@@ -21,9 +21,10 @@ import hashlib
 import logging
 import zipfile
 import base64
+import traceback
 import requests
 from datetime import datetime
-from typing import Dict, List, Any, Optional, Set, Tuple
+from typing import Dict, List, Any, Optional, Set, Tuple, Union
 
 # Configurar logging
 logging.basicConfig(
@@ -539,6 +540,418 @@ class SyncManager:
         
         logger.info(f"Cerebro importado: {brain_path}, resultado: {result}")
         return result
+        
+    def log_error(self, 
+                error_type: str, 
+                error_message: str, 
+                module_name: str, 
+                traceback_info: str = None,
+                additional_data: Dict[str, Any] = None) -> Dict[str, Any]:
+        """
+        Registra un error en el registro local de errores.
+        
+        Args:
+            error_type: Tipo de error (e.g., "RuntimeError", "APIError")
+            error_message: Mensaje de error
+            module_name: Nombre del módulo donde ocurrió el error
+            traceback_info: Información de traceback (opcional)
+            additional_data: Datos adicionales sobre el error (opcional)
+            
+        Returns:
+            Dict[str, Any]: Información del error registrado
+        """
+        # Crear directorio de errores si no existe
+        error_dir = os.path.join(self.sync_dir, "error_logs")
+        os.makedirs(error_dir, exist_ok=True)
+        
+        # Obtener traceback si no se proporciona
+        if traceback_info is None and sys.exc_info()[0] is not None:
+            traceback_info = traceback.format_exc()
+        
+        # Crear registro de error
+        error_log = {
+            "error_id": hashlib.md5(f"{error_type}:{error_message}:{time.time()}".encode()).hexdigest(),
+            "timestamp": datetime.now().isoformat(),
+            "error_type": error_type,
+            "error_message": error_message,
+            "module": module_name,
+            "traceback": traceback_info,
+            "system_info": {
+                "platform": sys.platform,
+                "python_version": sys.version,
+                "bot_version": self.manifest.get("version", "1.0.0")
+            },
+            "status": "pending",  # pending, reported, fixed
+            "fixed_in_version": None
+        }
+        
+        # Añadir datos adicionales si se proporcionan
+        if additional_data:
+            error_log["additional_data"] = additional_data
+        
+        # Guardar registro en archivo
+        error_log_file = os.path.join(error_dir, f"error_{error_log['error_id']}.json")
+        with open(error_log_file, 'w') as f:
+            json.dump(error_log, f, indent=4)
+        
+        # Mantener registro en memoria de errores recientes
+        if "recent_errors" not in self.manifest:
+            self.manifest["recent_errors"] = []
+        
+        # Añadir a lista de errores recientes (limitada a 100)
+        self.manifest["recent_errors"].insert(0, {
+            "error_id": error_log["error_id"],
+            "timestamp": error_log["timestamp"],
+            "error_type": error_log["error_type"],
+            "module": error_log["module"],
+            "status": error_log["status"]
+        })
+        
+        # Limitar a 100 errores recientes
+        self.manifest["recent_errors"] = self.manifest["recent_errors"][:100]
+        self._save_manifest()
+        
+        logger.error(f"Error registrado: {error_type} en {module_name} - {error_message} (ID: {error_log['error_id']})")
+        return error_log
+    
+    def report_error(self, 
+                   error_id: str, 
+                   remote_url: str,
+                   additional_comments: str = None) -> Dict[str, Any]:
+        """
+        Reporta un error registrado al servidor central.
+        
+        Args:
+            error_id: ID del error a reportar
+            remote_url: URL del servidor central
+            additional_comments: Comentarios adicionales (opcional)
+            
+        Returns:
+            Dict[str, Any]: Resultado del reporte
+        """
+        # Verificar que existe el error
+        error_dir = os.path.join(self.sync_dir, "error_logs")
+        error_file = os.path.join(error_dir, f"error_{error_id}.json")
+        
+        if not os.path.exists(error_file):
+            logger.error(f"Error no encontrado: {error_id}")
+            return {
+                "status": "error",
+                "message": f"Error no encontrado: {error_id}"
+            }
+        
+        try:
+            # Cargar error
+            with open(error_file, 'r') as f:
+                error_log = json.load(f)
+            
+            # Añadir comentarios adicionales
+            if additional_comments:
+                error_log["user_comments"] = additional_comments
+            
+            # Reportar error al servidor
+            response = requests.post(
+                f"{remote_url}/api/report-error",
+                json={
+                    "error_data": error_log,
+                    "bot_name": self.manifest.get("bot_name", "SolanaTradingBot"),
+                    "bot_version": self.manifest.get("version", "1.0.0"),
+                    "report_time": datetime.now().isoformat()
+                },
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                # Actualizar estado del error
+                error_log["status"] = "reported"
+                error_log["report_time"] = datetime.now().isoformat()
+                error_log["report_result"] = result
+                
+                # Guardar error actualizado
+                with open(error_file, 'w') as f:
+                    json.dump(error_log, f, indent=4)
+                
+                # Actualizar en lista de errores recientes
+                for error in self.manifest.get("recent_errors", []):
+                    if error.get("error_id") == error_id:
+                        error["status"] = "reported"
+                        break
+                
+                self._save_manifest()
+                
+                logger.info(f"Error reportado exitosamente: {error_id}")
+                return {
+                    "status": "success",
+                    "message": "Error reportado exitosamente",
+                    "response": result
+                }
+            else:
+                logger.error(f"Error al reportar error: {response.status_code}")
+                return {
+                    "status": "error",
+                    "message": f"Error {response.status_code} al reportar",
+                    "http_status": response.status_code
+                }
+                
+        except Exception as e:
+            logger.error(f"Error al reportar error {error_id}: {e}")
+            return {
+                "status": "error",
+                "message": f"Error al reportar: {e}"
+            }
+    
+    def check_error_fixes(self, remote_url: str) -> Dict[str, Any]:
+        """
+        Verifica si hay soluciones disponibles para errores reportados.
+        
+        Args:
+            remote_url: URL del servidor central
+            
+        Returns:
+            Dict[str, Any]: Información sobre soluciones disponibles
+        """
+        try:
+            # Obtener lista de errores reportados
+            error_dir = os.path.join(self.sync_dir, "error_logs")
+            reported_errors = []
+            
+            if os.path.exists(error_dir):
+                for filename in os.listdir(error_dir):
+                    if filename.startswith("error_") and filename.endswith(".json"):
+                        try:
+                            with open(os.path.join(error_dir, filename), 'r') as f:
+                                error_log = json.load(f)
+                                if error_log.get("status") == "reported":
+                                    reported_errors.append({
+                                        "error_id": error_log.get("error_id"),
+                                        "error_type": error_log.get("error_type"),
+                                        "module": error_log.get("module")
+                                    })
+                        except:
+                            continue
+            
+            # Si no hay errores reportados, no hay nada que verificar
+            if not reported_errors:
+                logger.info("No hay errores reportados para verificar soluciones")
+                return {
+                    "status": "success",
+                    "message": "No hay errores reportados para verificar",
+                    "fixes_available": 0
+                }
+            
+            # Consultar servidor por soluciones
+            response = requests.post(
+                f"{remote_url}/api/check-error-fixes",
+                json={
+                    "bot_name": self.manifest.get("bot_name", "SolanaTradingBot"),
+                    "bot_version": self.manifest.get("version", "1.0.0"),
+                    "reported_errors": reported_errors
+                },
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                fixes = result.get("fixes", [])
+                
+                # Procesar soluciones
+                for fix in fixes:
+                    error_id = fix.get("error_id")
+                    fix_type = fix.get("fix_type")
+                    
+                    if error_id and fix_type:
+                        error_file = os.path.join(error_dir, f"error_{error_id}.json")
+                        
+                        if os.path.exists(error_file):
+                            with open(error_file, 'r') as f:
+                                error_log = json.load(f)
+                            
+                            # Actualizar estado del error
+                            error_log["status"] = "fixed"
+                            error_log["fix_info"] = fix
+                            error_log["fixed_at"] = datetime.now().isoformat()
+                            
+                            with open(error_file, 'w') as f:
+                                json.dump(error_log, f, indent=4)
+                            
+                            # Actualizar en lista de errores recientes
+                            for error in self.manifest.get("recent_errors", []):
+                                if error.get("error_id") == error_id:
+                                    error["status"] = "fixed"
+                                    break
+                
+                self._save_manifest()
+                
+                return {
+                    "status": "success",
+                    "fixes_available": len(fixes),
+                    "fixes": fixes
+                }
+            else:
+                logger.error(f"Error al verificar soluciones: {response.status_code}")
+                return {
+                    "status": "error",
+                    "message": f"Error {response.status_code} al verificar soluciones"
+                }
+                
+        except Exception as e:
+            logger.error(f"Error al verificar soluciones: {e}")
+            return {
+                "status": "error",
+                "message": f"Error al verificar soluciones: {e}"
+            }
+    
+    def apply_error_fix(self, error_id: str, remote_url: str) -> Dict[str, Any]:
+        """
+        Aplica una solución para un error específico.
+        
+        Args:
+            error_id: ID del error a solucionar
+            remote_url: URL del servidor central
+            
+        Returns:
+            Dict[str, Any]: Resultado de la aplicación de la solución
+        """
+        # Verificar que existe el error
+        error_dir = os.path.join(self.sync_dir, "error_logs")
+        error_file = os.path.join(error_dir, f"error_{error_id}.json")
+        
+        if not os.path.exists(error_file):
+            logger.error(f"Error no encontrado: {error_id}")
+            return {
+                "status": "error",
+                "message": f"Error no encontrado: {error_id}"
+            }
+        
+        try:
+            # Cargar error
+            with open(error_file, 'r') as f:
+                error_log = json.load(f)
+            
+            # Verificar si el error ya tiene una solución
+            if error_log.get("status") != "fixed" or "fix_info" not in error_log:
+                # Verificar si hay una solución disponible
+                response = requests.get(
+                    f"{remote_url}/api/get-error-fix/{error_id}",
+                    timeout=30
+                )
+                
+                if response.status_code == 200:
+                    fix_info = response.json()
+                else:
+                    logger.error(f"No se encontró solución para el error {error_id}")
+                    return {
+                        "status": "error",
+                        "message": "No se encontró solución para el error"
+                    }
+            else:
+                fix_info = error_log.get("fix_info")
+            
+            # Aplicar la solución según su tipo
+            fix_type = fix_info.get("fix_type")
+            fix_data = fix_info.get("fix_data", {})
+            
+            result = {
+                "status": "success",
+                "error_id": error_id,
+                "fix_type": fix_type
+            }
+            
+            if fix_type == "code_update":
+                # La solución es una actualización de código
+                update_id = fix_data.get("update_id")
+                if update_id:
+                    # Descargar y aplicar la actualización
+                    update_result = self.download_remote_update(remote_url, update_id)
+                    result["update_result"] = update_result
+                    
+                    # Marcar error como solucionado si la actualización fue exitosa
+                    if update_result.get("status") == "success":
+                        error_log["status"] = "fixed"
+                        error_log["fix_applied"] = True
+                        error_log["fix_applied_at"] = datetime.now().isoformat()
+                        
+                        with open(error_file, 'w') as f:
+                            json.dump(error_log, f, indent=4)
+                else:
+                    result["status"] = "error"
+                    result["message"] = "Datos de actualización incompletos"
+            
+            elif fix_type == "config_update":
+                # La solución es una actualización de configuración
+                config_changes = fix_data.get("config_changes", {})
+                config_file = fix_data.get("config_file", "config.json")
+                
+                if config_changes and config_file:
+                    # Aplicar cambios de configuración
+                    config_path = os.path.join(self.base_dir, config_file)
+                    
+                    if os.path.exists(config_path):
+                        try:
+                            with open(config_path, 'r') as f:
+                                config = json.load(f)
+                            
+                            # Aplicar cambios
+                            self._merge_dict_recursive(config, config_changes)
+                            
+                            with open(config_path, 'w') as f:
+                                json.dump(config, f, indent=4)
+                            
+                            # Marcar error como solucionado
+                            error_log["status"] = "fixed"
+                            error_log["fix_applied"] = True
+                            error_log["fix_applied_at"] = datetime.now().isoformat()
+                            
+                            with open(error_file, 'w') as f:
+                                json.dump(error_log, f, indent=4)
+                            
+                            result["config_file"] = config_file
+                            result["changes_applied"] = True
+                        except Exception as e:
+                            result["status"] = "error"
+                            result["message"] = f"Error al aplicar cambios de configuración: {e}"
+                    else:
+                        result["status"] = "error"
+                        result["message"] = f"Archivo de configuración no encontrado: {config_file}"
+                else:
+                    result["status"] = "error"
+                    result["message"] = "Datos de configuración incompletos"
+            
+            elif fix_type == "documentation":
+                # La solución es documentación o instrucciones para el usuario
+                # Solo marcamos como leído, la solución real la aplica el usuario
+                error_log["status"] = "fixed"
+                error_log["fix_read"] = True
+                error_log["fix_read_at"] = datetime.now().isoformat()
+                
+                with open(error_file, 'w') as f:
+                    json.dump(error_log, f, indent=4)
+                
+                result["documentation"] = fix_data.get("instructions", "")
+                result["requires_user_action"] = True
+            
+            else:
+                result["status"] = "error"
+                result["message"] = f"Tipo de solución desconocido: {fix_type}"
+            
+            # Actualizar en lista de errores recientes
+            for error in self.manifest.get("recent_errors", []):
+                if error.get("error_id") == error_id:
+                    error["status"] = error_log["status"]
+                    break
+            
+            self._save_manifest()
+            
+            return result
+                
+        except Exception as e:
+            logger.error(f"Error al aplicar solución para {error_id}: {e}")
+            return {
+                "status": "error",
+                "message": f"Error al aplicar solución: {e}"
+            }
     
     def get_sync_history(self) -> List[Dict[str, Any]]:
         """
