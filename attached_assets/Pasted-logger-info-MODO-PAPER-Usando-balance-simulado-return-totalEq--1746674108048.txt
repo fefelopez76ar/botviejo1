@@ -1,0 +1,349 @@
+logger.info("🔄 MODO PAPER: Usando balance simulado")
+            return {
+                "totalEq": "1000",
+                "isoEq": "1000",
+                "adjEq": "1000",
+                "ordFroz": "0",
+                "imr": "0",
+                "mmr": "0",
+                "details": [
+                    {
+                        "ccy": "USDT",
+                        "eq": "1000",
+                        "cashBal": "1000",
+                        "uTime": str(int(time.time() * 1000)),
+                        "isoEq": "0",
+                        "availEq": "1000",
+                        "disEq": "1000",
+                        "availBal": "1000",
+                        "frozenBal": "0",
+                    }
+                ]
+            }
+        
+        # Si no estamos en modo paper, realizar petición real
+        endpoint = '/api/v5/account/balance'
+        response = self._request('GET', endpoint)
+        
+        if response.get('code') == '0':
+            return response['data'][0]
+        else:
+            logger.error(f"No se pudo obtener el balance: {response.get('msg')}")
+            # Fallback a balance vacío
+            return {}
+    
+    def get_positions(self, symbol: str = None) -> List[Dict]:
+        """
+        Obtiene las posiciones abiertas
+        
+        Args:
+            symbol (str, optional): Símbolo específico a consultar
+            
+        Returns:
+            List[Dict]: Lista de posiciones abiertas
+        """
+        # Si estamos en modo paper, devolver posiciones simuladas
+        if self.mode == 'paper':
+            logger.info("🔄 MODO PAPER: Usando posiciones simuladas")
+            
+            # Devolver posición actual si existe
+            if hasattr(self, 'position') and self.position and (not symbol or symbol == self.position.get('instId')):
+                position_data = {
+                    'adl': '1',
+                    'availPos': str(self.position.get('pos', '0')),
+                    'avgPx': str(self.position.get('avgPx', '0')),
+                    'cTime': str(int(time.time() * 1000)),
+                    'ccy': 'USDT',
+                    'instId': self.position.get('instId', symbol or 'SOL-USDT'),
+                    'instType': 'SPOT',
+                    'lever': '1',
+                    'pos': str(self.position.get('pos', '0')),
+                    'posSide': 'long',
+                    'uTime': str(int(time.time() * 1000)),
+                    'upl': str(self.position.get('upl', '0'))
+                }
+                return [position_data]
+            else:
+                return []
+        
+        # Solicitud real a la API
+        endpoint = '/api/v5/account/positions'
+        params = {}
+        if symbol:
+            params['instId'] = symbol
+        
+        response = self._request('GET', endpoint, params)
+        
+        if response.get('code') == '0':
+            return response['data']
+        else:
+            logger.error(f"No se pudieron obtener las posiciones: {response.get('msg')}")
+            return []
+    
+    def get_market_price(self, symbol: str) -> float:
+        """
+        Obtiene el precio actual del mercado
+        
+        Args:
+            symbol (str): Símbolo del instrumento
+            
+        Returns:
+            float: Precio actual o 0 si hay error
+        """
+        # SOLUCIÓN: Usar endpoint público sin autenticación
+        try:
+            endpoint = '/api/v5/market/ticker'
+            params = {'instId': symbol}
+            url = f"{self.base_url}{endpoint}"
+            
+            # Petición directa sin autenticación
+            logger.info(f"Obteniendo precio via endpoint público: {url}")
+            response = requests.get(url, params=params)
+            
+            if response.status_code == 200:
+                result = response.json()
+                if result.get('code') == '0' and result['data']:
+                    price = float(result['data'][0]['last'])
+                    logger.info(f"Precio obtenido: {price}")
+                    return price
+            
+            logger.error(f"No se pudo obtener el precio: {response.text}")
+            return 0.0
+        except Exception as e:
+            logger.error(f"Error al obtener precio: {e}")
+            return 0.0
+    
+    def get_historical_data(self, symbol: str, interval: str = '15m', 
+                         limit: int = 100) -> pd.DataFrame:
+        """
+        Obtiene datos históricos de precios
+        
+        Args:
+            symbol (str): Símbolo del instrumento
+            interval (str): Intervalo de tiempo (1m, 5m, 15m, 1h, 4h, 1d)
+            limit (int): Número de velas a obtener
+            
+        Returns:
+            pd.DataFrame: DataFrame con datos históricos
+        """
+        # SOLUCIÓN: Usar endpoint público sin autenticación
+        try:
+            # Mapear intervalos a formato OKX
+            interval_map = {
+                '1m': '1m',
+                '5m': '5m',
+                '15m': '15m',
+                '30m': '30m',
+                '1h': '1H',
+                '4h': '4H',
+                '1d': '1D'
+            }
+            
+            okx_interval = interval_map.get(interval, '15m')
+            
+            endpoint = '/api/v5/market/candles'
+            params = {
+                'instId': symbol,
+                'bar': okx_interval,
+                'limit': str(limit)
+            }
+            
+            # Petición directa sin autenticación
+            url = f"{self.base_url}{endpoint}"
+            logger.info(f"Obteniendo datos históricos via endpoint público: {url}")
+            response = requests.get(url, params=params)
+            
+            if response.status_code == 200:
+                result = response.json()
+                if result.get('code') == '0' and result['data']:
+                    # Formatear datos
+                    data = []
+                    for candle in result['data']:
+                        data.append({
+                            'timestamp': int(candle[0]),
+                            'open': float(candle[1]),
+                            'high': float(candle[2]),
+                            'low': float(candle[3]),
+                            'close': float(candle[4]),
+                            'volume': float(candle[5])
+                        })
+                    
+                    # Crear DataFrame
+                    df = pd.DataFrame(data)
+                    df['date'] = pd.to_datetime(df['timestamp'], unit='ms')
+                    df = df.sort_values('date')
+                    df.set_index('date', inplace=True)
+                    
+                    logger.info(f"Datos históricos obtenidos: {len(df)} velas")
+                    return df
+            
+            logger.error(f"No se pudieron obtener datos históricos: {response.text}")
+            return pd.DataFrame()
+        except Exception as e:
+            logger.error(f"Error al obtener datos históricos: {e}")
+            return pd.DataFrame()
+    
+    def place_order(self, symbol: str, side: str, size: float, 
+                  order_type: str = 'market', price: float = None) -> Dict:
+        """
+        Coloca una orden en el mercado
+        
+        Args:
+            symbol (str): Símbolo del instrumento
+            side (str): Dirección de la orden ('buy' o 'sell')
+            size (float): Tamaño de la orden
+            order_type (str): Tipo de orden ('market' o 'limit')
+            price (float, optional): Precio para órdenes limit
+            
+        Returns:
+            Dict: Resultado de la orden
+        """
+        if self.mode == 'paper':
+            # Simulación de orden en paper trading
+            logger.info(f"[PAPER] Orden simulada: {side} {size} {symbol} a precio {'market' if not price else price}")
+            
+            current_price = self.get_market_price(symbol)
+            if not current_price:
+                return {"code": "9999", "msg": "No se pudo obtener el precio actual", "data": []}
+            
+            # Simular orden exitosa
+            order_id = f"paper_{int(time.time() * 1000)}"
+            executed_price = price if price and order_type == 'limit' else current_price
+            
+            # Actualizar balance simulado
+            if side == 'buy':
+                self.position = {
+                    'posId': order_id,
+                    'instId': symbol,
+                    'pos': size,
+                    'avgPx': executed_price,
+                    'upl': 0.0
+                }
+            elif side == 'sell' and self.position:
+                # Calcular P&L
+                entry_price = self.position.get('avgPx', executed_price)
+                position_size = self.position.get('pos', 0)
+                pnl = (executed_price - entry_price) * position_size if position_size > 0 else 0
+                
+                # Actualizar balance
+                self.balance += pnl
+                self.position = None
+            
+            # Orden simulada exitosa
+            result = {
+                "code": "0",
+                "msg": "",
+                "data": [{
+                    "ordId": order_id,
+                    "clOrdId": f"client_{order_id}",
+                    "tag": "",
+                    "sCode": "0",
+                    "sMsg": ""
+                }]
+            }
+            
+            logger.info(f"[PAPER] Orden ejecutada: ID {order_id}, Precio {executed_price}")
+            return result
+        else:
+            # Trading real
+            endpoint = '/api/v5/trade/order'
+            
+            # Preparar parámetros
+            params = {
+                'instId': symbol,
+                'tdMode': 'cross',  # Usar margen cruzado
+                'side': side,
+                'ordType': order_type,
+                'sz': str(size)
+            }
+            
+            if order_type == 'limit' and price:
+                params['px'] = str(price)
+            
+            # Enviar orden
+            response = self._request('POST', endpoint, params)
+            
+            if response.get('code') == '0':
+                logger.info(f"Orden colocada: {side} {size} {symbol}")
+                return response
+            else:
+                logger.error(f"Error al colocar orden: {response.get('msg')}")
+                return response
+    
+    def cancel_order(self, symbol: str, order_id: str) -> Dict:
+        """
+        Cancela una orden existente
+        
+        Args:
+            symbol (str): Símbolo del instrumento
+            order_id (str): ID de la orden a cancelar
+            
+        Returns:
+            Dict: Resultado de la cancelación
+        """
+        if self.mode == 'paper':
+            # Simulación de cancelación en paper trading
+            logger.info(f"[PAPER] Cancelación simulada de orden {order_id} para {symbol}")
+            
+            # Simular cancelación exitosa
+            result = {
+                "code": "0", 
+                "msg": "", 
+                "data": [{
+                    "ordId": order_id,
+                    "clOrdId": f"client_{order_id}",
+                    "sCode": "0",
+                    "sMsg": ""
+                }]
+            }
+            
+            return result
+        else:
+            # Cancelación real
+            endpoint = '/api/v5/trade/cancel-order'
+            
+            params = {
+                'instId': symbol,
+                'ordId': order_id
+            }
+            
+            response = self._request('POST', endpoint, params)
+            
+            if response.get('code') == '0':
+                logger.info(f"Orden {order_id} cancelada")
+                return response
+            else:
+                logger.error(f"Error al cancelar orden: {response.get('msg')}")
+                return response
+    
+    def calculate_indicators(self, df: pd.DataFrame) -> Dict[str, Any]:
+        """
+        Calcula indicadores técnicos para tomar decisiones
+        
+        Args:
+            df (pd.DataFrame): DataFrame con datos históricos
+            
+        Returns:
+            Dict[str, Any]: Diccionario con indicadores calculados
+        """
+        if df.empty:
+            return {}
+        
+        # Asegurar que tenemos suficientes datos
+        if len(df) < 30:
+            logger.warning(f"Datos insuficientes para calcular indicadores: {len(df)} puntos")
+            return {}
+        
+        # Copiar DataFrame para evitar warnings
+        df = df.copy()
+        
+        # Calcular indicadores
+        indicators = {}
+        
+        # RSI
+        delta = df['close'].diff()
+        gain = delta.where(delta > 0, 0)
+        loss = -delta.where(delta < 0, 0)
+        
+        avg_gain = gain.rolling(window=14).mean()
+        avg_loss = loss.rolling(window=14).mean()
