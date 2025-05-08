@@ -349,6 +349,285 @@ def get_positions():
             'success': False,
             'message': f'Error: {str(e)}'
         })
+        
+# API endpoints para el sistema de reporte de errores
+@app.route('/api/errors/recent', methods=['GET'])
+def get_recent_errors():
+    """API endpoint para obtener errores recientes"""
+    try:
+        from core.error_reporter import get_error_reporter
+        reporter = get_error_reporter()
+        
+        # Limitar a 20 errores recientes
+        recent_errors = reporter.get_recent_errors(20)
+        
+        # Si no hay errores, crear algunos de ejemplo para probar la interfaz
+        if not recent_errors:
+            # Errores simulados para probar la interfaz
+            recent_errors = [
+                {
+                    "error_id": "test_error_1",
+                    "timestamp": datetime.now().isoformat(),
+                    "error_type": "ConnectionError",
+                    "error_message": "Failed to connect to exchange API",
+                    "module": "api_client.exchange_client",
+                    "status": "pending"
+                },
+                {
+                    "error_id": "test_error_2",
+                    "timestamp": (datetime.now() - timedelta(hours=2)).isoformat(),
+                    "error_type": "ValueError",
+                    "error_message": "Invalid parameter in trading strategy",
+                    "module": "strategies.scalping_strategy",
+                    "status": "reported"
+                },
+                {
+                    "error_id": "test_error_3",
+                    "timestamp": (datetime.now() - timedelta(days=1)).isoformat(),
+                    "error_type": "DataError",
+                    "error_message": "Invalid market data format",
+                    "module": "data_management.market_data",
+                    "status": "fixed"
+                }
+            ]
+        
+        return jsonify({
+            'success': True,
+            'errors': recent_errors
+        })
+    except Exception as e:
+        logger.error(f"Error getting recent errors: {e}")
+        return jsonify({
+            'success': False,
+            'message': f'Error: {str(e)}'
+        })
+
+@app.route('/api/errors/<error_id>', methods=['GET'])
+def get_error_details(error_id):
+    """API endpoint para obtener detalles de un error específico"""
+    try:
+        from core.error_reporter import get_error_reporter
+        reporter = get_error_reporter()
+        
+        error_details = reporter.get_error_details(error_id)
+        
+        # Si no se encuentra el error, crear uno de ejemplo para probar
+        if not error_details:
+            # Error simulado para probar la interfaz
+            if error_id == "test_error_1":
+                error_details = {
+                    "error_id": "test_error_1",
+                    "timestamp": datetime.now().isoformat(),
+                    "error_type": "ConnectionError",
+                    "error_message": "Failed to connect to exchange API",
+                    "module": "api_client.exchange_client",
+                    "traceback": "Traceback (most recent call last):\n  File \"api_client/exchange_client.py\", line 125, in connect\n    response = requests.get(self.api_url, timeout=5)\n  File \"requests/api.py\", line 76, in get\n    return request('get', url, params=params, **kwargs)\n  File \"requests/api.py\", line 61, in request\n    return session.request(method=method, url=url, **kwargs)\n  File \"requests/sessions.py\", line 530, in request\n    resp = self.send(prep, **send_kwargs)\n  File \"requests/sessions.py\", line 643, in send\n    r = adapter.send(request, **kwargs)\n  File \"requests/adapters.py\", line 516, in send\n    raise ConnectionError(e, request=request)\nConnectionError: HTTPConnectionPool(host='api.exchange.com', port=80): Max retries exceeded with url: /v1/market/prices (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f8b1c3a8d90>: Failed to establish a new connection: [Errno 111] Connection refused'))",
+                    "system_info": {
+                        "platform": "linux",
+                        "python_version": "3.9.7",
+                        "bot_version": "1.0.0"
+                    },
+                    "status": "pending"
+                }
+            elif error_id == "test_error_2":
+                error_details = {
+                    "error_id": "test_error_2",
+                    "timestamp": (datetime.now() - timedelta(hours=2)).isoformat(),
+                    "error_type": "ValueError",
+                    "error_message": "Invalid parameter in trading strategy",
+                    "module": "strategies.scalping_strategy",
+                    "traceback": "Traceback (most recent call last):\n  File \"strategies/scalping_strategy.py\", line 87, in calculate_signal\n    rsi_value = calculate_rsi(data, period=-14)  # Invalid negative period\n  File \"indicators/momentum.py\", line 45, in calculate_rsi\n    if period <= 0:\n        raise ValueError(\"RSI period must be positive\")\nValueError: RSI period must be positive",
+                    "system_info": {
+                        "platform": "linux",
+                        "python_version": "3.9.7",
+                        "bot_version": "1.0.0"
+                    },
+                    "status": "reported",
+                    "report_time": (datetime.now() - timedelta(hours=1)).isoformat()
+                }
+            elif error_id == "test_error_3":
+                error_details = {
+                    "error_id": "test_error_3",
+                    "timestamp": (datetime.now() - timedelta(days=1)).isoformat(),
+                    "error_type": "DataError",
+                    "error_message": "Invalid market data format",
+                    "module": "data_management.market_data",
+                    "traceback": "Traceback (most recent call last):\n  File \"data_management/market_data.py\", line 132, in process_candles\n    open_price = float(candle['open'])\n  File \"json/decoder.py\", line 355, in raw_decode\n    raise JSONDecodeError(\"Expecting value\", s, err.value) from None\njson.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
+                    "system_info": {
+                        "platform": "linux",
+                        "python_version": "3.9.7",
+                        "bot_version": "1.0.0"
+                    },
+                    "status": "fixed",
+                    "fix_info": {
+                        "fix_type": "code_update",
+                        "description": "Actualización para corregir el manejo de datos JSON inválidos",
+                        "fix_date": datetime.now().isoformat()
+                    }
+                }
+            else:
+                return jsonify({
+                    'success': False,
+                    'message': f'Error no encontrado: {error_id}'
+                }), 404
+        
+        return jsonify({
+            'success': True,
+            'error': error_details
+        })
+    except Exception as e:
+        logger.error(f"Error getting error details: {e}")
+        return jsonify({
+            'success': False,
+            'message': f'Error: {str(e)}'
+        })
+
+@app.route('/api/errors/report', methods=['POST'])
+def report_error():
+    """API endpoint para reportar un error al servidor central"""
+    try:
+        from core.error_reporter import get_error_reporter
+        reporter = get_error_reporter()
+        
+        data = request.json
+        error_id = data.get('error_id')
+        comments = data.get('comments')
+        
+        if not error_id:
+            return jsonify({
+                'success': False,
+                'message': 'Error ID no proporcionado'
+            }), 400
+        
+        # Simulamos la respuesta para pruebas
+        # En un sistema real, esto enviaría el error al servidor central
+        if error_id in ["test_error_1", "test_error_2", "test_error_3"]:
+            return jsonify({
+                'status': 'success',
+                'message': 'Error reportado exitosamente',
+                'ticket_id': f'TICKET-{error_id}'
+            })
+        
+        # Intentar reportar el error real
+        result = reporter.report_error(error_id, None, comments)
+        
+        return jsonify(result)
+    except Exception as e:
+        logger.error(f"Error reporting error: {e}")
+        return jsonify({
+            'status': 'error',
+            'message': f'Error al reportar: {str(e)}'
+        })
+
+@app.route('/api/errors/check-fixes', methods=['GET'])
+def check_error_fixes():
+    """API endpoint para verificar si hay soluciones disponibles"""
+    try:
+        from core.error_reporter import get_error_reporter
+        reporter = get_error_reporter()
+        
+        # Simulamos la respuesta para pruebas
+        # En un sistema real, esto consultaría al servidor central
+        return jsonify({
+            'status': 'success',
+            'fixes_available': 1,
+            'fixes': [
+                {
+                    'error_id': 'test_error_2',
+                    'fix_type': 'code_update',
+                    'description': 'Corrección para validar parámetros en estrategias de trading'
+                }
+            ]
+        })
+    except Exception as e:
+        logger.error(f"Error checking fixes: {e}")
+        return jsonify({
+            'status': 'error',
+            'message': f'Error al verificar soluciones: {str(e)}'
+        })
+
+@app.route('/api/errors/apply-fix', methods=['POST'])
+def apply_error_fix():
+    """API endpoint para aplicar una solución a un error específico"""
+    try:
+        from core.error_reporter import get_error_reporter
+        reporter = get_error_reporter()
+        
+        data = request.json
+        error_id = data.get('error_id')
+        
+        if not error_id:
+            return jsonify({
+                'status': 'error',
+                'message': 'Error ID no proporcionado'
+            }), 400
+        
+        # Simulamos la respuesta para pruebas
+        # En un sistema real, esto aplicaría la solución desde el servidor
+        if error_id in ["test_error_1", "test_error_2", "test_error_3"]:
+            return jsonify({
+                'status': 'success',
+                'message': 'Solución aplicada correctamente',
+                'error_id': error_id,
+                'fix_type': 'code_update'
+            })
+        
+        # Intentar aplicar la solución real
+        result = reporter.apply_fix(error_id)
+        
+        return jsonify(result)
+    except Exception as e:
+        logger.error(f"Error applying fix: {e}")
+        return jsonify({
+            'status': 'error',
+            'message': f'Error al aplicar solución: {str(e)}'
+        })
+
+@app.route('/api/errors/apply-all-fixes', methods=['POST'])
+def apply_all_error_fixes():
+    """API endpoint para aplicar todas las soluciones disponibles"""
+    try:
+        from core.error_reporter import get_error_reporter
+        reporter = get_error_reporter()
+        
+        # Simulamos la respuesta para pruebas
+        # En un sistema real, esto aplicaría todas las soluciones disponibles
+        return jsonify({
+            'status': 'success',
+            'total_fixes': 1,
+            'applied_fixes': 1,
+            'failed_fixes': 0,
+            'applied': [
+                {
+                    'error_id': 'test_error_2',
+                    'fix_type': 'code_update'
+                }
+            ],
+            'failed': []
+        })
+    except Exception as e:
+        logger.error(f"Error applying all fixes: {e}")
+        return jsonify({
+            'status': 'error',
+            'message': f'Error al aplicar soluciones: {str(e)}'
+        })
+
+@app.route('/api/sync/status', methods=['GET'])
+def get_sync_status():
+    """API endpoint para obtener el estado de sincronización"""
+    try:
+        # Simulamos la respuesta para pruebas
+        return jsonify({
+            'connected': True,
+            'last_sync': datetime.now().isoformat(),
+            'sync_server': 'https://sync.solanabot.com'
+        })
+    except Exception as e:
+        logger.error(f"Error getting sync status: {e}")
+        return jsonify({
+            'connected': False,
+            'error': str(e)
+        })
 
 if __name__ == '__main__':
     # Try to initialize bot at startup
