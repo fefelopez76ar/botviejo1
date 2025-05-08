@@ -70,7 +70,27 @@ def init_bot_manager():
 def main_menu():
     """Muestra el menú principal"""
     clear_screen()
+    
+    # Mostrar logo y encabezado con colores
+    from interface.cli_menu import display_logo, print_header
+    display_logo()
     print_header("SOLANA TRADING BOT - MENÚ PRINCIPAL")
+    
+    from interface.cli_utils import Colors
+    
+    # Estado del sistema
+    try:
+        from core.bot_manager import get_system_status
+        status = get_system_status()
+        
+        print(f"\n{Colors.CYAN}Estado del sistema:{Colors.END}")
+        print(f"Bots activos: {Colors.GREEN}{status.get('active_bots', 0)}{Colors.END}")
+        print(f"Última operación: {status.get('last_trade_time', 'N/A')}")
+        print(f"Precio actual SOL: {Colors.GREEN}{status.get('current_price', 0.0):.2f} USDT{Colors.END}")
+    except:
+        # Si hay error, mostrar mensajes simples
+        print(f"\n{Colors.CYAN}Estado del sistema:{Colors.END}")
+        print(f"Bot listo para operar")
     
     options = [
         "Gestionar Bots",
@@ -78,6 +98,7 @@ def main_menu():
         "Ver Mercados",
         "Backtesting",
         "Panel de Control",
+        "Configuración de IA",
         "Salir"
     ]
     
@@ -94,6 +115,9 @@ def main_menu():
     elif choice == 5:
         dashboard_menu()
     elif choice == 6:
+        from interface.ai_menu import ai_configuration_menu
+        ai_configuration_menu()
+    elif choice == 7:
         confirm_exit()
     else:
         print("Opción no válida. Inténtalo de nuevo.")
