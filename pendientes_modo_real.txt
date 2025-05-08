@@ -1,0 +1,47 @@
+PENDIENTES PARA IMPLEMENTACIÓN DEL MODO DE TRADING REAL
+=========================================================
+
+1. IMPLEMENTACIÓN EN TRADING_BOT.PY:
+---------------------------------------------
+- Agregar método verify_api_credentials() para verificar que las credenciales API sean válidas
+- Agregar método verify_performance_requirements() para verificar rendimiento mínimo antes de habilitar modo real
+- Agregar método set_trading_mode() para cambiar entre modo papel y real
+- Implementar mecanismo de seguridad para confirmar transición a modo real
+- Agregar logs detallados de cambios entre modos
+
+2. MEJORAS EN FRONTEND:
+---------------------------------------------
+- Añadir modal de confirmación para transición a modo real
+- Mostrar indicadores visuales claros del modo actual (colores diferentes)
+- Implementar bloqueo de UI durante transición entre modos
+- Añadir mensajes de advertencia sobre riesgos del trading real
+- Mostrar estadísticas de rendimiento previo a cambio de modo
+
+3. REQUISITOS DE SEGURIDAD:
+---------------------------------------------
+- Implementar verificación de win rate mínimo (>55%)
+- Implementar verificación de días consecutivos con rendimiento positivo (>7)
+- Implementar verificación de drawdown máximo (<15%)
+- Añadir límites de posición para modo real
+- Crear sistema de circuit breaker para detener trading en condiciones adversas
+
+4. NOTIFICACIONES:
+---------------------------------------------
+- Implementar notificaciones obligatorias para modo real
+- Enviar alertas en cada operación en modo real
+- Enviar resumen diario con rendimiento en modo real
+- Notificar cualquier error o problema crítico
+
+5. TESTING:
+---------------------------------------------
+- Probar cambio de modo papel a real con credenciales inválidas
+- Probar cambio de modo papel a real con rendimiento insuficiente
+- Probar operaciones básicas en modo real con montos pequeños
+- Verificar correcta gestión de errores de API en modo real
+
+6. DOCUMENTACIÓN:
+---------------------------------------------
+- Actualizar documentación con instrucciones para modo real
+- Incluir advertencias sobre riesgos
+- Documentar requisitos mínimos para habilitar modo real
+- Crear guía de resolución de problemas comunes
