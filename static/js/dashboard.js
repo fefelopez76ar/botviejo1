@@ -281,11 +281,79 @@ function updateIndicatorSignal(indicator, signal) {
 /**
  * Start the trading bot
  */
+function changeTradingMode(newMode, confirmed = false) {
+    // Función para cambiar entre modo papel y real (con confirmación para real)
+    const data = {
+        mode: newMode,
+        confirm: confirmed
+    };
+    
+    fetch('/api/change_mode', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Modo cambiado con éxito
+            showAlert(data.message, newMode === 'live' ? 'warning' : 'success');
+            
+            // Actualizar UI para reflejar el nuevo modo
+            const modeSelect = document.getElementById('modeSelect');
+            if (modeSelect) {
+                modeSelect.value = newMode;
+            }
+            
+            // Si estamos en la página de dashboard, actualizar el estado del bot
+            fetchBotStatus();
+        } else if (data.needs_confirmation) {
+            // Se requiere confirmación adicional para modo real
+            if (confirm(data.message + "\n\n¿Está SEGURO de activar el trading con fondos REALES?")) {
+                // Usuario confirmó, intentar de nuevo con el flag de confirmación
+                changeTradingMode(newMode, true);
+            }
+        } else {
+            // Error al cambiar el modo
+            showAlert(data.message, 'danger');
+        }
+    })
+    .catch(error => {
+        console.error('Error changing trading mode:', error);
+        showAlert('Error al cambiar el modo de trading', 'danger');
+    });
+}
+
+// Función para actualizar el modo cuando cambia el select
+function updateTradingMode() {
+    const modeSelect = document.getElementById('modeSelect');
+    if (modeSelect) {
+        const newMode = modeSelect.value;
+        if (newMode !== getCurrentTradingMode()) {
+            changeTradingMode(newMode);
+        }
+    }
+}
+
+// Función para obtener el modo actual
+function getCurrentTradingMode() {
+    const modeSelect = document.getElementById('modeSelect');
+    return modeSelect ? modeSelect.value : 'paper';
+}
+
 function startBot() {
     const symbol = document.getElementById('symbolSelect').value;
     const interval = document.getElementById('intervalSelect').value;
     const mode = document.getElementById('modeSelect').value;
     const notify = document.getElementById('notifyCheck').checked;
+    
+    // Si está intentando iniciar en modo real, primero verificar que el modo real está activo
+    if (mode === 'live' && getCurrentTradingMode() !== 'live') {
+        showAlert('Primero debe cambiar al modo de trading real antes de iniciar el bot en modo real', 'warning');
+        return;
+    }
     
     const data = {
         symbol: symbol,

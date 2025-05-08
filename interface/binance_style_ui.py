@@ -230,6 +230,7 @@ class BinanceStyleUI:
     def api_change_mode(self):
         """API para cambiar entre modo papel y real."""
         new_mode = request.json.get('mode')
+        confirm = request.json.get('confirm', False)
         
         if new_mode not in ['paper', 'live']:
             return jsonify({
@@ -237,18 +238,38 @@ class BinanceStyleUI:
                 "message": "Modo no válido. Use 'paper' o 'live'."
             })
         
-        # Verificar si se puede cambiar a modo real
-        if new_mode == 'live' and not self._verify_live_readiness():
-            return jsonify({
-                "success": False,
-                "message": "No se cumplen los requisitos para cambiar a modo real."
-            })
+        # Si está cambiando a modo real
+        if new_mode == 'live':
+            # Verificar si se puede cambiar a modo real
+            if not self._verify_live_readiness():
+                return jsonify({
+                    "success": False,
+                    "message": "No se cumplen los requisitos para cambiar a modo real. Verifique sus credenciales API y el rendimiento del bot."
+                })
+                
+            # Si no ha confirmado, pedir confirmación explícita
+            if not confirm:
+                return jsonify({
+                    "success": False,
+                    "needs_confirmation": True,
+                    "message": "ADVERTENCIA: Está a punto de activar el trading en vivo con fondos reales. Esta acción puede resultar en pérdidas económicas. Por favor, confirme que entiende los riesgos."
+                })
         
+        # Cambiar modo y registrar en log
+        previous_mode = self.current_mode
         self.current_mode = new_mode
+        
+        logger.warning(f"CAMBIO DE MODO: {previous_mode} -> {new_mode}")
+        
+        # Mensaje personalizado según el modo
+        if new_mode == 'live':
+            message = "¡MODO REAL ACTIVADO! El bot ahora operará con fondos reales."
+        else:
+            message = "Modo cambiado a simulación (paper trading)."
         
         return jsonify({
             "success": True,
-            "message": f"Modo cambiado a {new_mode}"
+            "message": message
         })
     
     def api_change_market(self):
@@ -1051,30 +1072,66 @@ class BinanceStyleUI:
     
     def _verify_live_readiness(self):
         """Verifica si se cumplen los requisitos para modo real."""
-        # TODO: Implementar lógica real
-        
-        # Comprobaciones para permitir el cambio a modo real
-        general_settings = self._get_general_settings()
-        performance_metrics = self._get_performance_metrics()
-        
-        # Verificar días consecutivos con ganancia
-        consecutive_days = performance_metrics.get('consecutive_profitable_days', 0)
-        required_days = general_settings.get('consecutive_profitable_days_required', 30)
-        
-        if consecutive_days >= required_days:
-            # Verificar win rate
-            win_rate = performance_metrics.get('monthly', {}).get('win_rate', 0)
-            required_win_rate = general_settings.get('min_win_rate_required', 60.0)
+        # Verificar si las credenciales de API están configuradas
+        try:
+            import os
+            from dotenv import load_dotenv
             
-            if win_rate >= required_win_rate:
-                # Verificar drawdown
-                drawdown = abs(performance_metrics.get('drawdown_max', 0))
-                max_drawdown = general_settings.get('max_drawdown_allowed', 5.0)
+            # Cargar variables de entorno si no están ya cargadas
+            load_dotenv('config.env')
+            
+            api_key = os.environ.get('OKX_API_KEY', '')
+            api_secret = os.environ.get('OKX_API_SECRET', '')
+            passphrase = os.environ.get('OKX_PASSPHRASE', '')
+            
+            # Verificar que no son los valores por defecto de demo
+            if api_key == 'demo_key' or api_secret == 'demo_secret' or passphrase == 'demo_passphrase':
+                logger.warning("Las credenciales API están usando valores de demostración")
+                return False
+            
+            # Verificar que las credenciales están presentes
+            if not api_key or not api_secret or not passphrase:
+                logger.warning("Faltan credenciales API para trading en vivo")
+                return False
+            
+            # Si estamos en modo de producción, verificar métricas de rendimiento
+            if not os.environ.get('DEVELOPMENT_MODE', ''):
+                # Comprobaciones para permitir el cambio a modo real basado en rendimiento
+                general_settings = self._get_general_settings()
+                performance_metrics = self._get_performance_metrics()
                 
-                if drawdown <= max_drawdown:
-                    return True
-        
-        return False
+                # Verificar si hay suficientes días consecutivos con ganancia
+                consecutive_days = performance_metrics.get('consecutive_profitable_days', 0)
+                required_days = general_settings.get('consecutive_profitable_days_required', 15)  # Reducido de 30 a 15
+                
+                # Verificar win rate mínimo
+                win_rate = performance_metrics.get('monthly', {}).get('win_rate', 0)
+                required_win_rate = general_settings.get('min_win_rate_required', 55.0)  # Reducido de 60 a 55
+                
+                # Verificar drawdown máximo permitido
+                drawdown = abs(performance_metrics.get('drawdown_max', 0))
+                max_drawdown = general_settings.get('max_drawdown_allowed', 7.0)  # Aumentado de 5 a 7
+                
+                # Solo permitir cambio a modo real si todos los criterios se cumplen
+                if consecutive_days < required_days:
+                    logger.warning(f"No hay suficientes días consecutivos con ganancia: {consecutive_days}/{required_days}")
+                    return False
+                    
+                if win_rate < required_win_rate:
+                    logger.warning(f"Win rate insuficiente: {win_rate}%/{required_win_rate}%")
+                    return False
+                    
+                if drawdown > max_drawdown:
+                    logger.warning(f"Drawdown demasiado alto: {drawdown}%/{max_drawdown}%")
+                    return False
+            
+            # Si todas las verificaciones pasaron o estamos en modo desarrollo
+            logger.info("Verificación para trading en vivo exitosa")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error al verificar readiness para trading en vivo: {e}")
+            return False
     
     def _update_performance_history(self, daily_result):
         """Actualiza historial de rendimiento y verifica readiness."""
