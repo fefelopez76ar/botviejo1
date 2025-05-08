@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Batalla de los Bots | Arena de Trading</title>
+    <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        :root {
+            --warrior-card-height: 230px;
+        }
+        
+        body {
+            background-color: var(--bs-gray-900);
+            color: var(--bs-light);
+            padding-bottom: 60px;
+        }
+        
+        .page-title {
+            text-align: center;
+            margin: 30px 0;
+            position: relative;
+        }
+        
+        .page-title:after {
+            content: '';
+            display: block;
+            width: 100px;
+            height: 3px;
+            background: var(--bs-primary);
+            margin: 10px auto 0;
+        }
+        
+        .warrior-card {
+            position: relative;
+            height: var(--warrior-card-height);
+            border-radius: 10px;
+            background: var(--bs-gray-800);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        .warrior-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        }
+        
+        .warrior-card .card-border {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+        
+        .warrior-content {
+            padding: 15px;
+            position: relative;
+            height: 100%;
+        }
+        
+        .warrior-name {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .warrior-strategy {
+            font-size: 14px;
+            color: var(--bs-gray-500);
+            margin-bottom: 10px;
+        }
+        
+        .warrior-stats {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        
+        .stat-group {
+            flex: 1 1 50%;
+            margin-bottom: 8px;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: var(--bs-gray-400);
+        }
+        
+        .stat-value {
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        .positive {
+            color: var(--bs-success);
+        }
+        
+        .negative {
+            color: var(--bs-danger);
+        }
+        
+        .rank-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .rank-s {
+            background: linear-gradient(135deg, #ffc107, #ff5722);
+            color: var(--bs-dark);
+        }
+        
+        .rank-a {
+            background: linear-gradient(135deg, #2196f3, #3f51b5);
+            color: var(--bs-light);
+        }
+        
+        .rank-b {
+            background: linear-gradient(135deg, #4caf50, #009688);
+            color: var(--bs-light);
+        }
+        
+        .rank-c {
+            background: linear-gradient(135deg, #607d8b, #455a64);
+            color: var(--bs-light);
+        }
+        
+        .rank-d {
+            background: linear-gradient(135deg, #9e9e9e, #616161);
+            color: var(--bs-light);
+        }
+        
+        .battle-status {
+            background-color: var(--bs-gray-800);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .status-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .status-title i {
+            margin-right: 10px;
+            color: var(--bs-primary);
+        }
+        
+        .status-row {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        
+        .status-item {
+            flex: 1;
+            text-align: center;
+            border-right: 1px solid var(--bs-gray-700);
+            padding: 0 10px;
+        }
+        
+        .status-item:last-child {
+            border-right: none;
+        }
+        
+        .status-label {
+            font-size: 12px;
+            color: var(--bs-gray-400);
+            margin-bottom: 5px;
+        }
+        
+        .status-value {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .chart-container {
+            background-color: var(--bs-gray-800);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            height: 400px;
+        }
+        
+        .quote-box {
+            position: absolute;
+            bottom: 10px;
+            left: 15px;
+            right: 15px;
+            padding: 5px 10px;
+            background-color: rgba(33, 37, 41, 0.8);
+            border-radius: 5px;
+            font-style: italic;
+            font-size: 12px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+        
+        .defeated {
+            opacity: 0.5;
+            filter: grayscale(1);
+        }
+        
+        .defeated:after {
+            content: 'ELIMINADO';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 30px;
+            font-weight: bold;
+            color: var(--bs-danger);
+            border: 3px solid var(--bs-danger);
+            padding: 5px 10px;
+            border-radius: 5px;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        
+        .best-warrior {
+            border: 2px solid var(--bs-warning);
+            transform: scale(1.02);
+        }
+        
+        .best-warrior:after {
+            content: 'LÍDER';
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            font-size: 12px;
+            font-weight: bold;
+            color: var(--bs-dark);
+            background-color: var(--bs-warning);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        
+        /* Proyecciones */
+        .projections {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed var(--bs-gray-700);
+        }
+        
+        .projection-title {
+            font-size: 12px;
+            color: var(--bs-info);
+            margin-bottom: 5px;
+        }
+        
+        .projection-stats {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .projection-item {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .projection-label {
+            font-size: 10px;
+            color: var(--bs-gray-500);
+        }
+        
+        .projection-value {
+            font-size: 14px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="page-title">
+            <i class="fas fa-robot"></i> La Batalla de los Bots
+            <small class="d-block text-muted">Arena de Trading Algorítmico</small>
+        </h1>
+        
+        <div class="row">
+            <div class="col-md-4">
+                <div class="battle-status">
+                    <div class="status-title">
+                        <i class="fas fa-medal"></i> Estado de la Arena
+                    </div>
+                    <div class="status-row">
+                        <div class="status-item">
+                            <div class="status-label">Bots Activos</div>
+                            <div class="status-value">12</div>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-label">Generación</div>
+                            <div class="status-value">4</div>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-label">Batallas</div>
+                            <div class="status-value">24</div>
+                        </div>
+                    </div>
+                    <div class="status-row">
+                        <div class="status-item">
+                            <div class="status-label">ROI Promedio</div>
+                            <div class="status-value positive">12.5%</div>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-label">Mejor ROI</div>
+                            <div class="status-value positive">35.8%</div>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-label">Próxima Evaluación</div>
+                            <div class="status-value">2d 5h</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <div class="status-title">
+                        <i class="fas fa-chart-line"></i> Evolución de Rendimiento
+                    </div>
+                    <div id="evolution-chart">
+                        <!-- Aquí iría el gráfico -->
+                        <img src="/static/evolution_chart.png" alt="Evolución de rendimiento" class="img-fluid">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-8">
+                <div class="row" id="warriors-container">
+                    <!-- Guerrero 1 (El mejor) -->
+                    <div class="col-md-6">
+                        <div class="warrior-card best-warrior">
+                            <div class="card-border" style="background: #3F51B5;"></div>
+                            <div class="warrior-content">
+                                <div class="rank-badge rank-s">S</div>
+                                <div class="warrior-name">Hugo</div>
+                                <div class="warrior-strategy">ml_adaptive 15m</div>
+                                
+                                <div class="warrior-stats">
+                                    <div class="stat-group">
+                                        <div class="stat-label">ROI</div>
+                                        <div class="stat-value positive">+35.8%</div>
+                                    </div>
+                                    <div class="stat-group">
+                                        <div class="stat-label">Diario</div>
+                                        <div class="stat-value positive">+2.1%</div>
+                                    </div>
+                                    <div class="stat-group">
+                                        <div class="stat-label">Tiempo de vida</div>
+                                        <div class="stat-value">16d 5h</div>
+                                    </div>
+                                    <div class="stat-group">
+                                        <div class="stat-label">Win Rate</div>
+                                        <div class="stat-value">68.5%</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="projections">
+                                    <div class="projection-title">Proyecciones</div>
+                                    <div class="projection-stats">
+                                        <div class="projection-item">
+                                            <div class="projection-label">Mensual</div>
+                                            <div class="projection-value positive">+63.0%</div>
+                                        </div>
+                                        <div class="projection-item">
+                                            <div class="projection-label">Anual</div>
+                                            <div class="projection-value positive">+766.5%</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="quote-box">
+                                    "Los débiles venden en pánico, los fuertes compran la caída"
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Guerrero 2 -->
+                    <div class="col-md-6">
+                        <div class="warrior-card">
+                            <div class="card-border" style="background: #4CAF50;"></div>
+                            <div class="warrior-content">
+                                <div class="rank-badge rank-a">A</div>
+                                <div class="warrior-name">María</div>
+                                <div class="warrior-strategy">breakout_scalping 5m</div>
+                                
+                                <div class="warrior-stats">
+                                    <div class="stat-group">
+                                        <div class="stat-label">ROI</div>
+                                        <div class="stat-value positive">+27.3%</div>
+                                    </div>
+                                    <div class="stat-group">
+                                        <div class="stat-label">Diario</div>
+                                        <div class="stat-value positive">+1.8%</div>
+                                    </div>
+                                    <div class="stat-group">
+                                        <div class="stat-label">Tiempo de vida</div>
+                                        <div class="stat-value">14d 3h</div>
+                                    </div>
+                                    <div class="stat-group">
+                                        <div class="stat-label">Win Rate</div>
+                                        <div class="stat-value">65.2%</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="projections">
+                                    <div class="projection-title">Proyecciones</div>
+                                    <div class="projection-stats">
+                                        <div class="projection-item">
+                                            <div class="projection-label">Mensual</div>
+                                            <div class="projection-value positive">+54.0%</div>
+                                        </div>
+                                        <div class="projection-item">
+                                            <div class="projection-label">Anual</div>
+                                            <div class="projection-value positive">+657.0%</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="quote-box">
+                                    "Análisis, paciencia, victoria"
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Guerrero 3 -->
+                    <div class="col-md-6">
+                        <div class="warrior-card">
+                            <div class="card-border" style="background: #FF9800;"></div>
+                            <div class="warrior-content">
+                                <div class="rank-badge rank-b">B</div>
+                                <div class="warrior-name">Carlos</div>
+                                <div class="warrior-strategy">momentum_scalping 1m</div>
+                                
+                                <div class="warrior-stats">
+                                    <div class="stat-group">
+                                        <div class="stat-label">ROI</div>
+                                        <div class="stat-value positive">+15.6%</div>
+                                    </div>
+                                    <div class="stat-group">
+                                        <div class="stat-label">Diario</div>
+                                        <div class="stat-value positive">+1.2%</div>
+                                    </div>
+                                    <div class="stat-group">
+                                        <div class="stat-label">Tiempo de vida</div>
+                                        <div class="stat-value">12d 8h</div>
+                                    </div>
+                                    <div class="stat-group">
+                                        <div class="stat-label">Win Rate</div>
+                                        <div class="stat-value">58.7%</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="projections">
+                                    <div class="projection-title">Proyecciones</div>
+                                    <div class="projection-stats">
+                                        <div class="projection-item">
+                                            <div class="projection-label">Mensual</div>
+                                            <div class="projection-value positive">+36.0%</div>
+                                        </div>
+                                        <div class="projection-item">
+                                            <div class="projection-label">Anual</div>
+                                            <div class="projection-value positive">+438.0%</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="quote-box">
+                                    "La volatilidad es mi aliada"
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Guerrero 4 -->
+                    <div class="col-md-6">
+                        <div class="warrior-card">
+                            <div class="card-border" style="background: #9C27B0;"></div>
+                            <div class="warrior-content">
+                                <div class="rank-badge rank-c">C</div>
+                                <div class="warrior-name">Laura</div>
+                                <div class="warrior-strategy">mean_reversion 15m</div>
+                                
+                                <div class="warrior-stats">
+                                    <div class="stat-group">
+                                        <div class="stat-label">ROI</div>
+                                        <div class="stat-value positive">+8.3%</div>
+                                    </div>
+                                    <div class="stat-group">
+                                        <div class="stat-label">Diario</div>
+                                        <div class="stat-value positive">+0.8%</div>
+                                    </div>
+                                    <div class="stat-group">
+                                        <div class="stat-label">Tiempo de vida</div>
+                                        <div class="stat-value">9d 12h</div>
+                                    </div>
+                                    <div class="stat-group">
+                                        <div class="stat-label">Win Rate</div>
+                                        <div class="stat-value">52.1%</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="projections">
+                                    <div class="projection-title">Proyecciones</div>
+                                    <div class="projection-stats">
+                                        <div class="projection-item">
+                                            <div class="projection-label">Mensual</div>
+                                            <div class="projection-value positive">+24.0%</div>
+                                        </div>
+                                        <div class="projection-item">
+                                            <div class="projection-label">Anual</div>
+                                            <div class="projection-value positive">+292.0%</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="quote-box">
+                                    "Las velas japonesas cuentan la historia, yo escribo el final"
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Guerrero 5 (Derrotado) -->
+                    <div class="col-md-6">
+                        <div class="warrior-card defeated">
+                            <div class="card-border" style="background: #F44336;"></div>
+                            <div class="warrior-content">
+                                <div class="rank-badge rank-d">D</div>
+                                <div class="warrior-name">Pedro</div>
+                                <div class="warrior-strategy">breakout_scalping 1m</div>
+                                
+                                <div class="warrior-stats">
+                                    <div class="stat-group">
+                                        <div class="stat-label">ROI</div>
+                                        <div class="stat-value negative">-5.3%</div>
+                                    </div>
+                                    <div class="stat-group">
+                                        <div class="stat-label">Diario</div>
+                                        <div class="stat-value negative">-0.9%</div>
+                                    </div>
+                                    <div class="stat-group">
+                                        <div class="stat-label">Tiempo de vida</div>
+                                        <div class="stat-value">6d 2h</div>
+                                    </div>
+                                    <div class="stat-group">
+                                        <div class="stat-label">Win Rate</div>
+                                        <div class="stat-value">43.5%</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="projections">
+                                    <div class="projection-title">Proyecciones</div>
+                                    <div class="projection-stats">
+                                        <div class="projection-item">
+                                            <div class="projection-label">Mensual</div>
+                                            <div class="projection-value negative">-27.0%</div>
+                                        </div>
+                                        <div class="projection-item">
+                                            <div class="projection-label">Anual</div>
+                                            <div class="projection-value negative">-328.5%</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="quote-box">
+                                    "El mercado es mi campo de batalla"
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <button class="btn btn-primary" id="evaluateArena">
+                        <i class="fas fa-balance-scale"></i> Evaluar Arena
+                    </button>
+                    <div>
+                        <button class="btn btn-outline-secondary" id="addBot">
+                            <i class="fas fa-robot"></i> Añadir Bot
+                        </button>
+                        <button class="btn btn-outline-secondary" id="showStats">
+                            <i class="fas fa-chart-pie"></i> Estadísticas
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        // Código JavaScript para manejar interacciones iría aquí
+        $(document).ready(function() {
+            // Simulación de evaluación
+            $("#evaluateArena").click(function() {
+                alert("Evaluación programada para el próximo ciclo");
+            });
+            
+            // Simulación de añadir bot
+            $("#addBot").click(function() {
+                alert("Funcionalidad de añadir bot en desarrollo");
+            });
+            
+            // Simulación de mostrar estadísticas
+            $("#showStats").click(function() {
+                alert("Estadísticas detalladas en desarrollo");
+            });
+        });
+    </script>
+</body>
+</html>
