@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solana Trading Bot</title>
+    <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <img src="{{ url_for('static', filename='img/solana-logo.svg') }}" alt="Solana Logo" width="30" height="30" class="d-inline-block align-top me-2">
+                Solana Trading Bot
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('index') }}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('settings') }}">Settings</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="container my-5">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-3">Automated Trading for Solana</h1>
+                <p class="lead mb-4">A powerful trading bot built for Solana on OKX, designed for both beginners and advanced traders.</p>
+                <div class="d-grid gap-2 d-md-flex">
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-primary me-md-2">Go to Dashboard</a>
+                    <a href="{{ url_for('settings') }}" class="btn btn-outline-secondary">Configure Bot</a>
+                </div>
+            </div>
+            <div class="col-lg-6 mt-4 mt-lg-0">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title border-bottom pb-2 mb-3">Current SOL-USDT Price</h5>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="crypto-ticker">
+                                <span class="fs-1 fw-bold crypto-price" id="currentPrice">---.--</span>
+                                <span class="text-secondary ms-2">USD</span>
+                            </div>
+                            <div class="price-change ms-3" id="priceChangeContainer">
+                                <span class="badge bg-secondary" id="priceChange">-.--%</span>
+                            </div>
+                        </div>
+                        <p class="card-text text-secondary mt-2 mb-0">Last updated: <span id="lastUpdated">--:--:--</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="container my-5">
+        <h2 class="text-center mb-4">Bot Features</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Advanced Technical Analysis</h5>
+                        <p class="card-text">Utilizes RSI, MACD, Bollinger Bands and other indicators to make informed trading decisions.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Paper Trading Mode</h5>
+                        <p class="card-text">Test strategies with simulated money before committing real funds to the market.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Real-time Notifications</h5>
+                        <p class="card-text">Receive instant Telegram notifications about trades, market movements, and bot status.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">24/7 Automated Trading</h5>
+                        <p class="card-text">The bot never sleeps, continuously monitoring and executing trades based on market conditions.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Risk Management</h5>
+                        <p class="card-text">Built-in stop-loss and take-profit features to protect your capital during volatile markets.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Customizable Strategy</h5>
+                        <p class="card-text">Tailor the bot's behavior to match your risk tolerance and trading preferences.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Getting Started Section -->
+    <div class="container my-5">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title mb-4">Getting Started</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <ol class="list-group list-group-numbered mb-4">
+                            <li class="list-group-item d-flex">
+                                <div>
+                                    <strong>Configure API Keys</strong>
+                                    <p class="mb-0">Add your OKX API credentials in Settings</p>
+                                </div>
+                            </li>
+                            <li class="list-group-item d-flex">
+                                <div>
+                                    <strong>Set Trading Parameters</strong>
+                                    <p class="mb-0">Customize your trading pair, interval, and mode</p>
+                                </div>
+                            </li>
+                            <li class="list-group-item d-flex">
+                                <div>
+                                    <strong>Start the Bot</strong>
+                                    <p class="mb-0">Activate the bot from the Dashboard</p>
+                                </div>
+                            </li>
+                            <li class="list-group-item d-flex">
+                                <div>
+                                    <strong>Monitor Performance</strong>
+                                    <p class="mb-0">Track results in real-time on the Dashboard</p>
+                                </div>
+                            </li>
+                        </ol>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="alert alert-info">
+                            <h5 class="alert-heading">Start with Paper Trading</h5>
+                            <p>We recommend starting with paper trading mode to test the bot's performance without risking real funds.</p>
+                            <hr>
+                            <p class="mb-0">When you're ready to switch to live trading, you can do so with a single click.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto py-3 bg-dark">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <p class="mb-0 text-white-50">Solana Trading Bot &copy; 2025</p>
+                </div>
+                <div>
+                    <small class="text-white-50">This bot is for educational purposes only. Trade at your own risk.</small>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Alert Container -->
+    <div id="alertContainer" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Get current price on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchMarketPrice();
+            
+            // Update price every 30 seconds
+            setInterval(fetchMarketPrice, 30000);
+        });
+
+        function fetchMarketPrice() {
+            fetch('/api/market/price?symbol=SOL-USDT')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const oldPrice = parseFloat(document.getElementById('currentPrice').innerText) || data.price;
+                        const newPrice = data.price;
+                        
+                        // Update price
+                        document.getElementById('currentPrice').innerText = newPrice.toFixed(2);
+                        
+                        // Calculate and display price change
+                        const priceChange = ((newPrice - oldPrice) / oldPrice) * 100;
+                        const priceChangeElement = document.getElementById('priceChange');
+                        
+                        if (priceChange > 0) {
+                            priceChangeElement.innerText = `+${priceChange.toFixed(2)}%`;
+                            priceChangeElement.className = 'badge bg-success';
+                        } else if (priceChange < 0) {
+                            priceChangeElement.innerText = `${priceChange.toFixed(2)}%`;
+                            priceChangeElement.className = 'badge bg-danger';
+                        } else {
+                            priceChangeElement.innerText = '0.00%';
+                            priceChangeElement.className = 'badge bg-secondary';
+                        }
+                        
+                        // Update timestamp
+                        const now = new Date();
+                        document.getElementById('lastUpdated').innerText = now.toLocaleTimeString();
+                    } else {
+                        showAlert('Error fetching price: ' + data.message, 'danger');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('Could not connect to server', 'danger');
+                });
+        }
+
+        function showAlert(message, type = 'info') {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertElement = document.createElement('div');
+            alertElement.className = `alert alert-${type} alert-dismissible fade show`;
+            alertElement.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            
+            alertContainer.appendChild(alertElement);
+            
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                alertElement.classList.remove('show');
+                setTimeout(() => {
+                    alertContainer.removeChild(alertElement);
+                }, 500);
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

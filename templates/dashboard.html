@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Solana Trading Bot</title>
+    <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <img src="{{ url_for('static', filename='img/solana-logo.svg') }}" alt="Solana Logo" width="30" height="30" class="d-inline-block align-top me-2">
+                Solana Trading Bot
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('dashboard') }}">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('settings') }}">Settings</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Header -->
+    <div class="container mt-4">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h1>Dashboard</h1>
+                <p class="lead">Monitor your bot's performance and market conditions</p>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <button id="startBotBtn" class="btn btn-success me-md-2" {{ 'disabled' if bot_state.get('is_running', False) else '' }}>
+                        <span class="me-1">Start Bot</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-play-fill" viewBox="0 0 16 16">
+                            <path d="M11.596 8.697l-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/>
+                        </svg>
+                    </button>
+                    <button id="stopBotBtn" class="btn btn-danger" {{ 'disabled' if not bot_state.get('is_running', False) else '' }}>
+                        <span class="me-1">Stop Bot</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-stop-fill" viewBox="0 0 16 16">
+                            <path d="M5 3.5h6A1.5 1.5 0 0 1 12.5 5v6a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 11V5A1.5 1.5 0 0 1 5 3.5z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Bar -->
+    <div class="container mt-4">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 col-6 border-end">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                {% if bot_state.get('is_running', False) %}
+                                <div class="trading-active-dot pulse"></div>
+                                {% else %}
+                                <div class="trading-inactive-dot"></div>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <h6 class="mb-0">Status</h6>
+                                <p class="mb-0 fw-bold">{{ 'Active' if bot_state.get('is_running', False) else 'Inactive' }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6 border-end">
+                        <h6 class="mb-0">Trading Pair</h6>
+                        <p class="mb-0 fw-bold crypto-symbol">{{ bot_state.get('symbol', 'SOL-USDT') }}</p>
+                    </div>
+                    <div class="col-md-3 col-6 border-end">
+                        <h6 class="mb-0">Mode</h6>
+                        <p class="mb-0 fw-bold">{{ bot_state.get('mode', 'Paper') }}</p>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <h6 class="mb-0">Interval</h6>
+                        <p class="mb-0 fw-bold">{{ bot_state.get('interval', '15m') }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard Content -->
+    <div class="container mt-4">
+        <div class="row">
+            <!-- Left Column: Price Chart & Positions -->
+            <div class="col-lg-8">
+                <!-- Price Chart -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title d-flex justify-content-between align-items-center">
+                            <span>SOL-USDT Price</span>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button type="button" class="btn btn-outline-primary active" data-interval="15m">15m</button>
+                                <button type="button" class="btn btn-outline-primary" data-interval="1h">1h</button>
+                                <button type="button" class="btn btn-outline-primary" data-interval="4h">4h</button>
+                                <button type="button" class="btn btn-outline-primary" data-interval="1d">1d</button>
+                            </div>
+                        </h5>
+                        <div class="mt-2" style="height: 300px;">
+                            <canvas id="priceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Current Position -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Current Position</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="positionContainer">
+                            {% if bot_state.get('position') %}
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <h6>Side</h6>
+                                        <p class="fw-bold">
+                                            {% if bot_state.position.side == 'buy' %}
+                                            <span class="badge bg-success">LONG</span>
+                                            {% else %}
+                                            <span class="badge bg-danger">SHORT</span>
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <h6>Size</h6>
+                                        <p class="fw-bold">{{ bot_state.position.size }}</p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <h6>Entry Price</h6>
+                                        <p class="fw-bold">${{ '%.2f' % bot_state.entry_price }}</p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <h6>Current Price</h6>
+                                        <p class="fw-bold">{{ bot_state.current_price }}</p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <h6>P&L</h6>
+                                        <p class="fw-bold {{ 'positive-roi' if bot_state.pnl > 0 else 'negative-roi' if bot_state.pnl < 0 else '' }}">
+                                            ${{ '%.2f' % bot_state.pnl }}
+                                        </p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <h6>Duration</h6>
+                                        <p class="fw-bold">{{ bot_state.get('position_duration', 'N/A') }}</p>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="text-center py-4">
+                                    <p class="mb-0 text-secondary">No active positions</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trade History -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Trade History</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="tradeHistoryContainer">
+                            {% if bot_state.get('trade_history', []) %}
+                                {% for trade in bot_state.get('trade_history', [])[:5] %}
+                                <div class="trade-history-item {{ 'win' if trade.pnl > 0 else 'loss' }}">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <span class="badge {{ 'bg-success' if trade.side == 'buy' else 'bg-danger' }}">
+                                                {{ 'LONG' if trade.side == 'buy' else 'SHORT' }}
+                                            </span>
+                                            <small class="ms-2">{{ trade.date }}</small>
+                                        </div>
+                                        <div class="{{ 'positive-roi' if trade.pnl > 0 else 'negative-roi' }}">
+                                            {{ '+' if trade.pnl > 0 else '' }}{{ '%.2f' % trade.pnl }}%
+                                        </div>
+                                    </div>
+                                    <div class="mt-1">
+                                        <small class="text-secondary">
+                                            Entry: ${{ '%.2f' % trade.entry_price }} | Exit: ${{ '%.2f' % trade.exit_price }} | Size: {{ trade.size }}
+                                        </small>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="text-center py-4">
+                                    <p class="mb-0 text-secondary">No trade history available</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Market Stats & Indicators -->
+            <div class="col-lg-4">
+                <!-- Account Stats -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Account Overview</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <div class="stats-card p-2">
+                                    <h6 class="text-secondary">Balance</h6>
+                                    <p class="fw-bold fs-5 mb-0">{{ bot_state.get('current_balance', '$1000.00') }}</p>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <div class="stats-card p-2">
+                                    <h6 class="text-secondary">ROI</h6>
+                                    <p class="fw-bold fs-5 mb-0 {{ 'positive-roi' if bot_state.get('roi', 0) > 0 else 'negative-roi' if bot_state.get('roi', 0) < 0 else '' }}">
+                                        {{ bot_state.get('roi', '0.00%') }}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <div class="stats-card p-2">
+                                    <h6 class="text-secondary">Trades</h6>
+                                    <p class="fw-bold fs-5 mb-0">{{ bot_state.get('trade_count', 0) }}</p>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <div class="stats-card p-2">
+                                    <h6 class="text-secondary">Win Rate</h6>
+                                    <p class="fw-bold fs-5 mb-0">
+                                        {% if bot_state.get('trade_count', 0) > 0 %}
+                                            {{ '%.1f' % ((bot_state.get('wins', 0) / bot_state.get('trade_count', 1)) * 100) }}%
+                                        {% else %}
+                                            N/A
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Market Signals -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Market Signals</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <!-- Integrated Signal -->
+                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                <span>Integrated Signal</span>
+                                <span id="integratedSignal" class="signal-badge 
+                                    {% if bot_state.get('integrated_signal') == 'strong_buy' %}
+                                        bg-success
+                                    {% elif bot_state.get('integrated_signal') == 'buy' %}
+                                        bg-info
+                                    {% elif bot_state.get('integrated_signal') == 'strong_sell' %}
+                                        bg-danger
+                                    {% elif bot_state.get('integrated_signal') == 'sell' %}
+                                        bg-warning
+                                    {% else %}
+                                        bg-secondary
+                                    {% endif %}
+                                ">
+                                    {{ bot_state.get('integrated_signal', 'neutral')|upper|replace("_", " ") }}
+                                </span>
+                            </li>
+                            
+                            <!-- RSI Signal -->
+                            {% set signals = bot_state.get('strategy_signals', {}) %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                <span>RSI</span>
+                                <span id="rsiSignal" class="signal-badge 
+                                    {% if signals.get('rsi') == 'buy' %}
+                                        bg-success
+                                    {% elif signals.get('rsi') == 'sell' %}
+                                        bg-danger
+                                    {% else %}
+                                        bg-secondary
+                                    {% endif %}
+                                ">
+                                    {{ signals.get('rsi', 'neutral')|upper }}
+                                </span>
+                            </li>
+                            
+                            <!-- Trend Signal -->
+                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                <span>Trend (MA)</span>
+                                <span id="trendSignal" class="signal-badge 
+                                    {% if signals.get('trend') == 'buy' %}
+                                        bg-success
+                                    {% elif signals.get('trend') == 'sell' %}
+                                        bg-danger
+                                    {% else %}
+                                        bg-secondary
+                                    {% endif %}
+                                ">
+                                    {{ signals.get('trend', 'neutral')|upper }}
+                                </span>
+                            </li>
+                            
+                            <!-- MACD Signal -->
+                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                <span>MACD</span>
+                                <span id="macdSignal" class="signal-badge 
+                                    {% if signals.get('macd') == 'buy' %}
+                                        bg-success
+                                    {% elif signals.get('macd') == 'sell' %}
+                                        bg-danger
+                                    {% else %}
+                                        bg-secondary
+                                    {% endif %}
+                                ">
+                                    {{ signals.get('macd', 'neutral')|upper }}
+                                </span>
+                            </li>
+                            
+                            <!-- Bollinger Bands Signal -->
+                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                <span>Bollinger Bands</span>
+                                <span id="bbSignal" class="signal-badge 
+                                    {% if signals.get('bollinger') == 'buy' %}
+                                        bg-success
+                                    {% elif signals.get('bollinger') == 'sell' %}
+                                        bg-danger
+                                    {% else %}
+                                        bg-secondary
+                                    {% endif %}
+                                ">
+                                    {{ signals.get('bollinger', 'neutral')|upper }}
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Bot Settings -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Bot Controls</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="botSettingsForm">
+                            <div class="mb-3">
+                                <label for="symbolSelect" class="form-label">Trading Pair</label>
+                                <select class="form-select" id="symbolSelect" name="symbol">
+                                    <option value="SOL-USDT" selected>SOL-USDT</option>
+                                    <option value="BTC-USDT">BTC-USDT</option>
+                                    <option value="ETH-USDT">ETH-USDT</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="intervalSelect" class="form-label">Time Interval</label>
+                                <select class="form-select" id="intervalSelect" name="interval">
+                                    <option value="5m">5 minutes</option>
+                                    <option value="15m" selected>15 minutes</option>
+                                    <option value="30m">30 minutes</option>
+                                    <option value="1h">1 hour</option>
+                                    <option value="4h">4 hours</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="modeSelect" class="form-label">Trading Mode</label>
+                                <select class="form-select" id="modeSelect" name="mode">
+                                    <option value="paper" selected>Paper Trading</option>
+                                    <option value="live">Live Trading</option>
+                                </select>
+                            </div>
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="notifyCheck" name="notify">
+                                <label class="form-check-label" for="notifyCheck">
+                                    Enable Telegram Notifications
+                                </label>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto py-3 bg-dark">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <p class="mb-0 text-white-50">Solana Trading Bot &copy; 2025</p>
+                </div>
+                <div>
+                    <small class="text-white-50">Last updated: <span id="lastUpdated">{{ bot_state.get('last_update', 'Never') }}</span></small>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Start Bot Modal -->
+    <div class="modal fade" id="startBotModal" tabindex="-1" aria-labelledby="startBotModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="startBotModalLabel">Confirm Bot Start</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>You are about to start the trading bot with the following settings:</p>
+                    <ul class="list-group list-group-flush mb-3">
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Trading Pair:</span>
+                            <strong id="confirmSymbol">SOL-USDT</strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Interval:</span>
+                            <strong id="confirmInterval">15m</strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Mode:</span>
+                            <strong id="confirmMode">Paper Trading</strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Notifications:</span>
+                            <strong id="confirmNotify">Disabled</strong>
+                        </li>
+                    </ul>
+                    <div class="alert alert-warning">
+                        <h6 class="alert-heading">Important</h6>
+                        <p class="mb-0">Make sure your API credentials are correctly configured in the Settings page before starting the bot.</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="confirmStartBtn">Start Bot</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stop Bot Modal -->
+    <div class="modal fade" id="stopBotModal" tabindex="-1" aria-labelledby="stopBotModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="stopBotModalLabel">Confirm Bot Stop</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to stop the trading bot?</p>
+                    <div class="alert alert-info">
+                        <p class="mb-0">The bot will complete its current cycle before stopping. This may take a few seconds.</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirmStopBtn">Stop Bot</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Container -->
+    <div id="alertContainer" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>
