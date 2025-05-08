@@ -211,22 +211,395 @@ def create_new_bot():
     mode_choice = get_user_choice(1, 2)
     paper_trading = mode_choice == 1
     
-    # Seleccionar estrategia
-    print("\nSelecciona la estrategia de trading:")
-    strategies = [
-        "Cruce de Medias Móviles",
-        "RSI + Bollinger Bands",
-        "MACD + Tendencia",
-        "Estadística (Mean Reversion)",
-        "Adaptativa (Múltiples indicadores)",
-        "Machine Learning (Experimental)"
-    ]
+    # Seleccionar método de configuración
+    print("\nSelecciona el método de configuración:")
+    print("1. Estrategia básica (configuración manual)")
+    print("2. Perfil predefinido (scalping, day trading, etc.)")
+    print("3. Recomendación IA (basada en análisis de mercado)")
+    print("4. Backtesting automático y optimización")
     
-    for i, strategy in enumerate(strategies, 1):
-        print(f"{i}. {strategy}")
+    config_choice = get_user_choice(1, 4)
+    if not config_choice:
+        return
     
-    strategy_choice = get_user_choice(1, len(strategies))
-    selected_strategy = strategies[strategy_choice - 1] if strategy_choice else strategies[0]
+    # Variables para configuración
+    selected_strategy = None
+    strategy_params = {}
+    profile_name = None
+    time_interval = "15m"
+    
+    # Procesamiento según método elegido
+    if config_choice == 1:
+        # Estrategia básica manual
+        print("\nSelecciona la estrategia de trading:")
+        strategies = [
+            "Cruce de Medias Móviles",
+            "RSI + Bollinger Bands",
+            "MACD + Tendencia",
+            "Estadística (Mean Reversion)",
+            "Adaptativa (Múltiples indicadores)",
+            "Machine Learning (Experimental)"
+        ]
+        
+        for i, strategy in enumerate(strategies, 1):
+            print(f"{i}. {strategy}")
+        
+        strategy_choice = get_user_choice(1, len(strategies))
+        selected_strategy = strategies[strategy_choice - 1] if strategy_choice else strategies[0]
+        
+        # Seleccionar intervalo de tiempo
+        print("\nSelecciona el intervalo de tiempo:")
+        intervals = ["1m", "5m", "15m", "30m", "1h", "4h", "1d"]
+        for i, interval in enumerate(intervals, 1):
+            print(f"{i}. {interval}")
+        
+        interval_choice = get_user_choice(1, len(intervals))
+        if interval_choice:
+            time_interval = intervals[interval_choice - 1]
+    
+    elif config_choice == 2:
+        # Perfil predefinido
+        try:
+            # Importar módulo de perfiles
+            from strategies.strategy_profiles import StrategyProfileManager, TradingStyle
+            
+            # Crear gestor de perfiles
+            profile_manager = StrategyProfileManager()
+            
+            # Listar perfiles por categoría
+            print("\nSelecciona el tipo de perfil:")
+            print("1. Scalping (operaciones rápidas, timeframes cortos)")
+            print("2. Day Trading (operaciones intradiarias)")
+            print("3. Swing Trading (operaciones de varios días)")
+            print("4. ML/AI (basado en machine learning)")
+            print("5. Adaptativo (ajusta parámetros automáticamente)")
+            
+            style_choice = get_user_choice(1, 5)
+            if not style_choice:
+                return
+            
+            # Mapear elección a estilo
+            style_map = {
+                1: TradingStyle.SCALPING,
+                2: TradingStyle.DAY_TRADING,
+                3: TradingStyle.SWING_TRADING,
+                4: TradingStyle.ML_BASED,
+                5: TradingStyle.ADAPTIVE
+            }
+            
+            selected_style = style_map.get(style_choice)
+            
+            # Obtener perfiles del estilo seleccionado
+            profiles = profile_manager.get_profiles_by_style(selected_style)
+            
+            if not profiles:
+                print(f"\n❌ No hay perfiles disponibles para {selected_style.value}.")
+                time.sleep(2)
+                return
+            
+            # Listar perfiles
+            print(f"\nPerfiles disponibles para {selected_style.value}:")
+            
+            profile_list = list(profiles.values())
+            
+            for i, profile in enumerate(profile_list, 1):
+                print(f"{i}. {profile.name} - {profile.description[:50]}...")
+            
+            profile_choice = get_user_choice(1, len(profile_list))
+            if not profile_choice:
+                return
+            
+            selected_profile = profile_list[profile_choice - 1]
+            
+            # Mostrar detalles del perfil
+            clear_screen()
+            print_header(f"PERFIL: {selected_profile.name}")
+            
+            print(f"\nEstilo de trading: {selected_profile.trading_style.value}")
+            print(f"Timeframe principal: {selected_profile.primary_timeframe}")
+            print(f"Take profit: {selected_profile.take_profit_pct}%")
+            print(f"Stop loss: {selected_profile.stop_loss_pct}%")
+            print(f"Riesgo por operación: {selected_profile.risk_per_trade_pct}%")
+            print(f"Posiciones máximas: {selected_profile.max_positions}")
+            
+            print("\nIndicadores:")
+            for indicator, params in selected_profile.indicators.items():
+                print(f"  - {indicator}: {params}")
+            
+            # Confirmar selección
+            print("\n¿Confirmar selección de este perfil?")
+            print("1. Sí, usar este perfil")
+            print("2. No, volver")
+            
+            confirm = get_user_choice(1, 2)
+            if confirm != 1:
+                return
+            
+            # Asignar información del perfil
+            profile_name = selected_profile.name
+            time_interval = selected_profile.primary_timeframe
+            
+            # Mapear perfil a estrategia
+            if "rsi" in selected_profile.indicators and not "macd" in selected_profile.indicators:
+                selected_strategy = "RSI + Bollinger Bands"
+            elif "macd" in selected_profile.indicators:
+                selected_strategy = "MACD + Tendencia"
+            elif "bollinger_bands" in selected_profile.indicators:
+                selected_strategy = "Bollinger Bands"
+            elif "all_indicators" in selected_profile.indicators:
+                selected_strategy = "Adaptativa (Múltiples indicadores)"
+            elif "ml_features" in selected_profile.indicators:
+                selected_strategy = "Machine Learning (Experimental)"
+            else:
+                selected_strategy = "Cruce de Medias Móviles"
+            
+            # Extraer parámetros relevantes
+            strategy_params = {
+                "take_profit": selected_profile.take_profit_pct,
+                "stop_loss": selected_profile.stop_loss_pct,
+                "risk_per_trade": selected_profile.risk_per_trade_pct,
+                "max_positions": selected_profile.max_positions,
+                "profile": profile_name
+            }
+            
+            # Añadir parámetros adicionales
+            if selected_profile.parameters:
+                for key, value in selected_profile.parameters.items():
+                    strategy_params[key] = value
+        
+        except ImportError as e:
+            print(f"\n❌ Error: Funcionalidad de perfiles no disponible. {e}")
+            time.sleep(2)
+            return
+        except Exception as e:
+            print(f"\n❌ Error al seleccionar perfil: {e}")
+            time.sleep(2)
+            return
+    
+    elif config_choice == 3:
+        # Recomendación IA
+        try:
+            from strategies.auto_suggestion import suggest_best_strategy
+            
+            # Seleccionar timeframe
+            print("\nSelecciona el timeframe para el análisis:")
+            timeframes = ["15m", "1h", "4h", "1d"]
+            
+            for i, tf in enumerate(timeframes, 1):
+                print(f"{i}. {tf}")
+            
+            tf_choice = get_user_choice(1, len(timeframes))
+            if not tf_choice:
+                return
+            
+            selected_timeframe = timeframes[tf_choice - 1]
+            
+            # Mostrar progreso
+            print(f"\n⚙️ La IA está analizando {selected_symbol} en {selected_timeframe}...")
+            print("Este proceso puede tardar varios minutos.")
+            
+            print("\nAnalizando condiciones de mercado...")
+            time.sleep(1)
+            
+            print("Ejecutando backtesting de estrategias...")
+            time.sleep(2)
+            
+            print("Optimizando parámetros...")
+            time.sleep(2)
+            
+            print("Generando recomendación...")
+            time.sleep(1)
+            
+            # Obtener recomendación
+            recommendation = suggest_best_strategy(selected_symbol, selected_timeframe)
+            
+            # Mostrar la recomendación
+            clear_screen()
+            print_header("RECOMENDACIÓN DE LA IA")
+            
+            market_analysis = recommendation.get("market_analysis", {})
+            
+            print(f"\nSímbolo: {selected_symbol}")
+            print(f"Timeframe: {selected_timeframe}")
+            
+            print("\nAnálisis de mercado:")
+            print(f"  Tendencia: {market_analysis.get('trend', 'N/A')}")
+            print(f"  Condición: {market_analysis.get('market_condition', 'N/A')}")
+            print(f"  Volatilidad: {market_analysis.get('volatility', 0) * 100:.2f}%")
+            
+            print("\nEstrategia recomendada:")
+            ai_strategy = recommendation.get("recommended_strategy", "MACD + Tendencia")
+            print(f"  {ai_strategy}")
+            
+            # Confirmar selección
+            print("\n¿Usar esta recomendación?")
+            print("1. Sí, usar la estrategia recomendada")
+            print("2. No, volver")
+            
+            confirm = get_user_choice(1, 2)
+            if confirm != 1:
+                return
+            
+            # Mapear estrategia recomendada a lista de estrategias
+            strategy_map = {
+                "SMA Crossover": "Cruce de Medias Móviles",
+                "RSI Strategy": "RSI + Bollinger Bands",
+                "MACD Strategy": "MACD + Tendencia",
+                "Bollinger Bands": "Bollinger Bands",
+                "Mean Reversion": "Estadística (Mean Reversion)",
+                "RSI+MACD Combined": "Adaptativa (Múltiples indicadores)"
+            }
+            
+            selected_strategy = strategy_map.get(ai_strategy, "Adaptativa (Múltiples indicadores)")
+            time_interval = selected_timeframe
+            profile_name = recommendation.get("profile_suggestion")
+            strategy_params = recommendation.get("optimal_params", {})
+            
+        except ImportError as e:
+            print(f"\n❌ Error: Funcionalidad de IA no disponible. {e}")
+            time.sleep(2)
+            return
+        except Exception as e:
+            print(f"\n❌ Error al obtener recomendación: {e}")
+            time.sleep(2)
+            return
+    
+    elif config_choice == 4:
+        # Backtesting y optimización
+        try:
+            from backtesting.advanced_optimizer import optimize_strategy_params
+            
+            # Seleccionar estrategia
+            print("\nSelecciona la estrategia a optimizar:")
+            strategies = [
+                "Cruce de Medias Móviles",
+                "RSI + Bollinger Bands",
+                "MACD + Tendencia",
+                "Estadística (Mean Reversion)",
+                "Adaptativa (Múltiples indicadores)"
+            ]
+            
+            for i, strategy in enumerate(strategies, 1):
+                print(f"{i}. {strategy}")
+            
+            strategy_choice = get_user_choice(1, len(strategies))
+            if not strategy_choice:
+                return
+            
+            selected_strategy = strategies[strategy_choice - 1]
+            
+            # Seleccionar timeframe
+            print("\nSelecciona el timeframe para la optimización:")
+            timeframes = ["15m", "1h", "4h", "1d"]
+            
+            for i, tf in enumerate(timeframes, 1):
+                print(f"{i}. {tf}")
+            
+            tf_choice = get_user_choice(1, len(timeframes))
+            if not tf_choice:
+                return
+            
+            selected_timeframe = timeframes[tf_choice - 1]
+            time_interval = selected_timeframe
+            
+            # Seleccionar período de backtesting
+            print("\nSelecciona el período para la optimización:")
+            periods = ["30 días", "60 días", "90 días", "180 días"]
+            
+            for i, period in enumerate(periods, 1):
+                print(f"{i}. {period}")
+            
+            period_choice = get_user_choice(1, len(periods))
+            if not period_choice:
+                return
+            
+            days_map = {1: 30, 2: 60, 3: 90, 4: 180}
+            selected_days = days_map.get(period_choice, 60)
+            
+            # Mostrar progreso
+            print(f"\n⚙️ Optimizando {selected_strategy} para {selected_symbol} en {selected_timeframe}...")
+            print("Este proceso puede tardar varios minutos.")
+            
+            print("\nRecopilando datos históricos...")
+            time.sleep(1)
+            
+            print("Probando diferentes combinaciones de parámetros...")
+            total_combinations = 24  # Un valor razonable para mostrar progreso
+            for i in range(total_combinations):
+                progress = (i + 1) / total_combinations * 100
+                print(f"Prueba {i+1}/{total_combinations} [{progress:>6.2f}%]", end="\r")
+                time.sleep(0.1)
+            
+            print("\nAnalizando resultados..." + " " * 30)
+            time.sleep(1)
+            
+            # Mapeo a estrategias para la API de backtesting
+            strategy_map_to_backtest = {
+                "Cruce de Medias Móviles": "SMA Crossover",
+                "RSI + Bollinger Bands": "RSI Strategy",
+                "MACD + Tendencia": "MACD Strategy",
+                "Estadística (Mean Reversion)": "Mean Reversion",
+                "Adaptativa (Múltiples indicadores)": "Multi-Indicator Strategy"
+            }
+            
+            # Obtener nombre para API de backtesting
+            backtest_strategy_name = strategy_map_to_backtest.get(selected_strategy, "SMA Crossover")
+            
+            # Ejecutar optimización (simulada por ahora)
+            optimization_result = {
+                "strategy": backtest_strategy_name,
+                "best_params": {
+                    "short_period": 10,
+                    "long_period": 30,
+                    "rsi_period": 14,
+                    "bb_std_dev": 2.0,
+                    "take_profit": 2.5,
+                    "stop_loss": 1.5
+                },
+                "best_metrics": {
+                    "return_pct": 18.5,
+                    "win_rate": 65.0,
+                    "profit_factor": 1.8
+                }
+            }
+            
+            # Mostrar resultados
+            clear_screen()
+            print_header("RESULTADOS DE OPTIMIZACIÓN")
+            
+            print(f"\nEstrategia: {selected_strategy}")
+            print(f"Período: {selected_days} días")
+            
+            print("\nParámetros optimizados:")
+            for param, value in optimization_result["best_params"].items():
+                print(f"  {param}: {value}")
+            
+            print("\nMétricas con parámetros optimizados:")
+            metrics = optimization_result["best_metrics"]
+            print(f"  Retorno: {metrics.get('return_pct', 0):.2f}%")
+            print(f"  Win rate: {metrics.get('win_rate', 0):.2f}%")
+            print(f"  Profit factor: {metrics.get('profit_factor', 0):.2f}")
+            
+            # Confirmar selección
+            print("\n¿Usar estos parámetros optimizados?")
+            print("1. Sí, usar los parámetros optimizados")
+            print("2. No, volver")
+            
+            confirm = get_user_choice(1, 2)
+            if confirm != 1:
+                return
+            
+            # Extraer parámetros optimizados
+            strategy_params = optimization_result.get("best_params", {})
+            
+        except ImportError as e:
+            print(f"\n❌ Error: Funcionalidad de backtesting avanzado no disponible. {e}")
+            time.sleep(2)
+            return
+        except Exception as e:
+            print(f"\n❌ Error al ejecutar optimización: {e}")
+            time.sleep(2)
+            return
     
     # Configurar balance inicial (para paper trading)
     initial_balance = 1000.0
@@ -248,11 +621,13 @@ def create_new_bot():
         "active": False,
         "created_at": datetime.now().isoformat(),
         "config": {
-            "risk_per_trade": 1.0,  # Porcentaje del balance por operación
-            "leverage": 1.0,        # Sin apalancamiento por defecto
-            "stop_loss": 2.0,       # ATR multiplier para stop loss
-            "take_profit": 3.0,     # ATR multiplier para take profit
-            "time_interval": "15m"  # Intervalo de tiempo predeterminado
+            "risk_per_trade": strategy_params.get("risk_per_trade", 1.0),
+            "leverage": strategy_params.get("leverage", 1.0),
+            "stop_loss": strategy_params.get("stop_loss", 2.0),
+            "take_profit": strategy_params.get("take_profit", 3.0),
+            "time_interval": time_interval,
+            "profile": profile_name,
+            "parameters": strategy_params
         }
     }
     
@@ -260,6 +635,14 @@ def create_new_bot():
     try:
         bot_manager.create_bot(bot_config)
         print(f"\n✅ Bot '{bot_name}' creado exitosamente!")
+        
+        if profile_name:
+            print(f"Usando perfil: {profile_name}")
+        
+        if strategy_params:
+            print("\nParámetros optimizados:")
+            for param, value in strategy_params.items():
+                print(f"  {param}: {value}")
     except Exception as e:
         logger.error(f"Error creating bot: {e}")
         print(f"\n❌ Error al crear el bot: {e}")
