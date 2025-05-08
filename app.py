@@ -123,6 +123,11 @@ def settings():
                           bot_initialized=bot_initialized,
                           is_running=is_bot_running)
 
+@app.route('/battle-arena')
+def battle_arena():
+    """Battle Arena page route"""
+    return render_template('battle_arena.html')
+
 @app.route('/api/bot/start', methods=['POST'])
 def start_bot():
     """API endpoint to start the bot"""
