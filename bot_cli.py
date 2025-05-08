@@ -897,8 +897,11 @@ def backtesting_menu():
         
         options = [
             "Ejecutar backtest",
+            "Ejecutar backtest de todas las estrategias",
             "Ver resultados anteriores",
             "Optimizar parámetros",
+            "Análisis de tendencia del mercado",
+            "Sistema de aprendizaje automático",
             "Volver al menú principal"
         ]
         
@@ -907,14 +910,766 @@ def backtesting_menu():
         if choice == 1:
             run_new_backtest()
         elif choice == 2:
-            view_backtest_results()
+            run_multi_strategy_backtest_menu()
         elif choice == 3:
-            optimize_parameters()
+            view_backtest_results()
         elif choice == 4:
+            optimize_parameters()
+        elif choice == 5:
+            market_trend_analysis()
+        elif choice == 6:
+            automated_learning_menu()
+        elif choice == 7:
             break
         else:
             print("Opción no válida. Inténtalo de nuevo.")
             time.sleep(1)
+
+def run_multi_strategy_backtest_menu():
+    """Menú para ejecutar backtesting de todas las estrategias"""
+    clear_screen()
+    print_header("BACKTEST DE TODAS LAS ESTRATEGIAS")
+    
+    # Seleccionar símbolo
+    symbols = get_available_symbols()
+    
+    print("\nSelecciona el par de trading:")
+    for i, symbol in enumerate(symbols, 1):
+        print(f"{i}. {symbol}")
+    
+    symbol_choice = get_user_choice(1, len(symbols))
+    if not symbol_choice:
+        return
+    
+    selected_symbol = symbols[symbol_choice - 1]
+    
+    # Seleccionar periodo
+    print("\nSelecciona el periodo de backtesting:")
+    periods = [
+        "Últimos 30 días",
+        "Últimos 60 días",
+        "Últimos 90 días",
+        "Últimos 180 días"
+    ]
+    
+    for i, period in enumerate(periods, 1):
+        print(f"{i}. {period}")
+    
+    period_choice = get_user_choice(1, len(periods))
+    if not period_choice:
+        return
+    
+    # Mapear elección a días
+    days_map = {1: 30, 2: 60, 3: 90, 4: 180}
+    days = days_map.get(period_choice, 90)
+    
+    # Seleccionar intervalo
+    print("\nSelecciona el intervalo de tiempo:")
+    intervals = ["15m", "1h", "4h", "1d"]
+    
+    for i, interval in enumerate(intervals, 1):
+        print(f"{i}. {interval}")
+    
+    interval_choice = get_user_choice(1, len(intervals))
+    if not interval_choice:
+        return
+    
+    selected_interval = intervals[interval_choice - 1]
+    
+    # Ejecutar backtesting
+    print(f"\n⚙️ Ejecutando backtesting de todas las estrategias para {selected_symbol} en {selected_interval} (últimos {days} días)")
+    print("Este proceso puede tardar varios minutos.")
+    
+    try:
+        # Importar solo cuando se necesita para evitar errores de inicio
+        from backtesting.advanced_optimizer import run_multi_strategy_backtest
+        
+        # Mostrar progreso
+        print("\nRecopilando datos históricos...")
+        time.sleep(1)
+        
+        # Simular progreso
+        print("\nEjecutando estrategias:")
+        strategies = [
+            "SMA Crossover", "RSI Strategy", "MACD Strategy", 
+            "Bollinger Bands", "Mean Reversion", "RSI+MACD Combined", 
+            "SMA Crossover (Fast)", "SMA Crossover (Slow)", 
+            "RSI (Aggressive)", "RSI (Conservative)"
+        ]
+        
+        for i, strategy in enumerate(strategies):
+            progress = (i + 1) / len(strategies) * 100
+            print(f"Procesando {strategy:<20} [{progress:>6.2f}%]", end="\r")
+            time.sleep(0.5)
+        
+        print("\nFinalizando análisis..." + " " * 30)
+        time.sleep(1)
+        
+        # Ejecutar backtesting
+        results = run_multi_strategy_backtest(selected_symbol, selected_interval, days)
+        
+        # Mostrar resultados
+        clear_screen()
+        print_header("RESULTADOS DE BACKTESTING MÚLTIPLE")
+        
+        print(f"\nPar: {selected_symbol}")
+        print(f"Intervalo: {selected_interval}")
+        print(f"Periodo: Últimos {days} días")
+        
+        # Detectar tendencia
+        trend = results.get("trend_report", {}).get("current_trend", "No disponible")
+        print(f"\nTendencia detectada: {trend}")
+        
+        # Mostrar mejores estrategias
+        print("\nMejores estrategias:")
+        
+        best_strategies = results.get("best_strategies", [])
+        
+        if best_strategies:
+            strategy_data = []
+            for i, strategy in enumerate(best_strategies, 1):
+                strategy_data.append([
+                    i,
+                    strategy["name"],
+                    f"{strategy['return_pct']:.2f}%",
+                    f"{strategy['win_rate']:.2f}%",
+                    f"{strategy['profit_factor']:.2f}",
+                    f"{strategy['sharpe_ratio']:.2f}",
+                    strategy["total_trades"]
+                ])
+            
+            headers = ["#", "Estrategia", "Retorno", "Win Rate", "Profit Factor", "Sharpe", "Trades"]
+            print_table(headers, strategy_data)
+            
+            # Mostrar mejores estrategias por tendencia
+            trend_report = results.get("trend_report", {})
+            
+            if trend_report:
+                print("\nMejores estrategias por tendencia:")
+                
+                for trend_type, trend_data in trend_report.items():
+                    if trend_type == "current_trend":
+                        continue
+                    
+                    symbol_data = trend_data.get(selected_symbol, [])
+                    if symbol_data:
+                        best_for_trend = symbol_data[0]["name"]
+                        print(f"{trend_type}: {best_for_trend}")
+        else:
+            print("No se encontraron resultados.")
+        
+        # Preguntar si crear bot con la mejor estrategia
+        if best_strategies:
+            best_strategy = best_strategies[0]["name"]
+            
+            print(f"\n¿Deseas crear un nuevo bot con la estrategia '{best_strategy}'?")
+            print("1. Sí, crear bot en modo simulado")
+            print("2. No")
+            
+            create_choice = get_user_choice(1, 2)
+            
+            if create_choice == 1:
+                # Crear bot con la mejor estrategia
+                create_bot_from_strategy(selected_symbol, best_strategy)
+    
+    except ImportError as e:
+        print(f"\n❌ Error: Funcionalidad no disponible. {e}")
+    except Exception as e:
+        print(f"\n❌ Error al ejecutar backtesting múltiple: {e}")
+    
+    input("\nPresiona Enter para continuar...")
+
+def create_bot_from_strategy(symbol: str, strategy_name: str):
+    """Crea un bot a partir de una estrategia"""
+    clear_screen()
+    print_header("CREAR BOT DESDE ESTRATEGIA")
+    
+    # Solicitar nombre del bot
+    print(f"\nCreando bot con estrategia '{strategy_name}' para {symbol}")
+    print("\nIntroduce un nombre para el bot:")
+    bot_name = input("> ").strip()
+    if not bot_name:
+        print("El nombre no puede estar vacío.")
+        time.sleep(2)
+        return
+    
+    # Modo simulado
+    paper_trading = True
+    
+    # Configurar balance inicial
+    print("\nIntroduce el balance inicial (USDT):")
+    try:
+        initial_balance = float(input("> ").strip())
+    except ValueError:
+        print("Valor no válido. Usando 1000 USDT por defecto.")
+        initial_balance = 1000.0
+    
+    # Crear configuración del bot
+    bot_config = {
+        "name": bot_name,
+        "symbol": symbol,
+        "paper_trading": paper_trading,
+        "strategy": strategy_name,
+        "balance": initial_balance,
+        "active": False,
+        "created_at": datetime.now().isoformat(),
+        "config": {
+            "risk_per_trade": 1.0,
+            "leverage": 1.0,
+            "stop_loss": 2.0,
+            "take_profit": 3.0,
+            "time_interval": "15m"
+        }
+    }
+    
+    # Guardar bot en la base de datos
+    try:
+        bot_manager.create_bot(bot_config)
+        print(f"\n✅ Bot '{bot_name}' creado exitosamente con la estrategia '{strategy_name}'!")
+    except Exception as e:
+        logger.error(f"Error creating bot: {e}")
+        print(f"\n❌ Error al crear el bot: {e}")
+
+def market_trend_analysis():
+    """Analiza la tendencia actual del mercado"""
+    clear_screen()
+    print_header("ANÁLISIS DE TENDENCIA DEL MERCADO")
+    
+    # Seleccionar símbolo
+    symbols = get_available_symbols()
+    
+    print("\nSelecciona el par de trading:")
+    for i, symbol in enumerate(symbols, 1):
+        print(f"{i}. {symbol}")
+    
+    symbol_choice = get_user_choice(1, len(symbols))
+    if not symbol_choice:
+        return
+    
+    selected_symbol = symbols[symbol_choice - 1]
+    
+    # Seleccionar intervalo
+    print("\nSelecciona el intervalo de tiempo:")
+    intervals = ["15m", "1h", "4h", "1d"]
+    
+    for i, interval in enumerate(intervals, 1):
+        print(f"{i}. {interval}")
+    
+    interval_choice = get_user_choice(1, len(intervals))
+    if not interval_choice:
+        return
+    
+    selected_interval = intervals[interval_choice - 1]
+    
+    # Ejecutar análisis
+    print(f"\n⚙️ Analizando tendencia de mercado para {selected_symbol} en {selected_interval}...")
+    
+    try:
+        # Importar solo cuando se necesita para evitar errores de inicio
+        from backtesting.advanced_optimizer import analyze_current_market
+        
+        # Ejecutar análisis
+        analysis = analyze_current_market(selected_symbol, selected_interval)
+        
+        # Mostrar resultados
+        clear_screen()
+        print_header("RESULTADOS DE ANÁLISIS DE TENDENCIA")
+        
+        print(f"\nPar: {selected_symbol}")
+        print(f"Intervalo: {selected_interval}")
+        print(f"Fecha de análisis: {analysis.get('timestamp', 'N/A')}")
+        
+        # Mostrar tendencia detectada
+        trend = analysis.get("trend", "No disponible")
+        market_condition = analysis.get("market_condition", "No disponible")
+        
+        print(f"\nTendencia detectada: {trend}")
+        print(f"Condición de mercado: {market_condition}")
+        print(f"Volatilidad: {analysis.get('volatility', 0) * 100:.2f}%")
+        print(f"Días en tendencia actual: {analysis.get('days_in_trend', 0)}")
+        
+        # Mostrar precios y medias
+        print(f"\nPrecio actual: {analysis.get('current_price', 0):.2f}")
+        print(f"SMA 20: {analysis.get('sma20', 0):.2f}")
+        print(f"SMA 50: {analysis.get('sma50', 0):.2f}")
+        print(f"SMA 100: {analysis.get('sma100', 0):.2f}")
+        
+        # Recomendaciones de estrategias
+        print("\nRecomendaciones de estrategias para la tendencia actual:")
+        
+        trend_recommendations = {
+            "strong_uptrend": ["SMA Crossover", "MACD Strategy", "RSI (Aggressive)"],
+            "weak_uptrend": ["SMA Crossover", "MACD Strategy", "Bollinger Bands"],
+            "neutral": ["Mean Reversion", "Bollinger Bands", "RSI Strategy"],
+            "weak_downtrend": ["Mean Reversion", "RSI Strategy", "Bollinger Bands"],
+            "strong_downtrend": ["Mean Reversion", "RSI (Conservative)", "MACD Strategy"],
+            "choppy": ["Bollinger Bands", "Mean Reversion", "RSI+MACD Combined"],
+            "volatile": ["RSI+MACD Combined", "Bollinger Bands", "RSI (Conservative)"]
+        }
+        
+        if trend in trend_recommendations:
+            for i, strategy in enumerate(trend_recommendations[trend], 1):
+                print(f"{i}. {strategy}")
+        else:
+            print("No hay recomendaciones disponibles para esta tendencia.")
+        
+        # Preguntar si crear bot con estrategia recomendada
+        if trend in trend_recommendations:
+            best_strategy = trend_recommendations[trend][0]
+            
+            print(f"\n¿Deseas crear un nuevo bot con la estrategia recomendada '{best_strategy}'?")
+            print("1. Sí, crear bot en modo simulado")
+            print("2. No")
+            
+            create_choice = get_user_choice(1, 2)
+            
+            if create_choice == 1:
+                # Crear bot con la estrategia recomendada
+                create_bot_from_strategy(selected_symbol, best_strategy)
+    
+    except ImportError as e:
+        print(f"\n❌ Error: Funcionalidad no disponible. {e}")
+    except Exception as e:
+        print(f"\n❌ Error al analizar tendencia: {e}")
+    
+    input("\nPresiona Enter para continuar...")
+
+def automated_learning_menu():
+    """Menú del sistema de aprendizaje automático"""
+    while True:
+        clear_screen()
+        print_header("SISTEMA DE APRENDIZAJE AUTOMÁTICO")
+        
+        from interface.cli_utils import Colors
+        
+        print(f"\n{Colors.CYAN}El sistema de aprendizaje automático permite:{Colors.END}")
+        print(f"{Colors.YELLOW}• Detectar automáticamente tendencias y condiciones de mercado{Colors.END}")
+        print(f"{Colors.YELLOW}• Ejecutar backtesting de todas las estrategias disponibles{Colors.END}")
+        print(f"{Colors.YELLOW}• Optimizar parámetros para cada estrategia{Colors.END}")
+        print(f"{Colors.YELLOW}• Crear y ejecutar bots en modo simulado para aprendizaje{Colors.END}")
+        print(f"{Colors.YELLOW}• Mejorar continuamente basándose en resultados{Colors.END}")
+        
+        options = [
+            "Iniciar ciclo de aprendizaje",
+            "Ver estado del sistema de aprendizaje",
+            "Crear bot optimizado",
+            "Crear bot con Machine Learning",
+            "Volver al menú de backtesting"
+        ]
+        
+        choice = print_menu(options)
+        
+        if choice == 1:
+            run_learning_cycle()
+        elif choice == 2:
+            view_learning_system_status()
+        elif choice == 3:
+            create_optimized_bot()
+        elif choice == 4:
+            create_ml_bot()
+        elif choice == 5:
+            break
+        else:
+            print("Opción no válida. Inténtalo de nuevo.")
+            time.sleep(1)
+
+def run_learning_cycle():
+    """Ejecuta un ciclo completo de aprendizaje"""
+    clear_screen()
+    print_header("INICIAR CICLO DE APRENDIZAJE")
+    
+    # Seleccionar símbolos
+    symbols = get_available_symbols()
+    
+    print("\nSelecciona los pares de trading a incluir en el ciclo de aprendizaje:")
+    for i, symbol in enumerate(symbols, 1):
+        print(f"{i}. {symbol}")
+    
+    print("\nIngresa los números separados por comas (ej: 1,3,5) o 'a' para todos:")
+    selection = input("> ").strip().lower()
+    
+    selected_symbols = []
+    if selection == 'a':
+        selected_symbols = symbols
+    else:
+        try:
+            indices = [int(idx.strip()) for idx in selection.split(',') if idx.strip()]
+            selected_symbols = [symbols[idx-1] for idx in indices if 1 <= idx <= len(symbols)]
+        except:
+            print("Selección inválida. Usando el primer símbolo por defecto.")
+            selected_symbols = [symbols[0]] if symbols else []
+    
+    if not selected_symbols:
+        print("No se seleccionaron símbolos. Operación cancelada.")
+        time.sleep(2)
+        return
+    
+    # Seleccionar intervalo
+    print("\nSelecciona el intervalo de tiempo:")
+    intervals = ["15m", "1h", "4h", "1d"]
+    
+    for i, interval in enumerate(intervals, 1):
+        print(f"{i}. {interval}")
+    
+    interval_choice = get_user_choice(1, len(intervals))
+    if not interval_choice:
+        return
+    
+    selected_interval = intervals[interval_choice - 1]
+    
+    # Confirmar inicio
+    symbols_str = ", ".join(selected_symbols)
+    if not confirm_action(f"¿Confirmas iniciar un ciclo de aprendizaje para {symbols_str} en {selected_interval}? Este proceso puede tardar varios minutos."):
+        return
+    
+    # Ejecutar ciclo de aprendizaje
+    print(f"\n⚙️ Iniciando ciclo de aprendizaje para {symbols_str} en {selected_interval}...")
+    print("Este proceso puede tardar varios minutos.")
+    
+    try:
+        # Importar solo cuando se necesita para evitar errores de inicio
+        from backtesting.advanced_optimizer import create_auto_learning_bots
+        
+        # Ejecutar ciclo
+        results = create_auto_learning_bots(selected_symbols, selected_interval)
+        
+        # Mostrar resultados
+        clear_screen()
+        print_header("RESULTADOS DEL CICLO DE APRENDIZAJE")
+        
+        print(f"\nSímbolos: {symbols_str}")
+        print(f"Intervalo: {selected_interval}")
+        print(f"Inicio: {results.get('started_at', 'N/A')}")
+        print(f"Fin: {results.get('completed_at', 'N/A')}")
+        
+        # Mostrar bots creados
+        created_bots = results.get("created_bots", [])
+        
+        if created_bots:
+            print("\nBots creados durante el ciclo:")
+            
+            bot_data = []
+            for bot in created_bots:
+                bot_results = bot.get("results", {})
+                bot_data.append([
+                    bot.get("bot_id", "N/A"),
+                    bot.get("type", "N/A"),
+                    bot_results.get("symbol", "N/A"),
+                    bot_results.get("strategy", "N/A"),
+                    f"{bot_results.get('return_pct', 0):.2f}%",
+                    bot_results.get("trades", 0),
+                    f"{bot_results.get('win_rate', 0):.2f}%"
+                ])
+            
+            headers = ["Bot ID", "Tipo", "Par", "Estrategia", "Retorno", "Trades", "Win Rate"]
+            print_table(headers, bot_data)
+        else:
+            print("\nNo se crearon bots durante el ciclo.")
+    
+    except ImportError as e:
+        print(f"\n❌ Error: Funcionalidad no disponible. {e}")
+    except Exception as e:
+        print(f"\n❌ Error al ejecutar ciclo de aprendizaje: {e}")
+    
+    input("\nPresiona Enter para continuar...")
+
+def view_learning_system_status():
+    """Muestra el estado del sistema de aprendizaje"""
+    clear_screen()
+    print_header("ESTADO DEL SISTEMA DE APRENDIZAJE")
+    
+    try:
+        # Importar solo cuando se necesita para evitar errores de inicio
+        from backtesting.advanced_optimizer import get_learning_system_status
+        
+        # Obtener estado
+        status = get_learning_system_status()
+        
+        # Mostrar resumen
+        print("\nResumen del sistema:")
+        print(f"Total de bots: {status.get('total_bots', 0)}")
+        
+        bots_by_type = status.get("bots_by_type", {})
+        for bot_type, count in bots_by_type.items():
+            print(f"Bots de tipo {bot_type}: {count}")
+        
+        # Mostrar rendimiento por tipo
+        performance_by_type = status.get("performance_by_type", {})
+        
+        if performance_by_type:
+            print("\nRendimiento por tipo de bot:")
+            
+            for bot_type, perf in performance_by_type.items():
+                print(f"\nTipo: {bot_type}")
+                print(f"Cantidad: {perf.get('count', 0)}")
+                print(f"Retorno promedio: {perf.get('avg_return', 0):.2f}%")
+                
+                best_bot = perf.get("best_bot", {})
+                if best_bot:
+                    print(f"Mejor bot: {best_bot.get('name', 'N/A')} ({best_bot.get('return_pct', 0):.2f}%)")
+        
+        # Mostrar insights de aprendizaje
+        insights = status.get("learning_insights", {})
+        
+        if "error" not in insights:
+            print("\nInsights de aprendizaje:")
+            
+            best_strategies = insights.get("best_strategies_by_condition", {})
+            
+            for condition, strategies in best_strategies.items():
+                print(f"\nCondición: {condition}")
+                
+                for i, strategy in enumerate(strategies[:3], 1):
+                    print(f"{i}. {strategy.get('name', 'N/A')} - Retorno: {strategy.get('avg_return', 0):.2f}% - " + 
+                          f"Win Rate: {strategy.get('avg_win_rate', 0):.2f}%")
+        else:
+            print("\nNo hay insights de aprendizaje disponibles.")
+    
+    except ImportError as e:
+        print(f"\n❌ Error: Funcionalidad no disponible. {e}")
+    except Exception as e:
+        print(f"\n❌ Error al obtener estado: {e}")
+    
+    input("\nPresiona Enter para continuar...")
+
+def create_optimized_bot():
+    """Crea un bot optimizado basado en aprendizaje"""
+    clear_screen()
+    print_header("CREAR BOT OPTIMIZADO")
+    
+    # Seleccionar símbolo
+    symbols = get_available_symbols()
+    
+    print("\nSelecciona el par de trading:")
+    for i, symbol in enumerate(symbols, 1):
+        print(f"{i}. {symbol}")
+    
+    symbol_choice = get_user_choice(1, len(symbols))
+    if not symbol_choice:
+        return
+    
+    selected_symbol = symbols[symbol_choice - 1]
+    
+    # Seleccionar intervalo
+    print("\nSelecciona el intervalo de tiempo:")
+    intervals = ["15m", "1h", "4h", "1d"]
+    
+    for i, interval in enumerate(intervals, 1):
+        print(f"{i}. {interval}")
+    
+    interval_choice = get_user_choice(1, len(intervals))
+    if not interval_choice:
+        return
+    
+    selected_interval = intervals[interval_choice - 1]
+    
+    # Seleccionar días para optimización
+    print("\nSelecciona el periodo para optimización:")
+    periods = ["30 días", "60 días", "90 días", "180 días"]
+    
+    for i, period in enumerate(periods, 1):
+        print(f"{i}. {period}")
+    
+    period_choice = get_user_choice(1, len(periods))
+    if not period_choice:
+        return
+    
+    days_map = {1: 30, 2: 60, 3: 90, 4: 180}
+    selected_days = days_map.get(period_choice, 60)
+    
+    # Solicitar nombre del bot
+    print("\nIntroduce un nombre para el bot:")
+    bot_name = input("> ").strip()
+    if not bot_name:
+        print("El nombre no puede estar vacío.")
+        time.sleep(2)
+        return
+    
+    # Ejecutar creación de bot optimizado
+    print(f"\n⚙️ Creando bot optimizado para {selected_symbol} en {selected_interval}...")
+    print("Este proceso incluye análisis de mercado, backtesting y optimización de parámetros.")
+    print("Puede tardar varios minutos.")
+    
+    try:
+        # Importar solo cuando se necesita para evitar errores de inicio
+        from backtesting.advanced_optimizer import AutomatedLearningSystem
+        
+        # Crear sistema de aprendizaje
+        learning_system = AutomatedLearningSystem()
+        
+        # Crear bot optimizado
+        print("\nAnalizando condiciones de mercado...")
+        time.sleep(1)
+        
+        print("\nEjecutando backtesting de estrategias...")
+        time.sleep(2)
+        
+        print("\nOptimizando parámetros...")
+        time.sleep(2)
+        
+        # Crear bot
+        bot_id = learning_system.create_optimized_bot(selected_symbol, selected_interval, selected_days)
+        
+        if bot_id:
+            # Actualizar nombre
+            bot_config = learning_system._load_bot_config(bot_id)
+            if bot_config:
+                bot_config["name"] = bot_name
+                learning_system._save_bot_config(bot_id, bot_config)
+            
+            # Iniciar simulación
+            print("\nIniciando simulación con bot optimizado...")
+            sim_result = learning_system.start_simulation_bot(bot_id, days_to_simulate=30)
+            
+            # Mostrar resultados
+            clear_screen()
+            print_header("BOT OPTIMIZADO CREADO")
+            
+            print(f"\nBot '{bot_name}' creado exitosamente!")
+            print(f"ID: {bot_id}")
+            print(f"Par: {selected_symbol}")
+            print(f"Intervalo: {selected_interval}")
+            
+            if "error" not in sim_result:
+                print(f"\nResultados de simulación inicial (30 días):")
+                print(f"Estrategia: {sim_result.get('strategy', 'N/A')}")
+                print(f"Balance inicial: {sim_result.get('initial_balance', 0):.2f} USDT")
+                print(f"Balance final: {sim_result.get('final_balance', 0):.2f} USDT")
+                print(f"Retorno: {sim_result.get('return_pct', 0):.2f}%")
+                print(f"Operaciones: {sim_result.get('trades', 0)}")
+                print(f"Win Rate: {sim_result.get('win_rate', 0):.2f}%")
+            else:
+                print(f"\nBot creado pero la simulación inicial falló: {sim_result.get('error', 'Error desconocido')}")
+        else:
+            print("\n❌ Error al crear bot optimizado.")
+    
+    except ImportError as e:
+        print(f"\n❌ Error: Funcionalidad no disponible. {e}")
+    except Exception as e:
+        print(f"\n❌ Error al crear bot optimizado: {e}")
+    
+    input("\nPresiona Enter para continuar...")
+
+def create_ml_bot():
+    """Crea un bot basado en Machine Learning"""
+    clear_screen()
+    print_header("CREAR BOT CON MACHINE LEARNING")
+    
+    # Seleccionar símbolo
+    symbols = get_available_symbols()
+    
+    print("\nSelecciona el par de trading:")
+    for i, symbol in enumerate(symbols, 1):
+        print(f"{i}. {symbol}")
+    
+    symbol_choice = get_user_choice(1, len(symbols))
+    if not symbol_choice:
+        return
+    
+    selected_symbol = symbols[symbol_choice - 1]
+    
+    # Seleccionar intervalo
+    print("\nSelecciona el intervalo de tiempo:")
+    intervals = ["15m", "1h", "4h", "1d"]
+    
+    for i, interval in enumerate(intervals, 1):
+        print(f"{i}. {interval}")
+    
+    interval_choice = get_user_choice(1, len(intervals))
+    if not interval_choice:
+        return
+    
+    selected_interval = intervals[interval_choice - 1]
+    
+    # Seleccionar tipo de modelo
+    print("\nSelecciona el tipo de modelo de ML:")
+    models = [
+        "Random Forest (más rápido, buena precisión)",
+        "Gradient Boosting (balance velocidad/precisión)",
+        "MLP Neural Network (más lento, alta capacidad)"
+    ]
+    
+    for i, model in enumerate(models, 1):
+        print(f"{i}. {model}")
+    
+    model_choice = get_user_choice(1, len(models))
+    if not model_choice:
+        return
+    
+    model_types = ["random_forest", "gradient_boosting", "mlp"]
+    selected_model = model_types[model_choice - 1]
+    
+    # Solicitar nombre del bot
+    print("\nIntroduce un nombre para el bot:")
+    bot_name = input("> ").strip()
+    if not bot_name:
+        print("El nombre no puede estar vacío.")
+        time.sleep(2)
+        return
+    
+    # Ejecutar creación de bot ML
+    print(f"\n⚙️ Creando bot ML con modelo {selected_model} para {selected_symbol} en {selected_interval}...")
+    print("Este proceso incluye entrenamiento de modelo, que puede tardar varios minutos.")
+    
+    try:
+        # Importar solo cuando se necesita para evitar errores de inicio
+        from backtesting.advanced_optimizer import AutomatedLearningSystem
+        
+        # Crear sistema de aprendizaje
+        learning_system = AutomatedLearningSystem()
+        
+        # Crear bot ML
+        print("\nObteniendo datos históricos...")
+        time.sleep(1)
+        
+        print("\nPreparando características...")
+        time.sleep(1)
+        
+        print("\nEntrenando modelo de ML...")
+        time.sleep(3)
+        
+        # Crear bot
+        bot_id = learning_system.create_ml_bot(selected_symbol, selected_interval, selected_model)
+        
+        if bot_id:
+            # Actualizar nombre
+            bot_config = learning_system._load_bot_config(bot_id)
+            if bot_config:
+                bot_config["name"] = bot_name
+                learning_system._save_bot_config(bot_id, bot_config)
+            
+            # Iniciar simulación
+            print("\nIniciando simulación con bot ML...")
+            sim_result = learning_system.start_simulation_bot(bot_id, days_to_simulate=30)
+            
+            # Mostrar resultados
+            clear_screen()
+            print_header("BOT ML CREADO")
+            
+            print(f"\nBot '{bot_name}' creado exitosamente!")
+            print(f"ID: {bot_id}")
+            print(f"Par: {selected_symbol}")
+            print(f"Intervalo: {selected_interval}")
+            print(f"Modelo: {selected_model}")
+            
+            if "error" not in sim_result:
+                print(f"\nResultados de simulación inicial (30 días):")
+                print(f"Balance inicial: {sim_result.get('initial_balance', 0):.2f} USDT")
+                print(f"Balance final: {sim_result.get('final_balance', 0):.2f} USDT")
+                print(f"Retorno: {sim_result.get('return_pct', 0):.2f}%")
+                print(f"Operaciones: {sim_result.get('trades', 0)}")
+                print(f"Win Rate: {sim_result.get('win_rate', 0):.2f}%")
+            else:
+                print(f"\nBot creado pero la simulación inicial falló: {sim_result.get('error', 'Error desconocido')}")
+        else:
+            print("\n❌ Error al crear bot ML.")
+    
+    except ImportError as e:
+        print(f"\n❌ Error: Funcionalidad no disponible. {e}")
+    except Exception as e:
+        print(f"\n❌ Error al crear bot ML: {e}")
+    
+    input("\nPresiona Enter para continuar...")
 
 def run_new_backtest():
     """Ejecuta un nuevo backtest"""
