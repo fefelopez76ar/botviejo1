@@ -776,6 +776,53 @@ def demo_market_data():
     print("\n✅ Demostración completada.")
     return True
 
+def get_available_symbols(exchange: str = "okx") -> List[str]:
+    """
+    Obtiene la lista de símbolos disponibles para trading.
+    
+    Args:
+        exchange: Exchange a consultar
+        
+    Returns:
+        List[str]: Lista de símbolos disponibles
+    """
+    # Lista de símbolos más populares
+    popular_symbols = [
+        'SOL-USDT', 'BTC-USDT', 'ETH-USDT', 'ADA-USDT', 'XRP-USDT',
+        'DOGE-USDT', 'DOT-USDT', 'AVAX-USDT', 'MATIC-USDT', 'LINK-USDT'
+    ]
+    
+    try:
+        # Intentar obtener lista de símbolos desde el exchange
+        if exchange.lower() == 'okx':
+            response = requests.get("https://www.okx.com/api/v5/market/tickers?instType=SPOT")
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("code") == "0" and "data" in data:
+                    # Filtrar solo pares con USDT
+                    symbols = [item["instId"] for item in data["data"] if "-USDT" in item["instId"]]
+                    return symbols
+                    
+        elif exchange.lower() == 'binance':
+            response = requests.get("https://api.binance.com/api/v3/exchangeInfo")
+            
+            if response.status_code == 200:
+                data = response.json()
+                # Filtrar solo pares con USDT
+                symbols = [symbol["symbol"].replace("USDT", "-USDT") 
+                          for symbol in data["symbols"] 
+                          if symbol["symbol"].endswith("USDT") and symbol["status"] == "TRADING"]
+                return symbols
+        
+        # Si no se pudieron obtener, devolver la lista predefinida
+        logger.warning(f"No se pudieron obtener símbolos de {exchange}, usando lista predefinida")
+        return popular_symbols
+        
+    except Exception as e:
+        logger.error(f"Error al obtener símbolos disponibles: {e}")
+        return popular_symbols
+
 if __name__ == "__main__":
     try:
         demo_market_data()
