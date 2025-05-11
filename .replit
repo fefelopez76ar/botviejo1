@@ -9,7 +9,7 @@ deploymentTarget = "autoscale"
 run = ["gunicorn", "--bind", "0.0.0.0:5000", "main:app"]
 
 [workflows]
-runButton = "Run Bot"
+runButton = "Run Trading Bot"
 
 [[workflows.workflow]]
 name = "Project"
@@ -31,6 +31,15 @@ waitForPort = 5000
 
 [[workflows.workflow]]
 name = "Run Bot"
+author = 42389922
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python main.py"
+
+[[workflows.workflow]]
+name = "Run Trading Bot"
 author = 42389922
 mode = "sequential"
 
