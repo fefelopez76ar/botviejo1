@@ -1,73 +1,67 @@
 
-from flask import Flask, render_template, jsonify
-from adaptive_system.bot_battle_arena import BotBattleArena
+from flask import Flask, jsonify
 import logging
-import threading
 import time
+import threading
 
-# Configurar logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
-arena = None
 
-def init_battle_arena():
-    """Inicializa y ejecuta un solo bot de scalping"""
-    global arena
-    arena = BotBattleArena()
-
-    # Crear un solo bot de scalping
-    warrior_id = arena.add_warrior(
-        strategy_name="breakout_scalping",
-        timeframe="1m",
-        params={
-            "take_profit_pct": 0.8,
-            "stop_loss_pct": 0.5,
-            "trailing_stop_pct": 0.3,
-            "max_position_size_pct": 50.0,
-            "min_volume_threshold": 1.5,
-            "min_rr_ratio": 1.5,
-            "max_fee_impact_pct": 0.15
+class ScalpingBot:
+    def __init__(self):
+        self.active = False
+        self.balance = 1000
+        self.current_position = None
+        self.last_trade_price = 0
+        self.total_trades = 0
+        
+    def start(self):
+        self.active = True
+        logger.info("Bot iniciado")
+        
+    def stop(self):
+        self.active = False
+        logger.info("Bot detenido")
+        
+    def get_status(self):
+        return {
+            "active": self.active,
+            "balance": self.balance,
+            "position": self.current_position,
+            "total_trades": self.total_trades
         }
-    )
-    
-    # Activar el bot
-    arena.activate_warrior(warrior_id)
 
-    # Ciclo de evaluación más frecuente para aprendizaje rápido
+bot = ScalpingBot()
+
+def run_bot():
     while True:
-        try:
-            arena.evaluate_arena()
-            time.sleep(60)  # Evaluar cada minuto
-        except Exception as e:
-            logger.error(f"Error en ciclo de evaluación: {e}")
-            time.sleep(5)
+        if bot.active:
+            try:
+                # Aquí irá la lógica de trading real
+                time.sleep(1)
+            except Exception as e:
+                logger.error(f"Error: {e}")
+                time.sleep(5)
+        else:
+            time.sleep(1)
 
-@app.route('/')
-def index():
-    return render_template('index.html')
+@app.route('/api/start')
+def start_bot():
+    bot.start()
+    return jsonify({"status": "Bot iniciado"})
 
-@app.route('/battle-arena')
-def battle_arena():
-    return render_template('battle_arena.html')
+@app.route('/api/stop')
+def stop_bot():
+    bot.stop()
+    return jsonify({"status": "Bot detenido"})
 
 @app.route('/api/status')
 def get_status():
-    if not arena:
-        return jsonify({"error": "Bot no inicializado"})
-    return jsonify(arena.get_arena_status())
-
-@app.route('/api/leaderboard')
-def get_leaderboard():
-    if not arena:
-        return jsonify({"error": "Bot no inicializado"})
-    return jsonify(arena.get_leaderboard())
+    return jsonify(bot.get_status())
 
 if __name__ == '__main__':
-    # Iniciar bot en un hilo separado
-    arena_thread = threading.Thread(target=init_battle_arena, daemon=True)
-    arena_thread.start()
-
-    # Iniciar servidor web
+    bot_thread = threading.Thread(target=run_bot, daemon=True)
+    bot_thread.start()
     app.run(host='0.0.0.0', port=5000, debug=False)
