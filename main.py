@@ -1,70 +1,59 @@
-from flask import Flask, render_template, request, jsonify
-import os
-import json
+from flask import Flask, render_template, jsonify
+from adaptive_system.bot_battle_arena import BotBattleArena
 import logging
-from datetime import datetime
-
-from adaptive_system.bot_battle_arena import get_bot_battle_arena, BotBattleArena
-from core.multi_bot_manager import get_multi_bot_manager
-from risk_management.adaptive_position_manager import get_position_manager
+import threading
+import time
 
 # Configurar logging
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger('app')
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SESSION_SECRET", "bot_battle_secret_key")
+arena = None
 
-# Rutas principales
+def init_battle_arena():
+    """Inicializa y ejecuta la arena de batalla"""
+    global arena
+    arena = BotBattleArena()
+
+    # Crear arena estándar con bots predefinidos
+    arena.create_standard_arena([
+        "breakout_scalping",
+        "momentum_scalping", 
+        "mean_reversion",
+        "ml_adaptive"
+    ])
+
+    # Ciclo de evaluación continua
+    while True:
+        try:
+            # Evaluar arena cada 15 minutos
+            arena.evaluate_arena()
+            time.sleep(900)  # 15 minutos
+        except Exception as e:
+            logger.error(f"Error en ciclo de evaluación: {e}")
+            time.sleep(60)  # Esperar 1 minuto en caso de error
+
 @app.route('/')
 def index():
     return render_template('index.html')
 
-@app.route('/battle-arena')
-def battle_arena():
-    """Página de la arena de batalla de bots."""
-    return render_template('battle_arena.html')
-
-# API para la arena de batalla
-@app.route('/api/battle-arena/status')
-def api_battle_arena_status():
-    """Obtiene el estado de la arena de batalla."""
-    arena = get_bot_battle_arena()
+@app.route('/api/status')
+def get_status():
+    if not arena:
+        return jsonify({"error": "Arena no inicializada"})
     return jsonify(arena.get_arena_status())
 
-@app.route('/api/battle-arena/warriors')
-def api_battle_arena_warriors():
-    """Obtiene los guerreros de la arena."""
-    arena = get_bot_battle_arena()
+@app.route('/api/leaderboard')
+def get_leaderboard():
+    if not arena:
+        return jsonify({"error": "Arena no inicializada"})
     return jsonify(arena.get_leaderboard())
 
-@app.route('/api/battle-arena/evaluate', methods=['POST'])
-def api_battle_arena_evaluate():
-    """Realiza una evaluación de la arena."""
-    arena = get_bot_battle_arena()
-    result = arena.evaluate_arena()
-    return jsonify(result)
-
-@app.route('/api/battle-arena/generate-charts', methods=['POST'])
-def api_battle_arena_generate_charts():
-    """Genera gráficos de la arena de batalla."""
-    arena = get_bot_battle_arena()
-    
-    # Generar gráficos
-    evolution_result = arena.generate_evolution_chart()
-    leaderboard_result = arena.generate_leaderboard_chart()
-    
-    return jsonify({
-        "evolution_chart": evolution_result,
-        "leaderboard_chart": leaderboard_result
-    })
-
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    # Iniciar arena en un hilo separado
+    arena_thread = threading.Thread(target=init_battle_arena, daemon=True)
+    arena_thread.start()
 
-"""
-Solana Trading Bot - Main Application
-"""
-
-if __name__ == "__main__":
+    # Iniciar servidor web
     app.run(host='0.0.0.0', port=5000)
