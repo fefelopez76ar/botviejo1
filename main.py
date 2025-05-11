@@ -60,5 +60,5 @@ if __name__ == '__main__':
     arena_thread = threading.Thread(target=init_battle_arena, daemon=True)
     arena_thread.start()
 
-    # Iniciar servidor web
-    app.run(host='0.0.0.0', port=5000)
+    # Iniciar servidor web con debug desactivado y host accesible
+    app.run(host='0.0.0.0', port=5000, debug=False)
