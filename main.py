@@ -38,6 +38,11 @@ def init_battle_arena():
 def index():
     return render_template('index.html')
 
+@app.route('/battle-arena')
+def battle_arena():
+    """Página de la arena de batalla."""
+    return render_template('battle_arena.html')
+
 @app.route('/api/status')
 def get_status():
     if not arena:
