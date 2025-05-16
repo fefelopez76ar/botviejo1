@@ -45,3 +45,5 @@ PENDIENTES PARA IMPLEMENTACIÓN DEL MODO DE TRADING REAL
 - Incluir advertencias sobre riesgos
 - Documentar requisitos mínimos para habilitar modo real
 - Crear guía de resolución de problemas comunes
+- Especificar requisito de Python 3.11.7 para compatibilidad con TensorFlow
+- Documentar pasos de instalación específicos para TensorFlow en Python 3.11.7
