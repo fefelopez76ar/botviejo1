@@ -8,37 +8,34 @@ diferentes condiciones de mercado para Solana.
 
 import os
 import json
-import time
 import logging
-import numpy as np
 import pandas as pd
-from typing import Dict, List, Tuple, Any, Optional
+import numpy as np
 from enum import Enum
-from datetime import datetime, timedelta
+from typing import Dict, List, Any, Tuple, Optional
 
 # Configurar logging
-logger = logging.getLogger("AdaptiveWeighting")
+logger = logging.getLogger(__name__)
 
-# Definir condiciones de mercado
 class MarketCondition(Enum):
-    STRONG_UPTREND = "strong_uptrend"
-    MODERATE_UPTREND = "moderate_uptrend"
-    LATERAL_LOW_VOL = "lateral_low_vol"
-    LATERAL_HIGH_VOL = "lateral_high_vol"
-    MODERATE_DOWNTREND = "moderate_downtrend"
-    STRONG_DOWNTREND = "strong_downtrend"
-    EXTREME_VOLATILITY = "extreme_volatility"
+    """Condiciones de mercado para contextualizar señales"""
+    STRONG_UPTREND = "strong_uptrend"          # Tendencia alcista fuerte
+    MODERATE_UPTREND = "moderate_uptrend"      # Tendencia alcista moderada
+    LATERAL_LOW_VOL = "lateral_low_vol"        # Mercado lateral con baja volatilidad
+    LATERAL_HIGH_VOL = "lateral_high_vol"      # Mercado lateral con alta volatilidad
+    MODERATE_DOWNTREND = "moderate_downtrend"  # Tendencia bajista moderada
+    STRONG_DOWNTREND = "strong_downtrend"      # Tendencia bajista fuerte
+    EXTREME_VOLATILITY = "extreme_volatility"  # Volatilidad extrema
 
-# Definir intervalos de tiempo
 class TimeInterval(Enum):
-    MINUTE_1 = "1m"
-    MINUTE_5 = "5m"
-    MINUTE_15 = "15m"
-    MINUTE_30 = "30m"
-    HOUR_1 = "1h"
-    HOUR_4 = "4h"
-    DAY_1 = "1d"
-
+    """Intervalos de tiempo para contextualizar señales"""
+    MINUTE_1 = "1m"       # 1 minuto
+    MINUTE_5 = "5m"       # 5 minutos
+    MINUTE_15 = "15m"     # 15 minutos
+    MINUTE_30 = "30m"     # 30 minutos
+    HOUR_1 = "1h"         # 1 hora
+    HOUR_4 = "4h"         # 4 horas
+    DAY_1 = "1d"          # 1 día
 
 class IndicatorPerformance:
     """Clase para almacenar y actualizar el rendimiento de los indicadores"""
@@ -51,33 +48,32 @@ class IndicatorPerformance:
             indicator_name: Nombre del indicador
         """
         self.name = indicator_name
-        self.total_signals = 0
+        self.signals_count = 0
         self.correct_signals = 0
-        self.profit_sum = 0.0
-        self.loss_sum = 0.0
+        self.incorrect_signals = 0
+        self.total_profit = 0.0
+        self.total_loss = 0.0
         
         # Rendimiento por condición de mercado
-        self.market_condition_performance = {
-            condition.value: {
-                "total": 0,
-                "correct": 0,
-                "profit_sum": 0.0,
-                "loss_sum": 0.0
-            } for condition in MarketCondition
-        }
+        self.market_conditions = {condition.value: {
+            'signals': 0,
+            'correct': 0,
+            'incorrect': 0,
+            'accuracy': 0.0,
+            'profit': 0.0
+        } for condition in MarketCondition}
         
         # Rendimiento por intervalo de tiempo
-        self.time_interval_performance = {
-            interval.value: {
-                "total": 0,
-                "correct": 0,
-                "profit_sum": 0.0,
-                "loss_sum": 0.0
-            } for interval in TimeInterval
-        }
+        self.time_intervals = {interval.value: {
+            'signals': 0,
+            'correct': 0,
+            'incorrect': 0,
+            'accuracy': 0.0,
+            'profit': 0.0
+        } for interval in TimeInterval}
         
-        # Rendimiento reciente (últimas 100 señales)
-        self.recent_signals = []  # Lista de tuplas (correct: bool, profit: float)
+        # Lista de señales recientes (últimas 20)
+        self.recent_signals = []
     
     def update(self, correct: bool, profit: float, 
               market_condition: MarketCondition, 
@@ -91,36 +87,63 @@ class IndicatorPerformance:
             market_condition: Condición de mercado actual
             time_interval: Intervalo de tiempo usado
         """
-        # Actualizar estadísticas globales
-        self.total_signals += 1
+        # Actualizar contadores generales
+        self.signals_count += 1
+        
         if correct:
             self.correct_signals += 1
-            self.profit_sum += profit
+            self.total_profit += profit
         else:
-            self.loss_sum += abs(profit)  # profit será negativo, lo convertimos a positivo
+            self.incorrect_signals += 1
+            self.total_loss += abs(profit)
         
-        # Actualizar estadísticas por condición de mercado
-        mc_stats = self.market_condition_performance[market_condition.value]
-        mc_stats["total"] += 1
+        # Actualizar rendimiento por condición de mercado
+        condition = market_condition.value
+        
+        self.market_conditions[condition]['signals'] += 1
+        
         if correct:
-            mc_stats["correct"] += 1
-            mc_stats["profit_sum"] += profit
+            self.market_conditions[condition]['correct'] += 1
+            self.market_conditions[condition]['profit'] += profit
         else:
-            mc_stats["loss_sum"] += abs(profit)
+            self.market_conditions[condition]['incorrect'] += 1
+            self.market_conditions[condition]['profit'] -= abs(profit)
         
-        # Actualizar estadísticas por intervalo de tiempo
-        ti_stats = self.time_interval_performance[time_interval.value]
-        ti_stats["total"] += 1
+        # Actualizar accuracy por condición
+        signals = self.market_conditions[condition]['signals']
+        correct = self.market_conditions[condition]['correct']
+        
+        self.market_conditions[condition]['accuracy'] = correct / signals if signals > 0 else 0.0
+        
+        # Actualizar rendimiento por intervalo de tiempo
+        interval = time_interval.value
+        
+        self.time_intervals[interval]['signals'] += 1
+        
         if correct:
-            ti_stats["correct"] += 1
-            ti_stats["profit_sum"] += profit
+            self.time_intervals[interval]['correct'] += 1
+            self.time_intervals[interval]['profit'] += profit
         else:
-            ti_stats["loss_sum"] += abs(profit)
+            self.time_intervals[interval]['incorrect'] += 1
+            self.time_intervals[interval]['profit'] -= abs(profit)
         
-        # Actualizar estadísticas recientes
-        self.recent_signals.append((correct, profit))
-        if len(self.recent_signals) > 100:
-            self.recent_signals.pop(0)  # Eliminar la señal más antigua
+        # Actualizar accuracy por intervalo
+        signals = self.time_intervals[interval]['signals']
+        correct = self.time_intervals[interval]['correct']
+        
+        self.time_intervals[interval]['accuracy'] = correct / signals if signals > 0 else 0.0
+        
+        # Actualizar señales recientes
+        self.recent_signals.append({
+            'correct': correct,
+            'profit': profit,
+            'market_condition': condition,
+            'time_interval': interval
+        })
+        
+        # Mantener solo las últimas 20 señales
+        if len(self.recent_signals) > 20:
+            self.recent_signals = self.recent_signals[-20:]
     
     def get_accuracy(self) -> float:
         """
@@ -129,9 +152,10 @@ class IndicatorPerformance:
         Returns:
             float: Tasa de acierto (0-1)
         """
-        if self.total_signals == 0:
-            return 0.5  # Valor neutral si no hay señales
-        return self.correct_signals / self.total_signals
+        if self.signals_count == 0:
+            return 0.0
+        
+        return self.correct_signals / self.signals_count
     
     def get_profit_factor(self) -> float:
         """
@@ -140,9 +164,10 @@ class IndicatorPerformance:
         Returns:
             float: Factor de rentabilidad (ganancias/pérdidas)
         """
-        if self.loss_sum == 0:
-            return 2.0  # Valor alto pero no infinito si no hay pérdidas
-        return self.profit_sum / self.loss_sum
+        if self.total_loss == 0:
+            return float('inf') if self.total_profit > 0 else 0.0
+        
+        return self.total_profit / self.total_loss
     
     def get_market_condition_accuracy(self, condition: MarketCondition) -> float:
         """
@@ -154,10 +179,7 @@ class IndicatorPerformance:
         Returns:
             float: Tasa de acierto para esa condición
         """
-        stats = self.market_condition_performance[condition.value]
-        if stats["total"] == 0:
-            return 0.5  # Valor neutral
-        return stats["correct"] / stats["total"]
+        return self.market_conditions[condition.value]['accuracy']
     
     def get_time_interval_accuracy(self, interval: TimeInterval) -> float:
         """
@@ -169,10 +191,7 @@ class IndicatorPerformance:
         Returns:
             float: Tasa de acierto para ese intervalo
         """
-        stats = self.time_interval_performance[interval.value]
-        if stats["total"] == 0:
-            return 0.5  # Valor neutral
-        return stats["correct"] / stats["total"]
+        return self.time_intervals[interval.value]['accuracy']
     
     def get_recent_accuracy(self) -> float:
         """
@@ -182,9 +201,9 @@ class IndicatorPerformance:
             float: Tasa de acierto reciente
         """
         if not self.recent_signals:
-            return 0.5  # Valor neutral
+            return 0.0
         
-        correct_count = sum(1 for correct, _ in self.recent_signals if correct)
+        correct_count = sum(1 for signal in self.recent_signals if signal['correct'])
         return correct_count / len(self.recent_signals)
     
     def to_dict(self) -> Dict:
@@ -195,14 +214,15 @@ class IndicatorPerformance:
             Dict: Representación en diccionario
         """
         return {
-            "name": self.name,
-            "total_signals": self.total_signals,
-            "correct_signals": self.correct_signals,
-            "profit_sum": self.profit_sum,
-            "loss_sum": self.loss_sum,
-            "market_condition_performance": self.market_condition_performance,
-            "time_interval_performance": self.time_interval_performance,
-            "recent_signals": self.recent_signals
+            'name': self.name,
+            'signals_count': self.signals_count,
+            'correct_signals': self.correct_signals,
+            'incorrect_signals': self.incorrect_signals,
+            'total_profit': self.total_profit,
+            'total_loss': self.total_loss,
+            'market_conditions': self.market_conditions,
+            'time_intervals': self.time_intervals,
+            'recent_signals': self.recent_signals
         }
     
     @classmethod
@@ -216,16 +236,18 @@ class IndicatorPerformance:
         Returns:
             IndicatorPerformance: Objeto reconstruido
         """
-        instance = cls(data["name"])
-        instance.total_signals = data["total_signals"]
-        instance.correct_signals = data["correct_signals"]
-        instance.profit_sum = data["profit_sum"]
-        instance.loss_sum = data["loss_sum"]
-        instance.market_condition_performance = data["market_condition_performance"]
-        instance.time_interval_performance = data["time_interval_performance"]
-        instance.recent_signals = data["recent_signals"]
-        return instance
-
+        perf = cls(data['name'])
+        
+        perf.signals_count = data['signals_count']
+        perf.correct_signals = data['correct_signals']
+        perf.incorrect_signals = data['incorrect_signals']
+        perf.total_profit = data['total_profit']
+        perf.total_loss = data['total_loss']
+        perf.market_conditions = data['market_conditions']
+        perf.time_intervals = data['time_intervals']
+        perf.recent_signals = data['recent_signals']
+        
+        return perf
 
 class AdaptiveWeightingSystem:
     """Sistema de ponderación adaptativa para indicadores técnicos"""
@@ -238,27 +260,15 @@ class AdaptiveWeightingSystem:
             data_file: Archivo para guardar/cargar datos de rendimiento
         """
         self.data_file = data_file
-        self.indicators = {}  # Diccionario de IndicatorPerformance
-        self.last_calibration = time.time()
-        self.calibration_interval = 86400  # 24 horas en segundos
+        self.indicators = {}
+        self.base_weights = {}
         
-        # Pesos base para cada indicador (1.0 = peso neutral)
-        self.base_weights = {
-            "sma_crossover": 1.0,
-            "ema_crossover": 1.0,
-            "rsi": 1.0,
-            "macd": 1.0,
-            "bollinger_bands": 1.0,
-            "atr": 1.0,
-            "ichimoku": 1.0,
-            "stochastic": 1.0,
-            "adx": 1.0,
-            "volume": 1.0,
-            "price_action": 1.0
-        }
-        
-        # Cargar datos previos si existen
+        # Cargar datos si existen
         self._load_data()
+        
+        # Inicializar indicadores básicos si no hay datos
+        if not self.indicators:
+            self._initialize_indicators()
     
     def _load_data(self):
         """Carga datos de rendimiento desde archivo"""
@@ -267,36 +277,66 @@ class AdaptiveWeightingSystem:
                 with open(self.data_file, 'r') as f:
                     data = json.load(f)
                 
-                for indicator_name, indicator_data in data.items():
-                    self.indicators[indicator_name] = IndicatorPerformance.from_dict(indicator_data)
+                # Cargar indicadores
+                for name, indicator_data in data.get('indicators', {}).items():
+                    self.indicators[name] = IndicatorPerformance.from_dict(indicator_data)
                 
-                logger.info(f"Cargados datos de rendimiento para {len(self.indicators)} indicadores")
+                # Cargar pesos base
+                self.base_weights = data.get('base_weights', {})
+                
+                logger.info(f"Datos de rendimiento cargados desde {self.data_file}")
+                
             except Exception as e:
-                logger.error(f"Error al cargar datos de rendimiento: {e}")
-                # Crear nuevos datos si hay error
+                logger.error(f"Error al cargar datos: {e}")
                 self._initialize_indicators()
         else:
-            # Inicializar indicadores con valores por defecto
             self._initialize_indicators()
     
     def _initialize_indicators(self):
         """Inicializa los indicadores con valores por defecto"""
-        for indicator_name in self.base_weights.keys():
-            self.indicators[indicator_name] = IndicatorPerformance(indicator_name)
+        # Indicadores comunes
+        default_indicators = [
+            'RSI', 'MACD', 'Bollinger', 'EMA_Cross', 'VWAP',
+            'Ichimoku', 'Stochastic', 'ADX', 'OBV', 'ATR',
+            'Fractal', 'Support_Resistance', 'Pivot', 'Fibonacci',
+            'Elliott_Wave'
+        ]
         
-        logger.info(f"Inicializados {len(self.indicators)} indicadores con valores por defecto")
+        # Crear objetos de rendimiento
+        for name in default_indicators:
+            self.indicators[name] = IndicatorPerformance(name)
+        
+        # Pesos iniciales (equiponderación)
+        weight = 1.0 / len(default_indicators)
+        self.base_weights = {name: weight for name in default_indicators}
+        
+        logger.info("Indicadores inicializados con pesos equiponderados")
     
     def _save_data(self):
         """Guarda datos de rendimiento en archivo"""
         try:
-            data = {name: indicator.to_dict() for name, indicator in self.indicators.items()}
+            # Preparar datos para guardar
+            indicators_data = {}
             
+            for name, indicator in self.indicators.items():
+                indicators_data[name] = indicator.to_dict()
+            
+            data = {
+                'indicators': indicators_data,
+                'base_weights': self.base_weights
+            }
+            
+            # Crear directorio si no existe
+            os.makedirs(os.path.dirname(self.data_file) or '.', exist_ok=True)
+            
+            # Guardar datos
             with open(self.data_file, 'w') as f:
-                json.dump(data, f, indent=2)
+                json.dump(data, f, indent=4)
             
-            logger.info(f"Guardados datos de rendimiento para {len(self.indicators)} indicadores")
+            logger.info(f"Datos de rendimiento guardados en {self.data_file}")
+            
         except Exception as e:
-            logger.error(f"Error al guardar datos de rendimiento: {e}")
+            logger.error(f"Error al guardar datos: {e}")
     
     def update_indicator_performance(self, indicator_name: str, correct: bool, 
                                     profit: float, market_condition: MarketCondition,
@@ -311,51 +351,75 @@ class AdaptiveWeightingSystem:
             market_condition: Condición de mercado actual
             time_interval: Intervalo de tiempo usado
         """
+        # Asegurarse de que el indicador existe
         if indicator_name not in self.indicators:
-            logger.warning(f"Indicador desconocido: {indicator_name}, inicializando")
             self.indicators[indicator_name] = IndicatorPerformance(indicator_name)
+            
+            # Añadir peso base (promedio de los existentes)
+            if self.base_weights:
+                avg_weight = sum(self.base_weights.values()) / len(self.base_weights)
+                self.base_weights[indicator_name] = avg_weight
+            else:
+                self.base_weights[indicator_name] = 1.0
         
-        self.indicators[indicator_name].update(
-            correct=correct,
-            profit=profit,
-            market_condition=market_condition,
-            time_interval=time_interval
-        )
+        # Actualizar rendimiento
+        self.indicators[indicator_name].update(correct, profit, market_condition, time_interval)
         
-        # Verificar si es momento de recalibrar
-        current_time = time.time()
-        if current_time - self.last_calibration > self.calibration_interval:
-            self._recalibrate_weights()
-            self.last_calibration = current_time
-            self._save_data()
+        # Recalibrar pesos
+        self._recalibrate_weights()
+        
+        # Guardar datos
+        self._save_data()
+        
+        logger.info(f"Actualizado rendimiento de indicador: {indicator_name} (correcto: {correct}, profit: {profit:.2f})")
     
     def _recalibrate_weights(self):
         """Recalibra los pesos de los indicadores basándose en su rendimiento"""
-        logger.info("Recalibrando pesos de indicadores...")
+        # Verificar que hay indicadores con señales
+        active_indicators = {name: ind for name, ind in self.indicators.items() if ind.signals_count > 0}
         
-        # Recalibrar pesos base según rendimiento global
-        for name, indicator in self.indicators.items():
-            if name in self.base_weights and indicator.total_signals > 50:
-                accuracy = indicator.get_accuracy()
-                profit_factor = indicator.get_profit_factor()
-                recent_accuracy = indicator.get_recent_accuracy()
-                
-                # Fórmula de recalibración
-                new_weight = (
-                    accuracy * 0.5 +                  # 50% basado en precisión global
-                    min(profit_factor / 2, 1.0) * 0.3 +  # 30% basado en factor de rentabilidad (max 1.0)
-                    recent_accuracy * 0.2             # 20% basado en precisión reciente
-                ) * 2.0  # Multiplicador para rango 0-2.0
-                
-                # Limitar rango
-                new_weight = max(0.5, min(2.5, new_weight))
-                
-                # Actualizar peso base
-                self.base_weights[name] = new_weight
-                
-                logger.info(f"Recalibrado {name}: Nuevo peso base = {new_weight:.2f} "
-                          f"(precisión: {accuracy:.2f}, factor rentabilidad: {profit_factor:.2f}, "
-                          f"precisión reciente: {recent_accuracy:.2f})")
+        if not active_indicators:
+            logger.info("No hay indicadores activos para recalibrar pesos")
+            return
+        
+        # Calcular nuevos pesos basados en accuracy y profit factor
+        new_weights = {}
+        
+        for name, indicator in active_indicators.items():
+            # Combinar accuracy y profit factor (con más peso en accuracy)
+            accuracy = indicator.get_accuracy()
+            profit_factor = min(indicator.get_profit_factor(), 10.0)  # Cap profit factor
+            
+            # Combinar métricas (70% accuracy, 30% profit factor)
+            combined_score = 0.7 * accuracy + 0.3 * (profit_factor / 10.0)
+            
+            # Añadir un factor para señales recientes (para adaptación rápida)
+            recent_accuracy = indicator.get_recent_accuracy()
+            recency_factor = 1.2 if recent_accuracy > accuracy else 0.8
+            
+            # Calcular peso final
+            new_weights[name] = combined_score * recency_factor
+        
+        # Normalizar pesos
+        total_weight = sum(new_weights.values())
+        
+        if total_weight > 0:
+            for name in new_weights:
+                new_weights[name] /= total_weight
+            
+            # Actualizar pesos base gradualmente (mezcla 70% nuevos, 30% antiguos)
+            for name, weight in new_weights.items():
+                if name in self.base_weights:
+                    self.base_weights[name] = 0.7 * weight + 0.3 * self.base_weights[name]
+                else:
+                    self.base_weights[name] = weight
+            
+            # Normalizar pesos base
+            total_base = sum(self.base_weights.values())
+            for name in self.base_weights:
+                self.base_weights[name] /= total_base
+            
+            logger.info("Pesos recalibrados basados en rendimiento")
     
     def get_indicator_weight(self, indicator_name: str, market_condition: MarketCondition, 
                            time_interval: TimeInterval) -> float:
@@ -370,44 +434,31 @@ class AdaptiveWeightingSystem:
         Returns:
             float: Peso ajustado del indicador
         """
-        if indicator_name not in self.base_weights:
-            return 1.0  # Peso neutral para indicadores desconocidos
+        # Verificar que el indicador existe
+        if indicator_name not in self.indicators:
+            logger.warning(f"Indicador no encontrado: {indicator_name}")
+            return 0.0
         
-        base_weight = self.base_weights.get(indicator_name, 1.0)
+        indicator = self.indicators[indicator_name]
         
-        # Consultar rendimiento específico por condición de mercado e intervalo
-        condition_factor = 1.0
-        interval_factor = 1.0
+        # Obtener peso base
+        base_weight = self.base_weights.get(indicator_name, 0.0)
         
-        if indicator_name in self.indicators:
-            indicator = self.indicators[indicator_name]
-            
-            # Ajustar por rendimiento en condiciones de mercado específicas
-            mc_accuracy = indicator.get_market_condition_accuracy(market_condition)
-            # Calcular factor que aumenta/disminuye en base a lo bueno/malo que es en esta condición
-            # 0.5 = neutral, <0.5 = malo, >0.5 = bueno
-            condition_factor = 0.5 + (mc_accuracy - 0.5) * 1.5  # Rango aproximado: 0.5-1.5
-            
-            # Ajustar por rendimiento en intervalos específicos
-            ti_accuracy = indicator.get_time_interval_accuracy(time_interval)
-            interval_factor = 0.5 + (ti_accuracy - 0.5) * 1.5  # Rango aproximado: 0.5-1.5
+        # Sin suficientes datos para ajustar, usar peso base
+        if indicator.signals_count < 10:
+            return base_weight
         
-        # Ajustes especiales para condiciones extremas
-        if market_condition == MarketCondition.EXTREME_VOLATILITY:
-            # Reducir osciladores en volatilidad extrema
-            if indicator_name in ["rsi", "stochastic"]:
-                condition_factor *= 0.7
-            # Aumentar tendencia en volatilidad extrema
-            elif indicator_name in ["sma_crossover", "ema_crossover", "adx"]:
-                condition_factor *= 1.3
+        # Ajustar según rendimiento en esta condición específica
+        condition_accuracy = indicator.get_market_condition_accuracy(market_condition)
+        interval_accuracy = indicator.get_time_interval_accuracy(time_interval)
         
-        # Calcular peso final
-        final_weight = base_weight * condition_factor * interval_factor
+        # Combinar factores de ajuste
+        condition_factor = 1.5 if condition_accuracy > indicator.get_accuracy() else 0.7
+        interval_factor = 1.3 if interval_accuracy > indicator.get_accuracy() else 0.8
         
-        # Limitar rango final
-        final_weight = max(0.3, min(3.0, final_weight))
+        adjusted_weight = base_weight * condition_factor * interval_factor
         
-        return final_weight
+        return adjusted_weight
     
     def get_all_weights(self, market_condition: MarketCondition, 
                       time_interval: TimeInterval) -> Dict[str, float]:
@@ -421,10 +472,19 @@ class AdaptiveWeightingSystem:
         Returns:
             Dict[str, float]: Diccionario de pesos ajustados por indicador
         """
-        return {
-            name: self.get_indicator_weight(name, market_condition, time_interval)
-            for name in self.base_weights.keys()
-        }
+        weights = {}
+        
+        for name in self.indicators:
+            weights[name] = self.get_indicator_weight(name, market_condition, time_interval)
+        
+        # Normalizar pesos
+        total_weight = sum(weights.values())
+        
+        if total_weight > 0:
+            for name in weights:
+                weights[name] /= total_weight
+        
+        return weights
     
     def detect_market_condition(self, df: pd.DataFrame) -> MarketCondition:
         """
@@ -436,37 +496,56 @@ class AdaptiveWeightingSystem:
         Returns:
             MarketCondition: Condición de mercado detectada
         """
-        # Calcular volatilidad
-        returns = df['close'].pct_change().dropna()
-        volatility = returns.rolling(20).std().iloc[-1] * np.sqrt(365)
+        # Verificar que hay suficientes datos
+        if len(df) < 20:
+            return MarketCondition.LATERAL_LOW_VOL
         
-        # Calcular ADX para fuerza de tendencia
-        # Nota: Simplificado, en producción usar función completa
-        high_minus_low = df['high'] - df['low']
-        atr = high_minus_low.rolling(14).mean().iloc[-1]
+        # Calcular indicadores básicos para detección
         
-        # Calcular direccionalidad (simplificado, usar función completa en producción)
-        price_change_pct = (df['close'].iloc[-1] / df['close'].iloc[-20] - 1) * 100
+        # 1. Tendencia usando medias móviles
+        df['sma20'] = df['close'].rolling(window=20).mean()
+        df['sma50'] = df['close'].rolling(window=50).mean()
         
-        # Detectar volatilidad extrema
-        if volatility > 1.5:  # >150% anualizado
+        # 2. Volatilidad usando ATR
+        true_range = pd.DataFrame()
+        true_range['hl'] = df['high'] - df['low']
+        true_range['hc'] = abs(df['high'] - df['close'].shift(1))
+        true_range['lc'] = abs(df['low'] - df['close'].shift(1))
+        df['atr14'] = true_range.max(axis=1).rolling(window=14).mean()
+        
+        # Obtener valores más recientes
+        latest_sma20 = df['sma20'].iloc[-1]
+        latest_sma50 = df['sma50'].iloc[-1]
+        avg_price = df['close'].iloc[-20:].mean()
+        latest_atr = df['atr14'].iloc[-1]
+        avg_atr = df['atr14'].iloc[-20:].mean()
+        
+        # Calcular indicadores derivados
+        sma_diff = (latest_sma20 - latest_sma50) / latest_sma50
+        volatility_ratio = latest_atr / avg_price
+        volatility_change = latest_atr / avg_atr
+        
+        # Decisión de condición de mercado
+        
+        # Comprobar volatilidad extrema primero
+        if volatility_ratio > 0.03 or volatility_change > 2.0:
             return MarketCondition.EXTREME_VOLATILITY
         
-        # Detectar tendencias
-        if price_change_pct > 20:  # +20% en 20 periodos
+        # Comprobar tendencias
+        if sma_diff > 0.02:  # Tendencia alcista fuerte
             return MarketCondition.STRONG_UPTREND
-        elif price_change_pct > 5:  # +5% en 20 periodos
+        elif sma_diff > 0.005:  # Tendencia alcista moderada
             return MarketCondition.MODERATE_UPTREND
-        elif price_change_pct < -20:  # -20% en 20 periodos
+        elif sma_diff < -0.02:  # Tendencia bajista fuerte
             return MarketCondition.STRONG_DOWNTREND
-        elif price_change_pct < -5:  # -5% en 20 periodos
+        elif sma_diff < -0.005:  # Tendencia bajista moderada
             return MarketCondition.MODERATE_DOWNTREND
         
-        # Mercado lateral (sin tendencia clara)
-        if volatility < 0.5:  # <50% anualizado
-            return MarketCondition.LATERAL_LOW_VOL
-        else:
+        # Si llegamos aquí, estamos en mercado lateral
+        if volatility_ratio > 0.015:
             return MarketCondition.LATERAL_HIGH_VOL
+        else:
+            return MarketCondition.LATERAL_LOW_VOL
     
     def get_example_weights(self) -> Dict[str, Dict[str, float]]:
         """
@@ -475,16 +554,15 @@ class AdaptiveWeightingSystem:
         Returns:
             Dict: Ejemplos de pesos por condición de mercado
         """
-        examples = {}
+        example_weights = {}
         
-        # Para cada condición de mercado, obtener pesos con intervalo de 15m
         for condition in MarketCondition:
-            weights = self.get_all_weights(condition, TimeInterval.MINUTE_15)
-            examples[condition.value] = {
-                k: round(v, 2) for k, v in weights.items()
-            }
+            # Usar intervalos de 1m para ejemplos
+            example_weights[condition.value] = self.get_all_weights(
+                condition, TimeInterval.MINUTE_1
+            )
         
-        return examples
+        return example_weights
     
     def calculate_weighted_signal(self, signals: Dict[str, float], 
                                  market_condition: MarketCondition,
@@ -500,69 +578,24 @@ class AdaptiveWeightingSystem:
         Returns:
             float: Señal ponderada combinada (-1 a +1)
         """
-        if not signals:
-            return 0.0  # Neutral si no hay señales
-        
         # Obtener pesos adaptados
-        weights = {
-            indicator: self.get_indicator_weight(indicator, market_condition, time_interval)
-            for indicator in signals.keys()
-        }
+        weights = self.get_all_weights(market_condition, time_interval)
+        
+        # Filtrar pesos para indicadores presentes en la señal
+        filtered_weights = {k: v for k, v in weights.items() if k in signals}
+        
+        # Si no hay pesos válidos, usar pesos iguales
+        if not filtered_weights:
+            num_signals = len(signals)
+            if num_signals == 0:
+                return 0.0
+            filtered_weights = {k: 1.0 / num_signals for k in signals}
+        
+        # Normalizar pesos filtrados
+        total_weight = sum(filtered_weights.values())
+        normalized_weights = {k: v / total_weight for k, v in filtered_weights.items()}
         
         # Calcular señal ponderada
-        weighted_sum = sum(signal * weights.get(indicator, 1.0) 
-                         for indicator, signal in signals.items())
-        total_weight = sum(weights.get(indicator, 1.0) 
-                         for indicator in signals.keys())
+        weighted_signal = sum(signals[k] * normalized_weights[k] for k in normalized_weights)
         
-        if total_weight == 0:
-            return 0.0
-        
-        weighted_signal = weighted_sum / total_weight
-        
-        # Limitar al rango -1 a +1
-        return max(-1.0, min(1.0, weighted_signal))
-
-
-# Ejemplo de uso para documentación
-if __name__ == "__main__":
-    # Crear sistema
-    aws = AdaptiveWeightingSystem()
-    
-    # Simular actualizaciones de rendimiento
-    aws.update_indicator_performance(
-        "rsi", 
-        True, 
-        0.05, 
-        MarketCondition.LATERAL_LOW_VOL, 
-        TimeInterval.MINUTE_15
-    )
-    
-    # Obtener pesos
-    weight = aws.get_indicator_weight(
-        "rsi", 
-        MarketCondition.LATERAL_LOW_VOL, 
-        TimeInterval.MINUTE_15
-    )
-    
-    print(f"Peso adaptado para RSI: {weight}")
-    
-    # Ejemplo de ponderaciones para diferentes condiciones
-    examples = aws.get_example_weights()
-    print("Ejemplos de ponderaciones por condición de mercado:")
-    print(json.dumps(examples, indent=2))
-    
-    # Ejemplo de señal ponderada
-    signals = {
-        "rsi": -0.8,         # Fuerte señal de sobreventa
-        "macd": -0.3,        # Débil señal de bajada
-        "bollinger_bands": 0.9  # Fuerte señal de sobrecompra
-    }
-    
-    weighted_signal = aws.calculate_weighted_signal(
-        signals, 
-        MarketCondition.LATERAL_LOW_VOL, 
-        TimeInterval.MINUTE_15
-    )
-    
-    print(f"Señal ponderada: {weighted_signal}")
+        return weighted_signal
