@@ -3,317 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solana Trading Bot | Sistema Avanzado de Trading Algorítmico</title>
-    <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <style>
-        body {
-            background-color: var(--bs-gray-900);
-            color: var(--bs-light);
-            padding-bottom: 60px;
-        }
-        
-        .hero-section {
-            height: 100vh;
-            min-height: 500px;
-            display: flex;
-            align-items: center;
-            background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1622630998477-20aa696ecb05?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2073&q=80');
-            background-size: cover;
-            background-position: center;
-            position: relative;
-        }
-        
-        .hero-text {
-            max-width: 800px;
-            margin: 0 auto;
-            text-align: center;
-            padding: 2rem;
-        }
-        
-        .hero-title {
-            font-size: 3.5rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-        }
-        
-        .hero-subtitle {
-            font-size: 1.5rem;
-            margin-bottom: 2rem;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-        }
-        
-        .feature-section {
-            padding: 5rem 0;
-        }
-        
-        .feature-icon {
-            font-size: 3rem;
-            margin-bottom: 1.5rem;
-            color: var(--bs-primary);
-        }
-        
-        .feature-card {
-            background-color: var(--bs-gray-800);
-            border-radius: 10px;
-            padding: 2rem;
-            height: 100%;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        
-        .feature-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
-        
-        .section-title {
-            text-align: center;
-            margin-bottom: 4rem;
-            position: relative;
-        }
-        
-        .section-title:after {
-            content: '';
-            display: block;
-            width: 100px;
-            height: 3px;
-            background: var(--bs-primary);
-            margin: 20px auto 0;
-        }
-        
-        .cta-section {
-            background-color: var(--bs-primary);
-            padding: 5rem 0;
-            text-align: center;
-            margin-top: 3rem;
-        }
-        
-        .footer {
-            background-color: var(--bs-gray-800);
-            padding: 3rem 0;
-            margin-top: 3rem;
-        }
-        
-        .bot-battle-card {
-            background-color: var(--bs-gray-700);
-            border-radius: 10px;
-            padding: 3rem 2rem;
-            margin-top: 3rem;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
-        }
-        
-        .bot-battle-title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-        }
-        
-        .bot-battle-card::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('https://images.unsplash.com/photo-1639322537231-2f206e06af84?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1932&q=80');
-            background-size: cover;
-            background-position: center;
-            opacity: 0.2;
-            z-index: 0;
-        }
-        
-        .bot-battle-content {
-            position: relative;
-            z-index: 1;
-        }
-        
-        .navbar {
-            transition: background-color 0.3s ease;
-        }
-        
-        .navbar.scrolled {
-            background-color: var(--bs-gray-900) !important;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-    </style>
+    <title>Bot de Trading Solana</title>
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark fixed-top bg-transparent">
-        <div class="container">
-            <a class="navbar-brand" href="#">
-                <i class="fas fa-robot me-2"></i>Solana Trading Bot
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#">Inicio</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('battle_arena') }}">Arena de Batalla</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Documentación</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Contacto</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="card bg-dark text-light mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h1 class="display-5">Bot de Trading Solana</h1>
+                        <p class="lead">Sistema de trading automatizado para Solana</p>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-warning">
+                            <strong>Importante:</strong> Este bot opera por defecto en modo simulación (Paper Trading) para proteger tus fondos. No se realizan operaciones reales a menos que se configure explícitamente.
+                        </div>
 
-    <!-- Hero Section -->
-    <section class="hero-section">
-        <div class="container">
-            <div class="hero-text">
-                <h1 class="hero-title">Bot de Trading Avanzado para Solana</h1>
-                <p class="hero-subtitle">Sistema inteligente que aprende y evoluciona automáticamente para maximizar tus ganancias en el mercado de criptomonedas</p>
-                <div class="d-flex justify-content-center gap-3">
-                    <a href="{{ url_for('battle_arena') }}" class="btn btn-primary btn-lg">
-                        <i class="fas fa-robot me-2"></i>Ver la Arena de Batalla
-                    </a>
-                    <a href="#features" class="btn btn-outline-light btn-lg">
-                        <i class="fas fa-info-circle me-2"></i>Conoce más
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Features Section -->
-    <section id="features" class="feature-section">
-        <div class="container">
-            <h2 class="section-title">Características Principales</h2>
-            <div class="row g-4">
-                <div class="col-md-4">
-                    <div class="feature-card">
-                        <div class="text-center">
-                            <i class="fas fa-brain feature-icon"></i>
-                            <h3>Inteligencia Artificial</h3>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card mb-4">
+                                    <div class="card-header">Control del Bot</div>
+                                    <div class="card-body">
+                                        <div class="d-grid gap-2">
+                                            <button id="startButton" class="btn btn-success">Iniciar Bot</button>
+                                            <button id="stopButton" class="btn btn-danger">Detener Bot</button>
+                                        </div>
+                                        <div class="mt-3">
+                                            <span>Estado: </span>
+                                            <span id="status" class="badge bg-secondary">Detenido</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">Acceso Rápido</div>
+                                    <div class="card-body">
+                                        <div class="d-grid gap-2">
+                                            <a href="/dashboard" class="btn btn-info">Panel de Control</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <p>Nuestro bot utiliza algoritmos avanzados de IA para analizar el mercado y optimizar constantemente sus estrategias de trading.</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="feature-card">
-                        <div class="text-center">
-                            <i class="fas fa-chart-line feature-icon"></i>
-                            <h3>Análisis Técnico Avanzado</h3>
-                        </div>
-                        <p>Combinación de más de 30 indicadores técnicos y patrones de precio para detectar las mejores oportunidades de trading.</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="feature-card">
-                        <div class="text-center">
-                            <i class="fas fa-shield-alt feature-icon"></i>
-                            <h3>Gestión de Riesgo</h3>
-                        </div>
-                        <p>Sistema avanzado de stops dinámicos y cierre escalonado de posiciones para maximizar ganancias y minimizar pérdidas.</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="feature-card">
-                        <div class="text-center">
-                            <i class="fas fa-bolt feature-icon"></i>
-                            <h3>Trading de Alta Frecuencia</h3>
-                        </div>
-                        <p>Capacidad para realizar operaciones de scalping en tiempo real con latencia mínima y alta precisión.</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="feature-card">
-                        <div class="text-center">
-                            <i class="fas fa-robot feature-icon"></i>
-                            <h3>Múltiples Estrategias</h3>
-                        </div>
-                        <p>Ejecución simultánea de diferentes estrategias para aprovechar diversas condiciones de mercado en cualquier momento.</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="feature-card">
-                        <div class="text-center">
-                            <i class="fas fa-exchange-alt feature-icon"></i>
-                            <h3>Transferencia de Conocimiento</h3>
-                        </div>
-                        <p>Exporta e importa el "cerebro" del bot con facilidad para transferir todo el conocimiento aprendido entre instalaciones.</p>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
 
-    <!-- Bot Battle Arena Section -->
-    <section class="container">
-        <div class="bot-battle-card">
-            <div class="bot-battle-content">
-                <h2 class="bot-battle-title">La Batalla de los Bots</h2>
-                <p class="lead mb-4">Observa en tiempo real cómo compiten múltiples bots con diferentes estrategias. Solo los más rentables sobreviven y evolucionan para ser aún mejores.</p>
-                <a href="{{ url_for('battle_arena') }}" class="btn btn-warning btn-lg">
-                    <i class="fas fa-trophy me-2"></i>Entrar a la Arena
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-4">
-                    <h4>Solana Trading Bot</h4>
-                    <p>Sistema avanzado de trading algorítmico con inteligencia artificial especializado en Solana.</p>
-                </div>
-                <div class="col-md-4">
-                    <h4>Enlaces Rápidos</h4>
-                    <ul class="list-unstyled">
-                        <li><a href="#">Inicio</a></li>
-                        <li><a href="{{ url_for('battle_arena') }}">Arena de Batalla</a></li>
-                        <li><a href="#">Documentación</a></li>
-                        <li><a href="#">Contacto</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-4">
-                    <h4>Contacto</h4>
-                    <p>
-                        <i class="fas fa-envelope me-2"></i> info@solanabot.com<br>
-                        <i class="fas fa-map-marker-alt me-2"></i> Ciudad Digital, Criptonilandia
-                    </p>
-                    <div class="d-flex mt-3">
-                        <a href="#" class="me-3"><i class="fab fa-twitter fa-lg"></i></a>
-                        <a href="#" class="me-3"><i class="fab fa-telegram fa-lg"></i></a>
-                        <a href="#" class="me-3"><i class="fab fa-discord fa-lg"></i></a>
-                        <a href="#" class="me-3"><i class="fab fa-github fa-lg"></i></a>
-                    </div>
-                </div>
-            </div>
-            <hr>
-            <div class="text-center">
-                <p>&copy; 2025 Solana Trading Bot. Todos los derechos reservados.</p>
-            </div>
-        </div>
-    </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/main.js"></script>
     <script>
-        // Cambiar estilo del navbar al hacer scroll
-        window.addEventListener('scroll', function() {
-            const navbar = document.querySelector('.navbar');
-            if (window.scrollY > 50) {
-                navbar.classList.add('scrolled');
-            } else {
-                navbar.classList.remove('scrolled');
-            }
+        // Función para actualizar el estado
+        function updateStatus() {
+            fetch('/api/status')
+                .then(response => response.json())
+                .then(data => {
+                    const statusElement = document.getElementById('status');
+                    if (data.active) {
+                        statusElement.textContent = 'Activo';
+                        statusElement.className = 'badge bg-success';
+                    } else {
+                        statusElement.textContent = 'Detenido';
+                        statusElement.className = 'badge bg-secondary';
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Iniciar y detener el bot
+        document.getElementById('startButton').addEventListener('click', function() {
+            fetch('/api/start', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    mode: 'paper'
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                updateStatus();
+            })
+            .catch(error => console.error('Error:', error));
         });
+
+        document.getElementById('stopButton').addEventListener('click', function() {
+            fetch('/api/stop', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                updateStatus();
+            })
+            .catch(error => console.error('Error:', error));
+        });
+
+        // Actualizar estado al cargar la página
+        document.addEventListener('DOMContentLoaded', updateStatus);
+        // Actualizar estado cada 5 segundos
+        setInterval(updateStatus, 5000);
     </script>
 </body>
 </html>
