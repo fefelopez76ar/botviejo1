@@ -1,5 +1,8 @@
 """
-Módulo para gestión de configuración del bot de trading
+Módulo de configuración para el bot de trading de Solana
+
+Proporciona funciones para cargar y guardar configuraciones, así como
+parámetros por defecto para el bot.
 """
 
 import os
@@ -7,182 +10,169 @@ import json
 import logging
 from typing import Dict, Any, Optional
 
-logger = logging.getLogger("ConfigManager")
+# Configurar logging
+logger = logging.getLogger(__name__)
 
-# Rutas predeterminadas
-CONFIG_FILE = "config.env"
-CONFIG_BACKUP = "config.env.bak"
+# Archivo de configuración por defecto
+CONFIG_FILE = "bot_config.json"
 
-def load_config() -> Dict[str, Any]:
+# Configuración por defecto del bot
+DEFAULT_CONFIG = {
+    "general": {
+        "symbol": "SOL-USDT",
+        "timeframe": "5m",
+        "paper_trading": True,
+        "strategy": "adaptive_multi",
+        "api_key": "",
+        "api_secret": "",
+        "api_password": "",
+        "exchange": "okx"
+    },
+    "risk": {
+        "max_position_size": 0.1,  # % del balance
+        "stop_loss_pct": 1.0,  # %
+        "take_profit_pct": 2.0,  # %
+        "trailing_stop": True,
+        "max_loss_per_day": 5.0,  # %
+        "max_trades_per_day": 20
+    },
+    "interface": {
+        "lang": "es",
+        "theme": "dark",
+        "notifications": {
+            "enable": True,
+            "trade_alerts": True,
+            "daily_report": True
+        }
+    },
+    "strategies": {
+        "adaptive_multi": {
+            "enabled_indicators": [
+                "rsi",
+                "macd",
+                "bollinger_bands",
+                "ema_cross",
+                "volume_profile"
+            ],
+            "weight_adjustment": True
+        },
+        "rsi_scalping": {
+            "rsi_period": 14,
+            "rsi_overbought": 70,
+            "rsi_oversold": 30,
+            "volume_factor": 1.5
+        },
+        "momentum_scalping": {
+            "price_change_pct": 0.2,
+            "volume_surge_factor": 2.0,
+            "lookback_periods": 3
+        }
+    }
+}
+
+def load_config(config_file: str = CONFIG_FILE) -> Dict[str, Any]:
     """
-    Carga la configuración del sistema
+    Carga la configuración desde un archivo
     
+    Args:
+        config_file: Ruta al archivo de configuración
+        
     Returns:
-        Dict: Configuración cargada
+        Dict: Configuración cargada o por defecto si hay error
     """
-    config = {}
-    
-    # Cargar configuración desde archivo
     try:
-        if os.path.exists(CONFIG_FILE):
-            with open(CONFIG_FILE, "r") as f:
-                for line in f:
-                    line = line.strip()
-                    if line and not line.startswith("#"):
-                        key, value = line.split("=", 1)
-                        config[key.strip()] = value.strip()
-            
-            logger.info("Configuración cargada desde archivo")
+        if os.path.exists(config_file):
+            with open(config_file, "r") as f:
+                config = json.load(f)
+                logger.info(f"Configuración cargada desde {config_file}")
+                return config
         else:
-            logger.warning(f"Archivo de configuración {CONFIG_FILE} no encontrado")
-            # Crear configuración predeterminada
-            config = get_default_config()
-            save_config(config)
+            logger.warning(f"Archivo de configuración {config_file} no encontrado, usando configuración por defecto")
+            # Crear archivo con configuración por defecto
+            save_config(DEFAULT_CONFIG, config_file)
+            return DEFAULT_CONFIG
     except Exception as e:
-        logger.error(f"Error al cargar configuración: {e}")
-        config = get_default_config()
-    
-    # Sobrescribir con variables de entorno
-    for key in config.keys():
-        env_value = os.environ.get(key)
-        if env_value is not None:
-            config[key] = env_value
-    
-    return config
+        logger.error(f"Error cargando configuración: {e}")
+        return DEFAULT_CONFIG
 
-def save_config(config: Dict[str, Any]) -> bool:
+def save_config(config: Dict[str, Any], config_file: str = CONFIG_FILE) -> bool:
     """
-    Guarda la configuración del sistema
+    Guarda la configuración en un archivo
     
     Args:
         config: Configuración a guardar
+        config_file: Ruta al archivo de configuración
         
     Returns:
-        bool: True si se guardó correctamente, False en caso contrario
+        bool: True si se guardó correctamente
     """
     try:
-        # Crear copia de seguridad si existe el archivo
-        if os.path.exists(CONFIG_FILE):
-            try:
-                with open(CONFIG_FILE, "r") as src, open(CONFIG_BACKUP, "w") as dst:
-                    dst.write(src.read())
-                logger.info(f"Copia de seguridad creada en {CONFIG_BACKUP}")
-            except Exception as e:
-                logger.warning(f"Error al crear copia de seguridad: {e}")
-        
-        # Guardar nueva configuración
-        with open(CONFIG_FILE, "w") as f:
-            for key, value in config.items():
-                f.write(f"{key}={value}\n")
-        
-        logger.info("Configuración guardada correctamente")
+        with open(config_file, "w") as f:
+            json.dump(config, f, indent=4)
+        logger.info(f"Configuración guardada en {config_file}")
         return True
     except Exception as e:
-        logger.error(f"Error al guardar configuración: {e}")
+        logger.error(f"Error guardando configuración: {e}")
         return False
 
-def get_default_config() -> Dict[str, Any]:
+def update_config(section: str, key: str, value: Any, config_file: str = CONFIG_FILE) -> bool:
     """
-    Obtiene la configuración predeterminada
-    
-    Returns:
-        Dict: Configuración predeterminada
-    """
-    return {
-        # Configuración del exchange
-        "EXCHANGE": "okx",
-        "API_KEY": "",
-        "API_SECRET": "",
-        "API_PASSPHRASE": "",
-        
-        # Configuración general
-        "DEFAULT_SYMBOL": "SOL-USDT",
-        "DEFAULT_INTERVAL": "15m",
-        "DEFAULT_PAPER_TRADING": "True",
-        
-        # Configuración de Telegram
-        "TELEGRAM_TOKEN": "",
-        "TELEGRAM_CHAT_ID": "",
-        "TELEGRAM_NOTIFICATIONS": "False",
-        
-        # Configuración del sistema
-        "LOG_LEVEL": "INFO",
-        "DATA_RETENTION_DAYS": "30",
-        "MAX_ACTIVE_BOTS": "5"
-    }
-
-def get_config_value(key: str, default: Any = None) -> Any:
-    """
-    Obtiene un valor específico de la configuración
+    Actualiza un valor específico en la configuración
     
     Args:
-        key: Clave a obtener
-        default: Valor predeterminado si no existe
+        section: Sección de la configuración
+        key: Clave a actualizar
+        value: Nuevo valor
+        config_file: Ruta al archivo de configuración
         
     Returns:
-        Any: Valor de configuración
+        bool: True si se actualizó correctamente
     """
-    config = load_config()
-    return config.get(key, default)
+    try:
+        config = load_config(config_file)
+        
+        if section not in config:
+            config[section] = {}
+        
+        config[section][key] = value
+        
+        return save_config(config, config_file)
+    except Exception as e:
+        logger.error(f"Error actualizando configuración: {e}")
+        return False
 
-def set_config_value(key: str, value: Any) -> bool:
+def get_system_status() -> Dict[str, Any]:
     """
-    Establece un valor específico en la configuración
+    Obtiene el estado actual del sistema
     
-    Args:
-        key: Clave a establecer
-        value: Valor a establecer
-        
     Returns:
-        bool: True si se estableció correctamente, False en caso contrario
+        Dict: Estado del sistema
     """
-    config = load_config()
-    config[key] = value
-    return save_config(config)
-
-def merge_configs(config1: Dict[str, Any], config2: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Combina dos configuraciones, priorizando la segunda
-    
-    Args:
-        config1: Primera configuración
-        config2: Segunda configuración (prioritaria)
+    try:
+        # Importar módulos requeridos
+        from data_management.market_data import get_current_price
         
-    Returns:
-        Dict: Configuración combinada
-    """
-    result = config1.copy()
-    result.update(config2)
-    return result
-
-def validate_config(config: Dict[str, Any]) -> Dict[str, str]:
-    """
-    Valida la configuración y retorna errores
-    
-    Args:
-        config: Configuración a validar
+        # Obtener estado
+        status = {
+            "active_bots": 0,
+            "last_trade_time": "N/A",
+            "current_price": 0.0,
+            "balance": 0.0,
+            "api_connected": False
+        }
         
-    Returns:
-        Dict: Diccionario de errores (vacío si no hay errores)
-    """
-    errors = {}
-    
-    # Validar exchange
-    if config.get("EXCHANGE") not in ["okx", "binance", "kucoin", "bybit"]:
-        errors["EXCHANGE"] = "Exchange no válido"
-    
-    # Validar API key si no es paper trading
-    if config.get("DEFAULT_PAPER_TRADING", "True").lower() != "true":
-        if not config.get("API_KEY"):
-            errors["API_KEY"] = "API Key requerida para trading real"
-        if not config.get("API_SECRET"):
-            errors["API_SECRET"] = "API Secret requerida para trading real"
-    
-    # Validar notificaciones Telegram
-    if config.get("TELEGRAM_NOTIFICATIONS", "False").lower() == "true":
-        if not config.get("TELEGRAM_TOKEN"):
-            errors["TELEGRAM_TOKEN"] = "Token de Telegram requerido para notificaciones"
-        if not config.get("TELEGRAM_CHAT_ID"):
-            errors["TELEGRAM_CHAT_ID"] = "Chat ID de Telegram requerido para notificaciones"
-    
-    return errors
+        # Obtener precio actual
+        price = get_current_price("SOL-USDT")
+        if price:
+            status["current_price"] = price
+        
+        return status
+    except Exception as e:
+        logger.error(f"Error obteniendo estado del sistema: {e}")
+        return {
+            "active_bots": 0,
+            "last_trade_time": "N/A",
+            "current_price": 0.0,
+            "balance": 0.0,
+            "api_connected": False
+        }
