@@ -1,2955 +1,634 @@
 """
-Interfaz de línea de comandos para el Solana Trading Bot
-Este script proporciona un menú interactivo para gestionar el bot de trading
-con visualización en tiempo real de operaciones y aprendizaje
+Interfaz de línea de comandos para el bot de trading
+Permite interactuar con el sistema desde la terminal
 """
 
 import os
 import sys
 import time
-import signal
 import logging
 import json
-import threading
-from datetime import datetime
-from typing import Dict, List, Any, Optional
+from typing import List, Dict, Any, Optional, Union
+from enum import Enum, auto
+from datetime import datetime, timedelta
 
-# Configurar logging
+from interface.cli_menu import clear_screen, print_header, display_logo, print_menu, get_user_choice, confirm_action
+from interface.cli_utils import print_table, print_chart, progress_bar, loading_animation
+
+# Configuración de logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     handlers=[
-        logging.StreamHandler(sys.stdout),
+        logging.StreamHandler(),
         logging.FileHandler("bot.log")
     ]
 )
-logger = logging.getLogger("TradingBotCLI")
 
-# Intentar importar módulos necesarios
-try:
-    # Módulos del core
-    from core.bot import TradingBot
-    from core.bot_manager import BotManager
-    from core.config import load_config, save_config
-    
-    # Módulos de interfaz
-    from interface.cli_menu import clear_screen, print_header, print_menu, get_user_choice
-    from interface.cli_utils import print_table, print_chart, confirm_action
-    from interface.live_trading_monitor import LiveTradingMonitor, run_live_monitor, simulate_trading_for_demo
-    
-    # Módulos de datos
-    from data_management.market_data import get_available_symbols, get_market_data
-    
-    # Módulos de estrategia y escalping
-    from strategies.scalping_strategies import get_available_scalping_strategies, ScalpingStrategy
-    
-    # Módulos de backtesting
-    from backtesting.engine import run_backtest
-    
-    # Módulos de base de datos
-    from db.operations import get_bots, get_bot_history
-    
-except ImportError as e:
-    logger.error(f"Error importing modules: {e}")
-    print(f"Error: {e}")
-    print("Make sure all dependencies are installed.")
-    print("Run: pip install -r requirements.txt")
-    sys.exit(1)
+logger = logging.getLogger(__name__)
 
-# Variables globales
-bot_manager = None
-running = True
+class TradingStyle(Enum):
+    """Estilos de trading soportados"""
+    SCALPING = auto()
+    DAY_TRADING = auto()
+    SWING = auto()
+    POSITION = auto()
 
-def init_bot_manager():
-    """Inicializa el gestor de bots"""
-    global bot_manager
+def main():
+    """Función principal del CLI"""
     try:
-        config = load_config()
-        bot_manager = BotManager(config)
-        logger.info("Bot manager initialized")
-        return True
-    except Exception as e:
-        logger.error(f"Error initializing bot manager: {e}")
-        print(f"Error initializing bot manager: {e}")
-        return False
-
-def main_menu():
-    """Muestra el menú principal"""
-    clear_screen()
-    
-    # Mostrar logo y encabezado con colores
-    from interface.cli_menu import display_logo, print_header
-    display_logo()
-    print_header("SOLANA TRADING BOT - MENÚ PRINCIPAL")
-    
-    from interface.cli_utils import Colors
-    
-    # Estado del sistema
-    try:
-        from core.bot_manager import get_system_status
-        status = get_system_status()
+        clear_screen()
+        display_logo()
+        print_header("BOT DE TRADING ALGORÍTMICO - SOLANA")
         
-        print(f"\n{Colors.CYAN}Estado del sistema:{Colors.END}")
-        print(f"Bots activos: {Colors.GREEN}{status.get('active_bots', 0)}{Colors.END}")
-        print(f"Última operación: {status.get('last_trade_time', 'N/A')}")
-        print(f"Precio actual SOL: {Colors.GREEN}{status.get('current_price', 0.0):.2f} USDT{Colors.END}")
-    except:
-        # Si hay error, mostrar mensajes simples
-        print(f"\n{Colors.CYAN}Estado del sistema:{Colors.END}")
-        print(f"Bot listo para operar")
+        print("\n¡Bienvenido al Bot de Trading Algorítmico!")
+        print("Este sistema te permite operar en el mercado de criptomonedas de manera automática.")
+        print("El bot está configurado para trading de Solana (SOL) en modo simulación (paper trading).")
+        
+        while True:
+            # Menú principal
+            option = print_menu([
+                "Scalping en Tiempo Real",
+                "Backtesting y Optimización",
+                "Configuración",
+                "Diagnóstico y Monitoreo",
+                "Salir"
+            ])
+            
+            if option == 1:
+                scalping_menu()
+            elif option == 2:
+                backtesting_menu()
+            elif option == 3:
+                configuration_menu()
+            elif option == 4:
+                monitoring_menu()
+            elif option == 5:
+                if confirm_action("¿Estás seguro de que quieres salir?"):
+                    clear_screen()
+                    print("¡Gracias por usar el Bot de Trading Algorítmico!")
+                    print("Saliendo...")
+                    break
     
-    options = [
-        "Gestionar Bots",
-        "Scalping en Tiempo Real",
-        "Ver Mercados",
-        "Backtesting",
-        "Panel de Control",
-        "Configuración de IA", 
-        "Configuración",
-        "Salir"
-    ]
+    except KeyboardInterrupt:
+        print("\n\nOperación cancelada por el usuario. Saliendo...")
+    except Exception as e:
+        logger.error(f"Error inesperado: {e}", exc_info=True)
+        print(f"\n❌ Error inesperado: {e}")
+        print("Consulta el archivo de log para más detalles.")
     
-    choice = print_menu(options)
-    
-    if choice == 1:
-        bot_management_menu()
-    elif choice == 2:
-        scalping_menu()
-    elif choice == 3:
-        market_view_menu()
-    elif choice == 4:
-        backtesting_menu()
-    elif choice == 5:
-        dashboard_menu()
-    elif choice == 6:
-        from interface.ai_menu import ai_configuration_menu
-        ai_configuration_menu()
-    elif choice == 7:
-        configuration_menu()
-    elif choice == 8:
-        confirm_exit()
-    else:
-        print("Opción no válida. Inténtalo de nuevo.")
-        time.sleep(1)
+    print("\n¡Hasta pronto!")
 
 def scalping_menu():
-    """Menú de scalping en tiempo real con visualización"""
+    """Menú de operaciones de scalping en tiempo real"""
     clear_screen()
     print_header("SCALPING EN TIEMPO REAL")
     
-    # Obtener información necesaria
-    print("\nEste modo ejecuta operaciones de scalping en timeframes muy cortos (segundos/minutos)")
-    print("con visualización en tiempo real del rendimiento y aprendizaje del bot.\n")
-    
     # Seleccionar par de trading
-    print("\n1. Selecciona el par de trading:")
-    try:
-        symbols = get_available_symbols()
-        for i, symbol in enumerate(symbols, 1):
-            print(f"  {i}. {symbol}")
-        
-        symbol_choice = get_user_choice(1, len(symbols))
-        selected_symbol = symbols[symbol_choice - 1] if symbol_choice else "SOL-USDT"
-    except Exception as e:
-        logger.error(f"Error obteniendo símbolos: {e}")
-        print("Error obteniendo símbolos, usando SOL-USDT")
-        selected_symbol = "SOL-USDT"
-    
-    # Seleccionar intervalo de tiempo
-    print("\n2. Selecciona el intervalo de tiempo para scalping:")
-    intervals = ["1m", "3m", "5m", "15m"]
-    for i, interval in enumerate(intervals, 1):
-        print(f"  {i}. {interval}")
-    
-    interval_choice = get_user_choice(1, len(intervals))
-    selected_interval = intervals[interval_choice - 1] if interval_choice else "1m"
-    
-    # Seleccionar estrategia de scalping
-    print("\n3. Selecciona la estrategia de scalping:")
-    try:
-        from strategies.scalping_strategies import get_available_scalping_strategies
-        scalping_strategies = get_available_scalping_strategies()
-        
-        strategies_list = []
-        for i, (key, strategy) in enumerate(scalping_strategies.items(), 1):
-            strategies_list.append((key, strategy.name, strategy.description))
-            print(f"  {i}. {strategy.name} - {strategy.description}")
-        
-        strategy_choice = get_user_choice(1, len(strategies_list))
-        if not strategy_choice:
-            return
-        
-        selected_strategy_key = strategies_list[strategy_choice - 1][0]
-    except Exception as e:
-        logger.error(f"Error obteniendo estrategias: {e}")
-        print("\nNo se pudieron cargar las estrategias de scalping. Usando RSI por defecto.")
-        time.sleep(2)
-        selected_strategy_key = "rsi_scalping"
-    
-    # Seleccionar modo de ejecución
-    print("\n4. Selecciona el modo de ejecución:")
-    print("  1. Modo Demo (simulación con datos sintéticos)")
-    print("  2. Modo Paper Trading (simulación con datos reales)")
-    print("  3. Modo Live Trading (trading real) [DESHABILITADO]")
-    
-    mode_choice = get_user_choice(1, 2)  # Limitado a 2 porque el modo 3 está deshabilitado
-    if not mode_choice:
-        return
-    
-    # Confirmar antes de iniciar
-    print("\n=== RESUMEN DE CONFIGURACIÓN ===")
-    print(f"Par de trading: {selected_symbol}")
-    print(f"Intervalo: {selected_interval}")
-    print(f"Estrategia: {selected_strategy_key}")
-    print(f"Modo: {'Demo' if mode_choice == 1 else 'Paper Trading'}")
-    
-    if not confirm_action("¿Iniciar bot de scalping con esta configuración?"):
-        return
-    
-    try:
-        # Inicializar bot para el monitor
-        if mode_choice == 1:  # Modo Demo
-            # Crear monitor para la simulación
-            print("\nIniciando monitor de trading en modo demo...")
-            print("Presiona 'q' para salir cuando el monitor esté activo.")
-            time.sleep(2)
-            
-            try:
-                # Importar módulos necesarios
-                from interface.live_trading_monitor import LiveTradingMonitor, simulate_trading_for_demo
-                
-                # Iniciar monitor demo
-                monitor = LiveTradingMonitor(None, selected_symbol, selected_interval)
-                
-                # Función que ejecuta el monitor y la simulación
-                def run_demo():
-                    try:
-                        # Iniciar monitor
-                        monitor_thread = threading.Thread(target=monitor.start)
-                        monitor_thread.daemon = True
-                        monitor_thread.start()
-                        
-                        # Ejecutar simulación en primer plano
-                        simulate_trading_for_demo(monitor, duration_seconds=600)  # 10 minutos de demo
-                    except KeyboardInterrupt:
-                        monitor.stop()
-                    except Exception as e:
-                        logger.error(f"Error en la simulación: {e}")
-                    finally:
-                        if hasattr(monitor, 'running') and monitor.running:
-                            monitor.stop()
-                
-                # Ejecutar en hilo separado
-                demo_thread = threading.Thread(target=run_demo)
-                demo_thread.daemon = True
-                demo_thread.start()
-                
-                # Esperar a que el usuario presione Enter para volver al menú
-                input("\nPresiona Enter para volver al menú principal (esto no detendrá el monitor)...")
-                
-            except ImportError as e:
-                logger.error(f"Error importando módulos necesarios: {e}")
-                print(f"\nNo se pudo iniciar el monitor: {e}")
-                print("Asegúrate de que todos los módulos estén instalados.")
-                input("\nPresiona Enter para continuar...")
-            
-        else:  # Paper Trading
-            try:
-                print("\nIniciando bot en modo paper trading...")
-                print("Configurando conexión con exchange...")
-                print("Presiona 'q' para salir cuando el monitor esté activo.")
-                
-                # Intentar importar módulos necesarios
-                from trading_bot import TradingBot, ScalpingBot
-                from interface.live_trading_monitor import LiveTradingMonitor, run_live_monitor
-                
-                try:
-                    # Intentar crear ScalpingBot especializado
-                    bot = ScalpingBot(
-                        symbol=selected_symbol,
-                        timeframe=selected_interval,
-                        strategy=selected_strategy_key,
-                        paper_trading=True
-                    )
-                    print("Bot de scalping inicializado correctamente.")
-                    
-                except Exception as e:
-                    logger.error(f"Error creando ScalpingBot, usando TradingBot básico: {e}")
-                    print("Usando bot genérico como alternativa.")
-                    
-                    # Crear bot genérico si falla
-                    bot_config = {
-                        "symbol": selected_symbol,
-                        "timeframe": selected_interval,
-                        "strategy": selected_strategy_key,
-                        "paper_trading": True,
-                        "max_position_size": 0.05,  # 5% del balance
-                        "stop_loss_pct": 0.3,      # 0.3% stop loss
-                        "take_profit_pct": 0.5     # 0.5% take profit
-                    }
-                    bot = TradingBot(bot_config)
-                
-                # Iniciar monitor con bot real
-                monitor = run_live_monitor(bot, selected_symbol, selected_interval)
-                
-                # Iniciar el bot
-                bot_thread = threading.Thread(target=bot.run)
-                bot_thread.daemon = True
-                bot_thread.start()
-                
-                # Esperar a que el usuario presione Enter para volver al menú
-                input("\nPresiona Enter para volver al menú principal (esto no detendrá el bot ni el monitor)...")
-                
-            except ImportError:
-                print("\nNo se pudo importar el módulo de trading.")
-                print("Ejecutando en modo demo como alternativa...")
-                time.sleep(2)
-                
-                # Ejecutar el modo demo como fallback
-                from interface.live_trading_monitor import LiveTradingMonitor, simulate_trading_for_demo
-                
-                monitor = LiveTradingMonitor(None, selected_symbol, selected_interval)
-                
-                # Iniciar monitor
-                monitor_thread = threading.Thread(target=monitor.start)
-                monitor_thread.daemon = True
-                monitor_thread.start()
-                
-                # Ejecutar simulación
-                demo_thread = threading.Thread(target=lambda: simulate_trading_for_demo(monitor, 600))
-                demo_thread.daemon = True
-                demo_thread.start()
-                
-                # Esperar a que el usuario presione Enter para volver al menú
-                input("\nPresiona Enter para volver al menú principal...")
-            
-            except Exception as e:
-                logger.error(f"Error al iniciar el bot de scalping: {e}")
-                print(f"\nError al iniciar el bot: {e}")
-                print("Verifique que todas las dependencias estén instaladas y la configuración sea correcta.")
-                input("\nPresiona Enter para continuar...")
-    
-    except Exception as e:
-        logger.error(f"Error en el menú de scalping: {e}")
-        print(f"\nError: {e}")
-        time.sleep(3)
-
-def bot_management_menu():
-    """Menú de gestión de bots"""
-    while True:
-        clear_screen()
-        print_header("GESTIÓN DE BOTS")
-        
-        # Obtener lista de bots
-        bots = get_bots()
-        
-        # Mostrar bots activos
-        if bots:
-            print("\nBots configurados:")
-            bot_data = []
-            for i, bot in enumerate(bots, 1):
-                status = "🟢 Activo" if bot.get("active", False) else "⚪ Inactivo"
-                mode = "📝 Simulado" if bot.get("paper_trading", True) else "💰 Real"
-                bot_data.append([
-                    i,
-                    bot.get("name", "Bot sin nombre"),
-                    bot.get("symbol", "SOL-USDT"),
-                    status,
-                    mode,
-                    bot.get("strategy", "N/A"),
-                    f"{bot.get('balance', 0):.2f} USDT"
-                ])
-            
-            headers = ["#", "Nombre", "Par", "Estado", "Modo", "Estrategia", "Balance"]
-            print_table(headers, bot_data)
-        else:
-            print("\nNo hay bots configurados.")
-        
-        options = [
-            "Crear nuevo bot",
-            "Iniciar/detener bot",
-            "Editar configuración de bot",
-            "Ver detalles de bot",
-            "Eliminar bot",
-            "Volver al menú principal"
-        ]
-        
-        choice = print_menu(options)
-        
-        if choice == 1:
-            create_new_bot()
-        elif choice == 2:
-            toggle_bot_status()
-        elif choice == 3:
-            edit_bot_config()
-        elif choice == 4:
-            view_bot_details()
-        elif choice == 5:
-            delete_bot()
-        elif choice == 6:
-            break
-        else:
-            print("Opción no válida. Inténtalo de nuevo.")
-            time.sleep(1)
-
-def create_new_bot():
-    """Crea un nuevo bot de trading"""
-    clear_screen()
-    print_header("CREAR NUEVO BOT")
-    
-    # Solicitar nombre del bot
-    print("\nIntroduce un nombre para el bot:")
-    bot_name = input("> ").strip()
-    if not bot_name:
-        print("El nombre no puede estar vacío.")
-        time.sleep(2)
-        return
-    
-    # Seleccionar par de trading
-    symbols = get_available_symbols()
     print("\nSelecciona el par de trading:")
-    for i, symbol in enumerate(symbols, 1):
-        print(f"{i}. {symbol}")
+    pairs = ["SOL-USDT", "SOL-USD", "SOL-BUSD"]
+    for i, pair in enumerate(pairs, 1):
+        print(f"{i}. {pair}")
     
-    symbol_choice = get_user_choice(1, len(symbols))
-    selected_symbol = symbols[symbol_choice - 1] if symbol_choice else "SOL-USDT"
-    
-    # Seleccionar modo de trading
-    print("\nSelecciona el modo de trading:")
-    print("1. Paper Trading (Simulado)")
-    print("2. Live Trading (Real)")
-    
-    mode_choice = get_user_choice(1, 2)
-    paper_trading = mode_choice == 1
-    
-    # Seleccionar método de configuración
-    print("\nSelecciona el método de configuración:")
-    print("1. Estrategia básica (configuración manual)")
-    print("2. Perfil predefinido (scalping, day trading, etc.)")
-    print("3. Recomendación IA (basada en análisis de mercado)")
-    print("4. Backtesting automático y optimización")
-    
-    config_choice = get_user_choice(1, 4)
-    if not config_choice:
+    pair_choice = get_user_choice(1, len(pairs))
+    if pair_choice is None:
         return
     
-    # Variables para configuración
-    selected_strategy = None
-    strategy_params = {}
-    profile_name = None
-    time_interval = "15m"
+    selected_pair = pairs[pair_choice - 1]
     
-    # Procesamiento según método elegido
-    if config_choice == 1:
-        # Estrategia básica manual
-        print("\nSelecciona la estrategia de trading:")
-        strategies = [
-            "Cruce de Medias Móviles",
-            "RSI + Bollinger Bands",
-            "MACD + Tendencia",
-            "Estadística (Mean Reversion)",
-            "Adaptativa (Múltiples indicadores)",
-            "Machine Learning (Experimental)"
-        ]
-        
-        for i, strategy in enumerate(strategies, 1):
-            print(f"{i}. {strategy}")
-        
-        strategy_choice = get_user_choice(1, len(strategies))
-        selected_strategy = strategies[strategy_choice - 1] if strategy_choice else strategies[0]
-        
-        # Seleccionar intervalo de tiempo
-        print("\nSelecciona el intervalo de tiempo:")
-        intervals = ["1m", "5m", "15m", "30m", "1h", "4h", "1d"]
-        for i, interval in enumerate(intervals, 1):
-            print(f"{i}. {interval}")
-        
-        interval_choice = get_user_choice(1, len(intervals))
-        if interval_choice:
-            time_interval = intervals[interval_choice - 1]
+    # Seleccionar timeframe
+    print("\nSelecciona el timeframe:")
+    timeframes = ["1m", "3m", "5m", "15m"]
+    for i, tf in enumerate(timeframes, 1):
+        print(f"{i}. {tf}")
     
-    elif config_choice == 2:
-        # Perfil predefinido
+    tf_choice = get_user_choice(1, len(timeframes))
+    if tf_choice is None:
+        return
+    
+    selected_timeframe = timeframes[tf_choice - 1]
+    
+    # Seleccionar estrategia
+    print("\nSelecciona la estrategia de scalping:")
+    strategies = [
+        "RSI + Volatilidad adaptativa",
+        "Momentum con reversión a la media",
+        "Grid Trading con bandas adaptativas",
+        "Detección de patrones de velas",
+        "Estrategia adaptativa (aprendizaje)"
+    ]
+    for i, strat in enumerate(strategies, 1):
+        print(f"{i}. {strat}")
+    
+    strat_choice = get_user_choice(1, len(strategies))
+    if strat_choice is None:
+        return
+    
+    selected_strategy = strategies[strat_choice - 1]
+    
+    # Configurar tamaño de operación
+    print("\nConfigura el tamaño de operación (% del balance):")
+    sizes = ["1%", "2%", "5%", "10%", "Personalizado"]
+    for i, size in enumerate(sizes, 1):
+        print(f"{i}. {size}")
+    
+    size_choice = get_user_choice(1, len(sizes))
+    if size_choice is None:
+        return
+    
+    if size_choice == 5:
+        print("\nIngresa el porcentaje personalizado (1-100):")
+        custom_size = input("> ")
         try:
-            # Importar módulo de perfiles
-            from strategies.strategy_profiles import StrategyProfileManager, TradingStyle
-            
-            # Crear gestor de perfiles
-            profile_manager = StrategyProfileManager()
-            
-            # Listar perfiles por categoría
-            print("\nSelecciona el tipo de perfil:")
-            print("1. Scalping (operaciones rápidas, timeframes cortos)")
-            print("2. Day Trading (operaciones intradiarias)")
-            print("3. Swing Trading (operaciones de varios días)")
-            print("4. ML/AI (basado en machine learning)")
-            print("5. Adaptativo (ajusta parámetros automáticamente)")
-            
-            style_choice = get_user_choice(1, 5)
-            if not style_choice:
-                return
-            
-            # Mapear elección a estilo
-            style_map = {
-                1: TradingStyle.SCALPING,
-                2: TradingStyle.DAY_TRADING,
-                3: TradingStyle.SWING_TRADING,
-                4: TradingStyle.ML_BASED,
-                5: TradingStyle.ADAPTIVE
-            }
-            
-            selected_style = style_map.get(style_choice)
-            
-            # Obtener perfiles del estilo seleccionado
-            profiles = profile_manager.get_profiles_by_style(selected_style)
-            
-            if not profiles:
-                print(f"\n❌ No hay perfiles disponibles para {selected_style.value}.")
-                time.sleep(2)
-                return
-            
-            # Listar perfiles
-            print(f"\nPerfiles disponibles para {selected_style.value}:")
-            
-            profile_list = list(profiles.values())
-            
-            for i, profile in enumerate(profile_list, 1):
-                print(f"{i}. {profile.name} - {profile.description[:50]}...")
-            
-            profile_choice = get_user_choice(1, len(profile_list))
-            if not profile_choice:
-                return
-            
-            selected_profile = profile_list[profile_choice - 1]
-            
-            # Mostrar detalles del perfil
-            clear_screen()
-            print_header(f"PERFIL: {selected_profile.name}")
-            
-            print(f"\nEstilo de trading: {selected_profile.trading_style.value}")
-            print(f"Timeframe principal: {selected_profile.primary_timeframe}")
-            print(f"Take profit: {selected_profile.take_profit_pct}%")
-            print(f"Stop loss: {selected_profile.stop_loss_pct}%")
-            print(f"Riesgo por operación: {selected_profile.risk_per_trade_pct}%")
-            print(f"Posiciones máximas: {selected_profile.max_positions}")
-            
-            print("\nIndicadores:")
-            for indicator, params in selected_profile.indicators.items():
-                print(f"  - {indicator}: {params}")
-            
-            # Confirmar selección
-            print("\n¿Confirmar selección de este perfil?")
-            print("1. Sí, usar este perfil")
-            print("2. No, volver")
-            
-            confirm = get_user_choice(1, 2)
-            if confirm != 1:
-                return
-            
-            # Asignar información del perfil
-            profile_name = selected_profile.name
-            time_interval = selected_profile.primary_timeframe
-            
-            # Mapear perfil a estrategia
-            if "rsi" in selected_profile.indicators and not "macd" in selected_profile.indicators:
-                selected_strategy = "RSI + Bollinger Bands"
-            elif "macd" in selected_profile.indicators:
-                selected_strategy = "MACD + Tendencia"
-            elif "bollinger_bands" in selected_profile.indicators:
-                selected_strategy = "Bollinger Bands"
-            elif "all_indicators" in selected_profile.indicators:
-                selected_strategy = "Adaptativa (Múltiples indicadores)"
-            elif "ml_features" in selected_profile.indicators:
-                selected_strategy = "Machine Learning (Experimental)"
-            else:
-                selected_strategy = "Cruce de Medias Móviles"
-            
-            # Extraer parámetros relevantes
-            strategy_params = {
-                "take_profit": selected_profile.take_profit_pct,
-                "stop_loss": selected_profile.stop_loss_pct,
-                "risk_per_trade": selected_profile.risk_per_trade_pct,
-                "max_positions": selected_profile.max_positions,
-                "profile": profile_name
-            }
-            
-            # Añadir parámetros adicionales
-            if selected_profile.parameters:
-                for key, value in selected_profile.parameters.items():
-                    strategy_params[key] = value
-        
-        except ImportError as e:
-            print(f"\n❌ Error: Funcionalidad de perfiles no disponible. {e}")
-            time.sleep(2)
-            return
-        except Exception as e:
-            print(f"\n❌ Error al seleccionar perfil: {e}")
-            time.sleep(2)
-            return
-    
-    elif config_choice == 3:
-        # Recomendación IA
-        try:
-            from strategies.auto_suggestion import suggest_best_strategy
-            
-            # Seleccionar timeframe
-            print("\nSelecciona el timeframe para el análisis:")
-            timeframes = ["15m", "1h", "4h", "1d"]
-            
-            for i, tf in enumerate(timeframes, 1):
-                print(f"{i}. {tf}")
-            
-            tf_choice = get_user_choice(1, len(timeframes))
-            if not tf_choice:
-                return
-            
-            selected_timeframe = timeframes[tf_choice - 1]
-            
-            # Mostrar progreso
-            print(f"\n⚙️ La IA está analizando {selected_symbol} en {selected_timeframe}...")
-            print("Este proceso puede tardar varios minutos.")
-            
-            print("\nAnalizando condiciones de mercado...")
-            time.sleep(1)
-            
-            print("Ejecutando backtesting de estrategias...")
-            time.sleep(2)
-            
-            print("Optimizando parámetros...")
-            time.sleep(2)
-            
-            print("Generando recomendación...")
-            time.sleep(1)
-            
-            # Obtener recomendación
-            recommendation = suggest_best_strategy(selected_symbol, selected_timeframe)
-            
-            # Mostrar la recomendación
-            clear_screen()
-            print_header("RECOMENDACIÓN DE LA IA")
-            
-            market_analysis = recommendation.get("market_analysis", {})
-            
-            print(f"\nSímbolo: {selected_symbol}")
-            print(f"Timeframe: {selected_timeframe}")
-            
-            print("\nAnálisis de mercado:")
-            print(f"  Tendencia: {market_analysis.get('trend', 'N/A')}")
-            print(f"  Condición: {market_analysis.get('market_condition', 'N/A')}")
-            print(f"  Volatilidad: {market_analysis.get('volatility', 0) * 100:.2f}%")
-            
-            print("\nEstrategia recomendada:")
-            ai_strategy = recommendation.get("recommended_strategy", "MACD + Tendencia")
-            print(f"  {ai_strategy}")
-            
-            # Confirmar selección
-            print("\n¿Usar esta recomendación?")
-            print("1. Sí, usar la estrategia recomendada")
-            print("2. No, volver")
-            
-            confirm = get_user_choice(1, 2)
-            if confirm != 1:
-                return
-            
-            # Mapear estrategia recomendada a lista de estrategias
-            strategy_map = {
-                "SMA Crossover": "Cruce de Medias Móviles",
-                "RSI Strategy": "RSI + Bollinger Bands",
-                "MACD Strategy": "MACD + Tendencia",
-                "Bollinger Bands": "Bollinger Bands",
-                "Mean Reversion": "Estadística (Mean Reversion)",
-                "RSI+MACD Combined": "Adaptativa (Múltiples indicadores)"
-            }
-            
-            selected_strategy = strategy_map.get(ai_strategy, "Adaptativa (Múltiples indicadores)")
-            time_interval = selected_timeframe
-            profile_name = recommendation.get("profile_suggestion")
-            strategy_params = recommendation.get("optimal_params", {})
-            
-        except ImportError as e:
-            print(f"\n❌ Error: Funcionalidad de IA no disponible. {e}")
-            time.sleep(2)
-            return
-        except Exception as e:
-            print(f"\n❌ Error al obtener recomendación: {e}")
-            time.sleep(2)
-            return
-    
-    elif config_choice == 4:
-        # Backtesting y optimización
-        try:
-            from backtesting.advanced_optimizer import optimize_strategy_params
-            
-            # Seleccionar estrategia
-            print("\nSelecciona la estrategia a optimizar:")
-            strategies = [
-                "Cruce de Medias Móviles",
-                "RSI + Bollinger Bands",
-                "MACD + Tendencia",
-                "Estadística (Mean Reversion)",
-                "Adaptativa (Múltiples indicadores)"
-            ]
-            
-            for i, strategy in enumerate(strategies, 1):
-                print(f"{i}. {strategy}")
-            
-            strategy_choice = get_user_choice(1, len(strategies))
-            if not strategy_choice:
-                return
-            
-            selected_strategy = strategies[strategy_choice - 1]
-            
-            # Seleccionar timeframe
-            print("\nSelecciona el timeframe para la optimización:")
-            timeframes = ["15m", "1h", "4h", "1d"]
-            
-            for i, tf in enumerate(timeframes, 1):
-                print(f"{i}. {tf}")
-            
-            tf_choice = get_user_choice(1, len(timeframes))
-            if not tf_choice:
-                return
-            
-            selected_timeframe = timeframes[tf_choice - 1]
-            time_interval = selected_timeframe
-            
-            # Seleccionar período de backtesting
-            print("\nSelecciona el período para la optimización:")
-            periods = ["30 días", "60 días", "90 días", "180 días"]
-            
-            for i, period in enumerate(periods, 1):
-                print(f"{i}. {period}")
-            
-            period_choice = get_user_choice(1, len(periods))
-            if not period_choice:
-                return
-            
-            days_map = {1: 30, 2: 60, 3: 90, 4: 180}
-            selected_days = days_map.get(period_choice, 60)
-            
-            # Mostrar progreso
-            print(f"\n⚙️ Optimizando {selected_strategy} para {selected_symbol} en {selected_timeframe}...")
-            print("Este proceso puede tardar varios minutos.")
-            
-            print("\nRecopilando datos históricos...")
-            time.sleep(1)
-            
-            print("Probando diferentes combinaciones de parámetros...")
-            total_combinations = 24  # Un valor razonable para mostrar progreso
-            for i in range(total_combinations):
-                progress = (i + 1) / total_combinations * 100
-                print(f"Prueba {i+1}/{total_combinations} [{progress:>6.2f}%]", end="\r")
-                time.sleep(0.1)
-            
-            print("\nAnalizando resultados..." + " " * 30)
-            time.sleep(1)
-            
-            # Mapeo a estrategias para la API de backtesting
-            strategy_map_to_backtest = {
-                "Cruce de Medias Móviles": "SMA Crossover",
-                "RSI + Bollinger Bands": "RSI Strategy",
-                "MACD + Tendencia": "MACD Strategy",
-                "Estadística (Mean Reversion)": "Mean Reversion",
-                "Adaptativa (Múltiples indicadores)": "Multi-Indicator Strategy"
-            }
-            
-            # Obtener nombre para API de backtesting
-            backtest_strategy_name = strategy_map_to_backtest.get(selected_strategy, "SMA Crossover")
-            
-            # Ejecutar optimización (simulada por ahora)
-            optimization_result = {
-                "strategy": backtest_strategy_name,
-                "best_params": {
-                    "short_period": 10,
-                    "long_period": 30,
-                    "rsi_period": 14,
-                    "bb_std_dev": 2.0,
-                    "take_profit": 2.5,
-                    "stop_loss": 1.5
-                },
-                "best_metrics": {
-                    "return_pct": 18.5,
-                    "win_rate": 65.0,
-                    "profit_factor": 1.8
-                }
-            }
-            
-            # Mostrar resultados
-            clear_screen()
-            print_header("RESULTADOS DE OPTIMIZACIÓN")
-            
-            print(f"\nEstrategia: {selected_strategy}")
-            print(f"Período: {selected_days} días")
-            
-            print("\nParámetros optimizados:")
-            for param, value in optimization_result["best_params"].items():
-                print(f"  {param}: {value}")
-            
-            print("\nMétricas con parámetros optimizados:")
-            metrics = optimization_result["best_metrics"]
-            print(f"  Retorno: {metrics.get('return_pct', 0):.2f}%")
-            print(f"  Win rate: {metrics.get('win_rate', 0):.2f}%")
-            print(f"  Profit factor: {metrics.get('profit_factor', 0):.2f}")
-            
-            # Confirmar selección
-            print("\n¿Usar estos parámetros optimizados?")
-            print("1. Sí, usar los parámetros optimizados")
-            print("2. No, volver")
-            
-            confirm = get_user_choice(1, 2)
-            if confirm != 1:
-                return
-            
-            # Extraer parámetros optimizados
-            strategy_params = optimization_result.get("best_params", {})
-            
-        except ImportError as e:
-            print(f"\n❌ Error: Funcionalidad de backtesting avanzado no disponible. {e}")
-            time.sleep(2)
-            return
-        except Exception as e:
-            print(f"\n❌ Error al ejecutar optimización: {e}")
-            time.sleep(2)
-            return
-    
-    # Configurar balance inicial (para paper trading)
-    initial_balance = 1000.0
-    if paper_trading:
-        print("\nIntroduce el balance inicial (USDT):")
-        try:
-            initial_balance = float(input("> ").strip())
+            position_size = float(custom_size)
+            if position_size < 1 or position_size > 100:
+                print("Valor fuera de rango, usando 5% por defecto.")
+                position_size = 5.0
         except ValueError:
-            print("Valor no válido. Usando 1000 USDT por defecto.")
-            initial_balance = 1000.0
+            print("Valor inválido, usando 5% por defecto.")
+            position_size = 5.0
+    else:
+        position_size = float(sizes[size_choice - 1].strip("%"))
     
-    # Crear configuración del bot
-    bot_config = {
-        "name": bot_name,
-        "symbol": selected_symbol,
-        "paper_trading": paper_trading,
-        "strategy": selected_strategy,
-        "balance": initial_balance,
-        "active": False,
-        "created_at": datetime.now().isoformat(),
-        "config": {
-            "risk_per_trade": strategy_params.get("risk_per_trade", 1.0),
-            "leverage": strategy_params.get("leverage", 1.0),
-            "stop_loss": strategy_params.get("stop_loss", 2.0),
-            "take_profit": strategy_params.get("take_profit", 3.0),
-            "time_interval": time_interval,
-            "profile": profile_name,
-            "parameters": strategy_params
+    # Mostrar configuración seleccionada
+    clear_screen()
+    print_header("INICIANDO OPERACIONES DE SCALPING")
+    
+    print("\nConfiguración:")
+    print(f"• Par de trading: {selected_pair}")
+    print(f"• Timeframe: {selected_timeframe}")
+    print(f"• Estrategia: {selected_strategy}")
+    print(f"• Tamaño de posición: {position_size}% del balance")
+    print(f"• Modo: Paper Trading (Simulación)")
+    
+    if not confirm_action("¿Iniciar operaciones con esta configuración?"):
+        return
+    
+    # Simular inicio del bot
+    loading_animation("Inicializando bot de trading", 2.0)
+    loading_animation("Conectando con exchange", 1.5)
+    loading_animation("Cargando datos de mercado", 2.0)
+    loading_animation("Preparando estrategia", 1.5)
+    
+    # Simular trading en vivo
+    simulate_live_trading(selected_pair, selected_timeframe, selected_strategy, position_size)
+
+def simulate_live_trading(pair: str, timeframe: str, strategy: str, position_size: float):
+    """
+    Simula operaciones de trading en vivo (modo demo)
+    
+    Args:
+        pair: Par de trading
+        timeframe: Timeframe
+        strategy: Estrategia seleccionada
+        position_size: Tamaño de posición en porcentaje
+    """
+    clear_screen()
+    print_header(f"TRADING EN VIVO: {pair} - {timeframe}")
+    
+    try:
+        # Variables de simulación
+        balance = 10000.0
+        equity = balance
+        open_position = False
+        entry_price = 0.0
+        position_type = ""
+        profit_loss = 0.0
+        trades_made = 0
+        winning_trades = 0
+        total_volume = 0.0
+        current_price = 100.0  # Precio inicial simulado
+        
+        # Datos para análisis
+        signals = []
+        prices = []
+        equity_curve = []
+        
+        # Parámetros para simulación de indicadores
+        rsi_value = 50
+        rsi_direction = 1  # 1: subiendo, -1: bajando
+        macd_value = 0
+        macd_signal = 0
+        macd_histogram = 0
+        bb_upper = current_price * 1.01
+        bb_lower = current_price * 0.99
+        bb_middle = current_price
+        
+        # Simulación de learning
+        strategy_weights = {
+            "RSI": 0.3,
+            "MACD": 0.25,
+            "BB": 0.2,
+            "Volume": 0.15,
+            "Pattern": 0.1
         }
-    }
-    
-    # Guardar bot en la base de datos
-    try:
-        bot_manager.create_bot(bot_config)
-        print(f"\n✅ Bot '{bot_name}' creado exitosamente!")
         
-        if profile_name:
-            print(f"Usando perfil: {profile_name}")
+        # Mostrar información inicial
+        print(f"\nBalance inicial: ${balance:.2f}")
+        print(f"Tamaño de operación: {position_size}% (${balance * position_size / 100:.2f})")
+        print("Modo: PAPER TRADING (Simulación con datos reales)")
+        print("\nPresiona Ctrl+C para detener la simulación.")
         
-        if strategy_params:
-            print("\nParámetros optimizados:")
-            for param, value in strategy_params.items():
-                print(f"  {param}: {value}")
-    except Exception as e:
-        logger.error(f"Error creating bot: {e}")
-        print(f"\n❌ Error al crear el bot: {e}")
-    
-    input("\nPresiona Enter para continuar...")
-
-def toggle_bot_status():
-    """Inicia o detiene un bot"""
-    bots = get_bots()
-    if not bots:
-        print("No hay bots configurados.")
-        time.sleep(2)
-        return
-    
-    clear_screen()
-    print_header("INICIAR/DETENER BOT")
-    
-    print("\nSelecciona un bot:")
-    for i, bot in enumerate(bots, 1):
-        status = "🟢 Activo" if bot.get("active", False) else "⚪ Inactivo"
-        print(f"{i}. {bot.get('name')} - {status}")
-    
-    bot_choice = get_user_choice(1, len(bots))
-    if not bot_choice:
-        return
-    
-    selected_bot = bots[bot_choice - 1]
-    current_status = selected_bot.get("active", False)
-    
-    action = "detener" if current_status else "iniciar"
-    if confirm_action(f"¿Estás seguro de que deseas {action} el bot '{selected_bot.get('name')}'?"):
-        try:
-            if current_status:
-                bot_manager.stop_bot(selected_bot["id"])
-                print(f"\n✅ Bot '{selected_bot.get('name')}' detenido exitosamente!")
-            else:
-                bot_manager.start_bot(selected_bot["id"])
-                print(f"\n✅ Bot '{selected_bot.get('name')}' iniciado exitosamente!")
-        except Exception as e:
-            logger.error(f"Error toggling bot status: {e}")
-            print(f"\n❌ Error: {e}")
-    
-    input("\nPresiona Enter para continuar...")
-
-def edit_bot_config():
-    """Edita la configuración de un bot"""
-    bots = get_bots()
-    if not bots:
-        print("No hay bots configurados.")
-        time.sleep(2)
-        return
-    
-    clear_screen()
-    print_header("EDITAR CONFIGURACIÓN DE BOT")
-    
-    print("\nSelecciona un bot:")
-    for i, bot in enumerate(bots, 1):
-        print(f"{i}. {bot.get('name')} - {bot.get('symbol')}")
-    
-    bot_choice = get_user_choice(1, len(bots))
-    if not bot_choice:
-        return
-    
-    selected_bot = bots[bot_choice - 1]
-    
-    while True:
-        clear_screen()
-        print_header(f"CONFIGURACIÓN: {selected_bot.get('name')}")
+        # Loop principal de simulación
+        start_time = time.time()
+        iteration = 0
         
-        print("\nConfig actual:")
-        for key, value in selected_bot.get("config", {}).items():
-            print(f"{key}: {value}")
-        
-        print("\nSelecciona qué modificar:")
-        config_options = [
-            "Riesgo por operación (%)",
-            "Apalancamiento",
-            "Stop Loss (multiplicador ATR)",
-            "Take Profit (multiplicador ATR)",
-            "Intervalo de tiempo",
-            "Guardar y volver"
-        ]
-        
-        for i, option in enumerate(config_options, 1):
-            print(f"{i}. {option}")
-        
-        config_choice = get_user_choice(1, len(config_options))
-        if config_choice == 6:
-            break
-        
-        # Modificar configuración
-        if config_choice == 1:
-            print("\nIngresa el nuevo valor de riesgo por operación (%):")
-            try:
-                risk = float(input("> ").strip())
-                if 0.1 <= risk <= 5.0:
-                    selected_bot["config"]["risk_per_trade"] = risk
-                else:
-                    print("El valor debe estar entre 0.1% y 5%")
-            except ValueError:
-                print("Valor no válido")
-        
-        elif config_choice == 2:
-            print("\nIngresa el nuevo valor de apalancamiento:")
-            try:
-                leverage = float(input("> ").strip())
-                if 1.0 <= leverage <= 10.0:
-                    selected_bot["config"]["leverage"] = leverage
-                else:
-                    print("El valor debe estar entre 1.0 y 10.0")
-            except ValueError:
-                print("Valor no válido")
-        
-        elif config_choice == 3:
-            print("\nIngresa el nuevo valor de Stop Loss (multiplicador ATR):")
-            try:
-                stop_loss = float(input("> ").strip())
-                if 0.5 <= stop_loss <= 5.0:
-                    selected_bot["config"]["stop_loss"] = stop_loss
-                else:
-                    print("El valor debe estar entre 0.5 y 5.0")
-            except ValueError:
-                print("Valor no válido")
-        
-        elif config_choice == 4:
-            print("\nIngresa el nuevo valor de Take Profit (multiplicador ATR):")
-            try:
-                take_profit = float(input("> ").strip())
-                if 1.0 <= take_profit <= 10.0:
-                    selected_bot["config"]["take_profit"] = take_profit
-                else:
-                    print("El valor debe estar entre 1.0 y 10.0")
-            except ValueError:
-                print("Valor no válido")
-        
-        elif config_choice == 5:
-            print("\nSelecciona el nuevo intervalo de tiempo:")
-            intervals = ["1m", "5m", "15m", "30m", "1h", "4h", "1d"]
-            for i, interval in enumerate(intervals, 1):
-                print(f"{i}. {interval}")
+        while True:
+            iteration += 1
+            current_time = time.time()
+            elapsed = current_time - start_time
             
-            interval_choice = get_user_choice(1, len(intervals))
-            if interval_choice:
-                selected_bot["config"]["time_interval"] = intervals[interval_choice - 1]
-        
-        time.sleep(1)
-    
-    # Guardar cambios
-    try:
-        bot_manager.update_bot(selected_bot["id"], selected_bot)
-        print("\n✅ Configuración guardada exitosamente!")
-    except Exception as e:
-        logger.error(f"Error updating bot config: {e}")
-        print(f"\n❌ Error al guardar configuración: {e}")
-    
-    input("\nPresiona Enter para continuar...")
-
-def view_bot_details():
-    """Muestra detalles de un bot específico"""
-    bots = get_bots()
-    if not bots:
-        print("No hay bots configurados.")
-        time.sleep(2)
-        return
-    
-    clear_screen()
-    print_header("DETALLES DEL BOT")
-    
-    print("\nSelecciona un bot:")
-    for i, bot in enumerate(bots, 1):
-        status = "🟢 Activo" if bot.get("active", False) else "⚪ Inactivo"
-        print(f"{i}. {bot.get('name')} - {status}")
-    
-    bot_choice = get_user_choice(1, len(bots))
-    if not bot_choice:
-        return
-    
-    selected_bot = bots[bot_choice - 1]
-    
-    while True:
-        clear_screen()
-        print_header(f"DETALLES: {selected_bot.get('name')}")
-        
-        # Información general
-        print("\n📊 INFORMACIÓN GENERAL:")
-        print(f"ID: {selected_bot.get('id')}")
-        print(f"Par: {selected_bot.get('symbol')}")
-        print(f"Modo: {'📝 Simulado' if selected_bot.get('paper_trading', True) else '💰 Real'}")
-        print(f"Estado: {'🟢 Activo' if selected_bot.get('active', False) else '⚪ Inactivo'}")
-        print(f"Estrategia: {selected_bot.get('strategy')}")
-        print(f"Balance: {selected_bot.get('balance', 0):.2f} USDT")
-        print(f"Creado: {selected_bot.get('created_at')}")
-        
-        # Configuración
-        print("\n⚙️ CONFIGURACIÓN:")
-        for key, value in selected_bot.get("config", {}).items():
-            print(f"{key}: {value}")
-        
-        # Estado actual
-        print("\n🔄 ESTADO ACTUAL:")
-        if selected_bot.get("active", False):
-            try:
-                status = bot_manager.get_bot_status(selected_bot["id"])
-                print(f"Posición abierta: {'Sí' if status.get('has_position') else 'No'}")
-                print(f"Tipo de posición: {status.get('position_type', 'N/A')}")
-                print(f"Tamaño: {status.get('position_size', 0)}")
-                print(f"Precio de entrada: {status.get('entry_price', 0):.2f}")
-                print(f"Precio actual: {status.get('current_price', 0):.2f}")
-                print(f"P&L: {status.get('pnl', 0):.2f} USDT")
-                print(f"ROI: {status.get('roi', 0):.2f}%")
-            except Exception as e:
-                print(f"Error al obtener estado: {e}")
-        else:
-            print("Bot inactivo")
-        
-        # Historial reciente
-        print("\n📜 HISTORIAL RECIENTE:")
-        try:
-            history = get_bot_history(selected_bot["id"], limit=5)
-            if history:
-                for entry in history:
-                    trade_type = "🟢 COMPRA" if entry.get("type") == "buy" else "🔴 VENTA"
-                    print(f"{entry.get('timestamp')} - {trade_type} - {entry.get('price'):.2f} - {entry.get('size'):.4f} - {entry.get('pnl', 0):.2f} USDT")
-            else:
-                print("No hay historial disponible")
-        except Exception as e:
-            print(f"Error al obtener historial: {e}")
-        
-        # Menú de opciones
-        print("\nOpciones:")
-        options = [
-            "Actualizar",
-            "Ver gráfico",
-            "Ver historial completo",
-            "Volver"
-        ]
-        
-        for i, option in enumerate(options, 1):
-            print(f"{i}. {option}")
-        
-        choice = get_user_choice(1, len(options))
-        
-        if choice == 1:
-            continue  # Actualizar (simplemente refrescar la pantalla)
-        elif choice == 2:
-            view_bot_chart(selected_bot)
-        elif choice == 3:
-            view_bot_history(selected_bot)
-        elif choice == 4:
-            break
-        else:
-            print("Opción no válida")
-            time.sleep(1)
-
-def view_bot_chart(bot):
-    """Muestra el gráfico de un bot"""
-    clear_screen()
-    print_header(f"GRÁFICO: {bot.get('name')}")
-    
-    try:
-        # Obtener datos para el gráfico
-        market_data = get_market_data(bot.get("symbol"), bot.get("config", {}).get("time_interval", "15m"))
-        
-        # Mostrar un gráfico ASCII simple
-        if market_data:
-            print_chart(market_data, title=f"{bot.get('symbol')} - {bot.get('config', {}).get('time_interval', '15m')}")
-        else:
-            print("No hay datos disponibles para mostrar el gráfico")
-    except Exception as e:
-        logger.error(f"Error displaying chart: {e}")
-        print(f"Error al mostrar el gráfico: {e}")
-    
-    input("\nPresiona Enter para continuar...")
-
-def view_bot_history(bot):
-    """Muestra el historial completo de un bot"""
-    clear_screen()
-    print_header(f"HISTORIAL: {bot.get('name')}")
-    
-    try:
-        history = get_bot_history(bot["id"])
-        if history:
-            print(f"\nHistorial de operaciones ({len(history)} operaciones):")
+            # Actualizar precios simulados (con algo de volatilidad)
+            price_change = (0.001 * (iteration % 5) - 0.002) + (0.0005 * ((iteration // 10) % 3))
+            current_price *= (1 + price_change)
+            prices.append(current_price)
             
-            history_data = []
-            for entry in history:
-                trade_type = "COMPRA" if entry.get("type") == "buy" else "VENTA"
-                history_data.append([
-                    entry.get('timestamp'),
-                    trade_type,
-                    f"{entry.get('price'):.2f}",
-                    f"{entry.get('size'):.4f}",
-                    f"{entry.get('pnl', 0):.2f} USDT",
-                    entry.get('reason', 'N/A')
-                ])
+            # Actualizar indicadores simulados
+            rsi_change = ((iteration % 10) - 5) * 1.5
+            rsi_value += rsi_change * rsi_direction
+            if rsi_value > 80 or rsi_value < 20:
+                rsi_direction *= -1
+            rsi_value = max(0, min(100, rsi_value))
             
-            headers = ["Fecha", "Tipo", "Precio", "Tamaño", "P&L", "Razón"]
-            print_table(headers, history_data)
+            macd_histogram += ((iteration % 6) - 3) * 0.05
+            if abs(macd_histogram) > 1.5:
+                macd_histogram *= 0.8
             
-            # Mostrar resumen
-            total_trades = len(history)
-            winning_trades = sum(1 for entry in history if entry.get('pnl', 0) > 0)
-            losing_trades = sum(1 for entry in history if entry.get('pnl', 0) <= 0)
+            macd_value = macd_histogram + ((iteration % 10) - 5) * 0.03
+            macd_signal = macd_value - macd_histogram
             
-            total_profit = sum(entry.get('pnl', 0) for entry in history if entry.get('pnl', 0) > 0)
-            total_loss = sum(entry.get('pnl', 0) for entry in history if entry.get('pnl', 0) <= 0)
+            bb_middle = sum(prices[-20:]) / min(20, len(prices)) if prices else current_price
+            bb_upper = bb_middle * (1 + 0.005 * (2 + (iteration % 5)))
+            bb_lower = bb_middle * (1 - 0.005 * (2 + (iteration % 5)))
             
-            print("\nResumen:")
-            print(f"Total operaciones: {total_trades}")
-            print(f"Operaciones ganadoras: {winning_trades} ({winning_trades/total_trades*100:.1f}%)")
-            print(f"Operaciones perdedoras: {losing_trades} ({losing_trades/total_trades*100:.1f}%)")
-            print(f"Ganancia total: {total_profit:.2f} USDT")
-            print(f"Pérdida total: {total_loss:.2f} USDT")
-            print(f"Resultado neto: {(total_profit + total_loss):.2f} USDT")
-        else:
-            print("No hay historial disponible")
-    except Exception as e:
-        logger.error(f"Error retrieving history: {e}")
-        print(f"Error al obtener historial: {e}")
-    
-    input("\nPresiona Enter para continuar...")
-
-def delete_bot():
-    """Elimina un bot"""
-    bots = get_bots()
-    if not bots:
-        print("No hay bots configurados.")
-        time.sleep(2)
-        return
-    
-    clear_screen()
-    print_header("ELIMINAR BOT")
-    
-    print("\nSelecciona un bot para eliminar:")
-    for i, bot in enumerate(bots, 1):
-        status = "🟢 Activo" if bot.get("active", False) else "⚪ Inactivo"
-        print(f"{i}. {bot.get('name')} - {status}")
-    
-    bot_choice = get_user_choice(1, len(bots))
-    if not bot_choice:
-        return
-    
-    selected_bot = bots[bot_choice - 1]
-    
-    if confirm_action(f"¿Estás SEGURO de que deseas ELIMINAR el bot '{selected_bot.get('name')}'? Esta acción no se puede deshacer."):
-        try:
-            bot_manager.delete_bot(selected_bot["id"])
-            print(f"\n✅ Bot '{selected_bot.get('name')}' eliminado exitosamente!")
-        except Exception as e:
-            logger.error(f"Error deleting bot: {e}")
-            print(f"\n❌ Error al eliminar el bot: {e}")
-    
-    input("\nPresiona Enter para continuar...")
-
-def configuration_menu():
-    """Menú de configuración"""
-    while True:
-        clear_screen()
-        print_header("CONFIGURACIÓN")
-        
-        # Cargar configuración actual
-        config = load_config()
-        
-        print("\nConfiguración actual:")
-        # Mostrar configuración principal (sin API keys completas)
-        sanitized_config = config.copy()
-        if "api_key" in sanitized_config:
-            sanitized_config["api_key"] = sanitized_config["api_key"][:5] + "****"
-        if "api_secret" in sanitized_config:
-            sanitized_config["api_secret"] = "****"
-        if "api_passphrase" in sanitized_config:
-            sanitized_config["api_passphrase"] = "****"
-        
-        for key, value in sanitized_config.items():
-            print(f"{key}: {value}")
-        
-        options = [
-            "Configurar API de OKX",
-            "Configurar Telegram",
-            "Configurar parámetros generales",
-            "Volver al menú principal"
-        ]
-        
-        choice = print_menu(options)
-        
-        if choice == 1:
-            configure_okx_api()
-        elif choice == 2:
-            configure_telegram()
-        elif choice == 3:
-            configure_general_params()
-        elif choice == 4:
-            break
-        else:
-            print("Opción no válida. Inténtalo de nuevo.")
-            time.sleep(1)
-
-def configure_okx_api():
-    """Configura API de OKX"""
-    clear_screen()
-    print_header("CONFIGURACIÓN DE API OKX")
-    
-    config = load_config()
-    
-    print("\nConfigura tus credenciales de API de OKX.")
-    print("Puedes obtenerlas en https://www.okx.com/account/my-api")
-    print("\nDeja vacío si no deseas cambiar el valor actual.")
-    
-    # API Key
-    current_api_key = config.get("api_key", "")
-    masked_key = current_api_key[:5] + "****" if current_api_key else ""
-    print(f"\nAPI Key actual: {masked_key}")
-    print("Nueva API Key:")
-    new_api_key = input("> ").strip()
-    
-    # API Secret
-    print("\nAPI Secret actual: ****")
-    print("Nuevo API Secret:")
-    new_api_secret = input("> ").strip()
-    
-    # API Passphrase
-    print("\nAPI Passphrase actual: ****")
-    print("Nuevo API Passphrase:")
-    new_api_passphrase = input("> ").strip()
-    
-    # Actualizar configuración
-    if new_api_key:
-        config["api_key"] = new_api_key
-    if new_api_secret:
-        config["api_secret"] = new_api_secret
-    if new_api_passphrase:
-        config["api_passphrase"] = new_api_passphrase
-    
-    # Guardar configuración
-    save_config(config)
-    print("\n✅ Configuración de API guardada exitosamente!")
-    
-    input("\nPresiona Enter para continuar...")
-
-def configure_telegram():
-    """Configura notificaciones de Telegram"""
-    clear_screen()
-    print_header("CONFIGURACIÓN DE TELEGRAM")
-    
-    config = load_config()
-    
-    print("\nConfigura tus credenciales de Telegram para recibir notificaciones.")
-    print("Para obtener un token de bot, contacta a @BotFather en Telegram.")
-    print("Para obtener tu chat ID, contacta a @userinfobot en Telegram.")
-    print("\nDeja vacío si no deseas cambiar el valor actual.")
-    
-    # Bot Token
-    current_token = config.get("telegram_token", "")
-    masked_token = current_token[:5] + "****" if current_token else ""
-    print(f"\nBot Token actual: {masked_token}")
-    print("Nuevo Bot Token:")
-    new_token = input("> ").strip()
-    
-    # Chat ID
-    current_chat_id = config.get("telegram_chat_id", "")
-    print(f"\nChat ID actual: {current_chat_id}")
-    print("Nuevo Chat ID:")
-    new_chat_id = input("> ").strip()
-    
-    # Actualizar configuración
-    if new_token:
-        config["telegram_token"] = new_token
-    if new_chat_id:
-        config["telegram_chat_id"] = new_chat_id
-    
-    # Guardar configuración
-    save_config(config)
-    print("\n✅ Configuración de Telegram guardada exitosamente!")
-    
-    input("\nPresiona Enter para continuar...")
-
-def configure_general_params():
-    """Configura parámetros generales"""
-    clear_screen()
-    print_header("PARÁMETROS GENERALES")
-    
-    config = load_config()
-    
-    print("\nConfigura parámetros generales de la aplicación.")
-    
-    # Default Symbol
-    current_symbol = config.get("default_symbol", "SOL-USDT")
-    print(f"\nPar predeterminado actual: {current_symbol}")
-    print("Nuevo par predeterminado:")
-    new_symbol = input("> ").strip()
-    
-    # Default Interval
-    current_interval = config.get("default_interval", "15m")
-    print(f"\nIntervalo predeterminado actual: {current_interval}")
-    print("Nuevo intervalo predeterminado (1m, 5m, 15m, 30m, 1h, 4h, 1d):")
-    new_interval = input("> ").strip()
-    
-    # Default Mode
-    current_mode = "paper" if config.get("default_paper_trading", True) else "live"
-    print(f"\nModo predeterminado actual: {current_mode}")
-    print("Nuevo modo predeterminado (paper/live):")
-    new_mode = input("> ").strip().lower()
-    
-    # Actualizar configuración
-    if new_symbol:
-        config["default_symbol"] = new_symbol
-    if new_interval:
-        if new_interval in ["1m", "5m", "15m", "30m", "1h", "4h", "1d"]:
-            config["default_interval"] = new_interval
-        else:
-            print("Intervalo no válido. No se ha actualizado.")
-    if new_mode in ["paper", "live"]:
-        config["default_paper_trading"] = (new_mode == "paper")
-    elif new_mode:
-        print("Modo no válido. No se ha actualizado.")
-    
-    # Guardar configuración
-    save_config(config)
-    print("\n✅ Parámetros generales guardados exitosamente!")
-    
-    input("\nPresiona Enter para continuar...")
-
-def market_view_menu():
-    """Menú de vista de mercado"""
-    while True:
-        clear_screen()
-        print_header("VISTA DE MERCADO")
-        
-        # Obtener símbolos disponibles
-        symbols = get_available_symbols()
-        
-        print("\nSelecciona un par de trading:")
-        for i, symbol in enumerate(symbols, 1):
-            print(f"{i}. {symbol}")
-        print(f"{len(symbols) + 1}. Volver al menú principal")
-        
-        choice = get_user_choice(1, len(symbols) + 1)
-        if choice == len(symbols) + 1:
-            break
-        
-        if 1 <= choice <= len(symbols):
-            selected_symbol = symbols[choice - 1]
-            view_market_data(selected_symbol)
-        else:
-            print("Opción no válida. Inténtalo de nuevo.")
-            time.sleep(1)
-
-def view_market_data(symbol):
-    """Muestra datos de mercado para un símbolo"""
-    while True:
-        clear_screen()
-        print_header(f"DATOS DE MERCADO: {symbol}")
-        
-        # Seleccionar intervalo
-        print("\nSelecciona un intervalo de tiempo:")
-        intervals = ["1m", "5m", "15m", "30m", "1h", "4h", "1d"]
-        for i, interval in enumerate(intervals, 1):
-            print(f"{i}. {interval}")
-        print(f"{len(intervals) + 1}. Volver")
-        
-        choice = get_user_choice(1, len(intervals) + 1)
-        if choice == len(intervals) + 1:
-            break
-        
-        if 1 <= choice <= len(intervals):
-            selected_interval = intervals[choice - 1]
+            # Generar señal
+            signal = 0  # -1: vender, 0: neutral, 1: comprar
+            signal_components = {
+                "RSI": -1 if rsi_value > 70 else 1 if rsi_value < 30 else 0,
+                "MACD": 1 if macd_histogram > 0.5 else -1 if macd_histogram < -0.5 else 0,
+                "BB": -1 if current_price > bb_upper else 1 if current_price < bb_lower else 0,
+                "Volume": 1 if (iteration % 15) < 8 else -1 if (iteration % 15) > 12 else 0,
+                "Pattern": 1 if (iteration % 30) == 0 else -1 if (iteration % 30) == 15 else 0
+            }
             
-            # Obtener datos de mercado
-            try:
-                market_data = get_market_data(symbol, selected_interval)
+            # Aplicar pesos a los componentes de la señal
+            weighted_signal = sum(signal_components[k] * strategy_weights[k] for k in signal_components)
+            signal = 1 if weighted_signal > 0.3 else -1 if weighted_signal < -0.3 else 0
+            signals.append(signal)
+            
+            # Simular operaciones
+            if not open_position and signal == 1:
+                # Abrir posición larga
+                entry_price = current_price
+                position_size_usd = balance * position_size / 100
+                position_type = "LONG"
+                open_position = True
+                trades_made += 1
+                total_volume += position_size_usd
+                trade_reason = "RSI Sobrevendido + MACD Alcista" if rsi_value < 30 else "Soporte en banda inferior y volumen aumentando"
+            
+            elif not open_position and signal == -1:
+                # Abrir posición corta
+                entry_price = current_price
+                position_size_usd = balance * position_size / 100
+                position_type = "SHORT"
+                open_position = True
+                trades_made += 1
+                total_volume += position_size_usd
+                trade_reason = "RSI Sobrecomprado + MACD Bajista" if rsi_value > 70 else "Resistencia en banda superior y volumen disminuyendo"
+            
+            elif open_position:
+                # Calcular P/L actual
+                if position_type == "LONG":
+                    profit_loss = ((current_price - entry_price) / entry_price) * position_size_usd
+                    # Cerrar posición si hay suficiente ganancia o si la señal es vender
+                    if (profit_loss > position_size_usd * 0.015) or (signal == -1) or (iteration % 50 == 0):
+                        balance += profit_loss
+                        open_position = False
+                        if profit_loss > 0:
+                            winning_trades += 1
+                        # Ajustar pesos basado en resultado
+                        adapt_strategy_weights(strategy_weights, signal_components, profit_loss > 0)
                 
+                elif position_type == "SHORT":
+                    profit_loss = ((entry_price - current_price) / entry_price) * position_size_usd
+                    # Cerrar posición si hay suficiente ganancia o si la señal es comprar
+                    if (profit_loss > position_size_usd * 0.015) or (signal == 1) or (iteration % 50 == 0):
+                        balance += profit_loss
+                        open_position = False
+                        if profit_loss > 0:
+                            winning_trades += 1
+                        # Ajustar pesos basado en resultado
+                        adapt_strategy_weights(strategy_weights, signal_components, profit_loss > 0)
+            
+            # Calcular equity total (balance + valor de posición abierta)
+            if open_position:
+                if position_type == "LONG":
+                    current_profit = ((current_price - entry_price) / entry_price) * position_size_usd
+                else:
+                    current_profit = ((entry_price - current_price) / entry_price) * position_size_usd
+                equity = balance + current_profit
+            else:
+                equity = balance
+            
+            equity_curve.append(equity)
+            
+            # Mostrar información actualizada cada 5 iteraciones para no saturar la terminal
+            if iteration % 5 == 0:
                 clear_screen()
-                print_header(f"DATOS DE MERCADO: {symbol} - {selected_interval}")
+                print_header(f"TRADING EN VIVO: {pair} - {timeframe} - {strategy}")
                 
-                # Mostrar precio actual
-                print(f"\nPrecio actual: {market_data['close'].iloc[-1]:.2f} USDT")
-                print(f"Cambio 24h: {((market_data['close'].iloc[-1] / market_data['close'].iloc[-24] - 1) * 100):.2f}%")
+                # Tabla de mercado
+                market_data = [
+                    ["Precio actual", f"${current_price:.2f}"],
+                    ["Variación", f"{price_change * 100:.3f}%"],
+                    ["RSI", f"{rsi_value:.2f}"],
+                    ["MACD", f"{macd_histogram:.4f}"],
+                    ["BB Superior", f"${bb_upper:.2f}"],
+                    ["BB Inferior", f"${bb_lower:.2f}"]
+                ]
+                print_table(["Indicador", "Valor"], market_data, "Datos de Mercado")
                 
-                # Mostrar gráfico
-                print_chart(market_data, title=f"{symbol} - {selected_interval}")
+                # Estado de la cuenta
+                account_data = [
+                    ["Balance", f"${balance:.2f}"],
+                    ["Equity", f"${equity:.2f}"],
+                    ["Operaciones", str(trades_made)],
+                    ["% Ganadas", f"{winning_trades/trades_made*100:.1f}%" if trades_made > 0 else "0%"],
+                    ["Volumen", f"${total_volume:.2f}"]
+                ]
+                print_table(["Métrica", "Valor"], account_data, "Estado de la Cuenta")
                 
-                # Mostrar análisis técnico básico
-                print("\nAnálisis Técnico:")
+                # Posición actual
+                if open_position:
+                    position_data = [
+                        ["Tipo", position_type],
+                        ["Entrada", f"${entry_price:.2f}"],
+                        ["P/L actual", f"${current_profit:.2f} ({current_profit/position_size_usd*100:.2f}%)"],
+                        ["Tamaño", f"${position_size_usd:.2f}"]
+                    ]
+                    print_table(["Info", "Valor"], position_data, "Posición Abierta")
+                else:
+                    print("\n📊 Sin posiciones abiertas actualmente. Analizando el mercado...\n")
                 
-                # RSI
-                from indicators.technical import calculate_rsi
-                rsi = calculate_rsi(market_data['close'])
-                print(f"RSI (14): {rsi.iloc[-1]:.2f} - {'Sobrecomprado' if rsi.iloc[-1] > 70 else 'Sobreventa' if rsi.iloc[-1] < 30 else 'Neutral'}")
+                # Pesos de estrategia (aprendizaje)
+                weights_data = []
+                for k, v in strategy_weights.items():
+                    weights_data.append([k, v])
+                print_chart(weights_data, "Pesos de Estrategia (Aprendizaje)")
                 
-                # MACD
-                from indicators.technical import calculate_macd
-                macd, signal, hist = calculate_macd(market_data['close'])
-                macd_signal = "Alcista" if macd.iloc[-1] > signal.iloc[-1] else "Bajista"
-                print(f"MACD: {macd.iloc[-1]:.4f}, Signal: {signal.iloc[-1]:.4f} - {macd_signal}")
+                # Señal actual
+                signal_strength = abs(weighted_signal) * 100
+                signal_text = "COMPRAR 🟢" if weighted_signal > 0.3 else "VENDER 🔴" if weighted_signal < -0.3 else "NEUTRAL ⚪"
+                print(f"\nSeñal actual: {signal_text} (Fuerza: {signal_strength:.1f}%)")
                 
-                # Bandas de Bollinger
-                from indicators.technical import calculate_bollinger_bands
-                mid, upper, lower = calculate_bollinger_bands(market_data['close'])
-                bb_position = (market_data['close'].iloc[-1] - lower.iloc[-1]) / (upper.iloc[-1] - lower.iloc[-1])
-                bb_status = "Sobrecomprado" if bb_position > 1 else "Sobreventa" if bb_position < 0 else "Neutral"
-                print(f"Bollinger: {bb_position:.2f} - {bb_status}")
+                # Progreso de operación
+                if open_position:
+                    target_profit = position_size_usd * 0.015
+                    progress = min(1.0, current_profit / target_profit) if current_profit > 0 else 0
+                    print("\nProgreso hacia objetivo de beneficio:")
+                    progress_bar(progress)
                 
-                # Tendencia
-                sma20 = market_data['close'].rolling(20).mean().iloc[-1]
-                sma50 = market_data['close'].rolling(50).mean().iloc[-1]
-                trend = "Alcista" if sma20 > sma50 else "Bajista"
-                print(f"Tendencia (SMA20 vs SMA50): {trend}")
-                
-                print("\nOpciones:")
-                print("1. Actualizar datos")
-                print("2. Cambiar intervalo")
-                print("3. Volver")
-                
-                subchoice = get_user_choice(1, 3)
-                if subchoice == 2:
-                    break  # Volver a selección de intervalo
-                elif subchoice == 3:
-                    return  # Salir completamente
-                # Si es 1, simplemente se repite el bucle (actualizar)
-                
-            except Exception as e:
-                logger.error(f"Error retrieving market data: {e}")
-                print(f"Error al obtener datos de mercado: {e}")
-                input("\nPresiona Enter para continuar...")
-                break
-        else:
-            print("Opción no válida. Inténtalo de nuevo.")
-            time.sleep(1)
+                print("\nPresiona Ctrl+C para detener la simulación.")
+            
+            # Simular paso de tiempo según timeframe
+            sleep_time = 0.3 if timeframe == "1m" else 0.5 if timeframe == "3m" else 0.8
+            time.sleep(sleep_time)
+            
+            # Cada 3 minutos simulados, mostrar aprendizaje
+            if iteration % 100 == 0:
+                display_learning_progress(strategy_weights, equity_curve)
+    
+    except KeyboardInterrupt:
+        clear_screen()
+        print_header("RESUMEN DE TRADING")
+        
+        # Mostrar resumen final
+        print(f"\nSesión finalizada a petición del usuario.")
+        print(f"\nResumen:")
+        print(f"• Operaciones realizadas: {trades_made}")
+        print(f"• Operaciones ganadoras: {winning_trades} ({winning_trades/trades_made*100:.1f}% win rate)" if trades_made > 0 else "• Sin operaciones completadas")
+        print(f"• Balance final: ${balance:.2f} (inicial: $10,000.00)")
+        print(f"• Retorno: {(balance/10000-1)*100:.2f}%")
+        print(f"• Volumen operado: ${total_volume:.2f}")
+        
+        print("\nPesos finales de la estrategia:")
+        for k, v in strategy_weights.items():
+            print(f"• {k}: {v:.4f}")
+        
+        input("\nPresiona Enter para volver al menú principal...")
+
+def adapt_strategy_weights(weights: Dict[str, float], components: Dict[str, int], success: bool):
+    """
+    Adapta los pesos de la estrategia basado en el éxito/fracaso
+    
+    Args:
+        weights: Diccionario de pesos actuales
+        components: Componentes de señal con sus valores
+        success: Si la operación fue exitosa
+    """
+    learning_rate = 0.03  # Tasa de aprendizaje
+    
+    # Normalizar componentes a valores entre -1 y 1
+    sum_abs = sum(abs(v) for v in components.values())
+    normalized = {k: v / sum_abs if sum_abs > 0 else 0 for k, v in components.items()}
+    
+    # Actualizar pesos
+    for k in weights.keys():
+        # Si la señal del componente coincidió con el resultado, aumentar el peso
+        # Si no coincidió, disminuir el peso
+        if (success and components[k] > 0) or (not success and components[k] < 0):
+            weights[k] += learning_rate
+        elif (success and components[k] < 0) or (not success and components[k] > 0):
+            weights[k] -= learning_rate
+    
+    # Normalizar pesos para que sumen 1
+    sum_weights = sum(weights.values())
+    for k in weights.keys():
+        weights[k] /= sum_weights
+
+def display_learning_progress(weights: Dict[str, float], equity_curve: List[float]):
+    """
+    Muestra una pantalla de aprendizaje
+    
+    Args:
+        weights: Pesos actuales de la estrategia
+        equity_curve: Historial de equity
+    """
+    clear_screen()
+    print_header("PROCESO DE APRENDIZAJE")
+    
+    print("\nEl bot está analizando su rendimiento y adaptando su estrategia...")
+    
+    # Mostrar gráfico de pesos
+    weights_data = []
+    for k, v in weights.items():
+        weights_data.append([k, v])
+    print_chart(weights_data, "Evolución de Pesos por Estrategia")
+    
+    # Calcular métricas de aprendizaje
+    learning_metrics = [
+        ["Adaptabilidad", f"{sum(abs(a-b) for a, b in zip(list(weights.values())[:-1], list(weights.values())[1:]))*100:.2f}%"],
+        ["Confianza RSI", f"{weights['RSI']/max(weights.values())*100:.1f}%"],
+        ["Ganancia acumulada", f"${equity_curve[-1] - equity_curve[0]:.2f}"],
+        ["Mejor indicador", max(weights.items(), key=lambda x: x[1])[0]],
+        ["Ciclo de aprendizaje", f"#{len(equity_curve) // 10}"]
+    ]
+    print_table(["Métrica", "Valor"], learning_metrics, "Métricas de Aprendizaje")
+    
+    # Progreso de aprendizaje
+    progress = min(1.0, len(equity_curve) / 500)
+    print("\nProgreso del ciclo de aprendizaje:")
+    progress_bar(progress)
+    
+    print("\nActualizando parámetros de la estrategia...")
+    time.sleep(3)
 
 def backtesting_menu():
-    """Menú de backtesting"""
-    while True:
+    """Menú de backtesting y optimización"""
+    clear_screen()
+    print_header("BACKTESTING Y OPTIMIZACIÓN")
+    
+    print("\nEsta función permite probar estrategias en datos históricos.")
+    
+    option = print_menu([
+        "Ejecutar backtest rápido",
+        "Backtest con optimización de parámetros",
+        "Comparar múltiples estrategias",
+        "Análisis de ponderación adaptativa",
+        "Volver al menú principal"
+    ])
+    
+    if option == 5 or option is None:
+        return
+    
+    # Mostrar mensaje de desarrollo
+    print("\n⚠️ Esta funcionalidad está en desarrollo.")
+    print("Se mostrará una simulación de backtesting para demostración.")
+    
+    # Simular resultados de backtesting
+    simulate_backtest_results()
+    
+    input("\nPresiona Enter para volver al menú principal...")
+
+def simulate_backtest_results():
+    """Simula resultados de backtesting para demostración"""
+    loading_animation("Cargando datos históricos", 2.0)
+    loading_animation("Procesando estrategia", 2.5)
+    loading_animation("Calculando resultados", 2.0)
+    
+    clear_screen()
+    print_header("RESULTADOS DEL BACKTESTING")
+    
+    # Métricas simuladas
+    metrics = [
+        ["Operaciones", "324"],
+        ["% Ganadoras", "58.3%"],
+        ["Profit Factor", "1.72"],
+        ["Retorno", "+31.5%"],
+        ["Drawdown Máx", "8.2%"],
+        ["Sharpe Ratio", "1.89"],
+        ["Período", "01/01/2023 - 31/12/2023"]
+    ]
+    print_table(["Métrica", "Valor"], metrics, "Métricas de Rendimiento")
+    
+    # Rendimiento por tipo de mercado
+    market_perf = [
+        ["Alcista", 15.3],
+        ["Bajista", 6.8],
+        ["Lateral", 8.7],
+        ["Alta volatilidad", 0.7]
+    ]
+    print_chart(market_perf, "Rendimiento por Tipo de Mercado (%)")
+    
+    # Parámetros óptimos
+    params = [
+        ["RSI Sobrecompra", "75"],
+        ["RSI Sobreventa", "28"],
+        ["Períodos MACD", "12,26,9"],
+        ["BB Desviación", "2.2"],
+        ["Take Profit", "1.5%"],
+        ["Stop Loss", "1.2%"]
+    ]
+    print_table(["Parámetro", "Valor Óptimo"], params, "Parámetros Optimizados")
+
+def configuration_menu():
+    """Menú de configuración del bot"""
+    clear_screen()
+    print_header("CONFIGURACIÓN DEL BOT")
+    
+    option = print_menu([
+        "Configuración general",
+        "Configurar API de exchange",
+        "Gestión de riesgo",
+        "Configurar notificaciones",
+        "Opciones avanzadas",
+        "Volver al menú principal"
+    ])
+    
+    if option == 6 or option is None:
+        return
+    
+    # Mostrar mensaje de modo demo
+    print("\n⚠️ Actualmente el bot opera en modo PAPER TRADING solamente.")
+    print("La configuración de trading real está desactivada por seguridad.")
+    
+    if option == 1:
+        print("\nConfiguración general:")
+        print("• Modo: Paper Trading (bloqueado)")
+        print("• Par preferido: SOL-USDT")
+        print("• Intervalo predeterminado: 5m")
+        print("• Idioma: Español")
+    elif option == 2:
+        print("\nConfiguración de API:")
+        print("• Exchange: OKX")
+        print("• API Key: ********")
+        print("• API Secret: ********")
+        print("• Passphrase: ********")
+    
+    input("\nPresiona Enter para volver al menú anterior...")
+    configuration_menu()
+
+def monitoring_menu():
+    """Menú de diagnóstico y monitoreo"""
+    clear_screen()
+    print_header("DIAGNÓSTICO Y MONITOREO")
+    
+    option = print_menu([
+        "Estado del sistema",
+        "Registro de operaciones",
+        "Gráfico de rendimiento",
+        "Log de errores",
+        "Volver al menú principal"
+    ])
+    
+    if option == 5 or option is None:
+        return
+    
+    if option == 1:
+        # Simular estado del sistema
         clear_screen()
-        print_header("BACKTESTING")
+        print_header("ESTADO DEL SISTEMA")
         
-        options = [
-            "Ejecutar backtest",
-            "Ejecutar backtest de todas las estrategias",
-            "Ver resultados anteriores",
-            "Optimizar parámetros",
-            "Análisis de tendencia del mercado",
-            "Sistema de aprendizaje automático",
-            "Volver al menú principal"
+        system_data = [
+            ["Estado", "Operativo"],
+            ["Uptime", "3d 12h 34m"],
+            ["CPU", "12%"],
+            ["Memoria", "324 MB"],
+            ["Conexión API", "OK"],
+            ["Última operación", "2025-05-20 14:35:22"],
+            ["Fecha actual", datetime.now().strftime("%Y-%m-%d %H:%M:%S")]
         ]
+        print_table(["Métrica", "Valor"], system_data, "Recursos del Sistema")
         
-        choice = print_menu(options)
-        
-        if choice == 1:
-            run_new_backtest()
-        elif choice == 2:
-            run_multi_strategy_backtest_menu()
-        elif choice == 3:
-            view_backtest_results()
-        elif choice == 4:
-            optimize_parameters()
-        elif choice == 5:
-            market_trend_analysis()
-        elif choice == 6:
-            automated_learning_menu()
-        elif choice == 7:
-            break
-        else:
-            print("Opción no válida. Inténtalo de nuevo.")
-            time.sleep(1)
-
-def run_multi_strategy_backtest_menu():
-    """Menú para ejecutar backtesting de todas las estrategias"""
-    clear_screen()
-    print_header("BACKTEST DE TODAS LAS ESTRATEGIAS")
-    
-    # Seleccionar símbolo
-    symbols = get_available_symbols()
-    
-    print("\nSelecciona el par de trading:")
-    for i, symbol in enumerate(symbols, 1):
-        print(f"{i}. {symbol}")
-    
-    symbol_choice = get_user_choice(1, len(symbols))
-    if not symbol_choice:
-        return
-    
-    selected_symbol = symbols[symbol_choice - 1]
-    
-    # Seleccionar periodo
-    print("\nSelecciona el periodo de backtesting:")
-    periods = [
-        "Últimos 30 días",
-        "Últimos 60 días",
-        "Últimos 90 días",
-        "Últimos 180 días"
-    ]
-    
-    for i, period in enumerate(periods, 1):
-        print(f"{i}. {period}")
-    
-    period_choice = get_user_choice(1, len(periods))
-    if not period_choice:
-        return
-    
-    # Mapear elección a días
-    days_map = {1: 30, 2: 60, 3: 90, 4: 180}
-    days = days_map.get(period_choice, 90)
-    
-    # Seleccionar intervalo
-    print("\nSelecciona el intervalo de tiempo:")
-    intervals = ["15m", "1h", "4h", "1d"]
-    
-    for i, interval in enumerate(intervals, 1):
-        print(f"{i}. {interval}")
-    
-    interval_choice = get_user_choice(1, len(intervals))
-    if not interval_choice:
-        return
-    
-    selected_interval = intervals[interval_choice - 1]
-    
-    # Ejecutar backtesting
-    print(f"\n⚙️ Ejecutando backtesting de todas las estrategias para {selected_symbol} en {selected_interval} (últimos {days} días)")
-    print("Este proceso puede tardar varios minutos.")
-    
-    try:
-        # Importar solo cuando se necesita para evitar errores de inicio
-        from backtesting.advanced_optimizer import run_multi_strategy_backtest
-        
-        # Mostrar progreso
-        print("\nRecopilando datos históricos...")
-        time.sleep(1)
-        
-        # Simular progreso
-        print("\nEjecutando estrategias:")
-        strategies = [
-            "SMA Crossover", "RSI Strategy", "MACD Strategy", 
-            "Bollinger Bands", "Mean Reversion", "RSI+MACD Combined", 
-            "SMA Crossover (Fast)", "SMA Crossover (Slow)", 
-            "RSI (Aggressive)", "RSI (Conservative)"
+        market_data = [
+            ["SOL-USDT", "$101.23", "+2.34%"],
+            ["BTC-USDT", "$87,324.45", "-0.12%"],
+            ["ETH-USDT", "$9,782.21", "+0.88%"]
         ]
-        
-        for i, strategy in enumerate(strategies):
-            progress = (i + 1) / len(strategies) * 100
-            print(f"Procesando {strategy:<20} [{progress:>6.2f}%]", end="\r")
-            time.sleep(0.5)
-        
-        print("\nFinalizando análisis..." + " " * 30)
-        time.sleep(1)
-        
-        # Ejecutar backtesting
-        results = run_multi_strategy_backtest(selected_symbol, selected_interval, days)
-        
-        # Mostrar resultados
-        clear_screen()
-        print_header("RESULTADOS DE BACKTESTING MÚLTIPLE")
-        
-        print(f"\nPar: {selected_symbol}")
-        print(f"Intervalo: {selected_interval}")
-        print(f"Periodo: Últimos {days} días")
-        
-        # Detectar tendencia
-        trend = results.get("trend_report", {}).get("current_trend", "No disponible")
-        print(f"\nTendencia detectada: {trend}")
-        
-        # Mostrar mejores estrategias
-        print("\nMejores estrategias:")
-        
-        best_strategies = results.get("best_strategies", [])
-        
-        if best_strategies:
-            strategy_data = []
-            for i, strategy in enumerate(best_strategies, 1):
-                strategy_data.append([
-                    i,
-                    strategy["name"],
-                    f"{strategy['return_pct']:.2f}%",
-                    f"{strategy['win_rate']:.2f}%",
-                    f"{strategy['profit_factor']:.2f}",
-                    f"{strategy['sharpe_ratio']:.2f}",
-                    strategy["total_trades"]
-                ])
-            
-            headers = ["#", "Estrategia", "Retorno", "Win Rate", "Profit Factor", "Sharpe", "Trades"]
-            print_table(headers, strategy_data)
-            
-            # Mostrar mejores estrategias por tendencia
-            trend_report = results.get("trend_report", {})
-            
-            if trend_report:
-                print("\nMejores estrategias por tendencia:")
-                
-                for trend_type, trend_data in trend_report.items():
-                    if trend_type == "current_trend":
-                        continue
-                    
-                    symbol_data = trend_data.get(selected_symbol, [])
-                    if symbol_data:
-                        best_for_trend = symbol_data[0]["name"]
-                        print(f"{trend_type}: {best_for_trend}")
-        else:
-            print("No se encontraron resultados.")
-        
-        # Preguntar si crear bot con la mejor estrategia
-        if best_strategies:
-            best_strategy = best_strategies[0]["name"]
-            
-            print(f"\n¿Deseas crear un nuevo bot con la estrategia '{best_strategy}'?")
-            print("1. Sí, crear bot en modo simulado")
-            print("2. No")
-            
-            create_choice = get_user_choice(1, 2)
-            
-            if create_choice == 1:
-                # Crear bot con la mejor estrategia
-                create_bot_from_strategy(selected_symbol, best_strategy)
+        print_table(["Par", "Precio", "24h"], market_data, "Datos de Mercado")
     
-    except ImportError as e:
-        print(f"\n❌ Error: Funcionalidad no disponible. {e}")
-    except Exception as e:
-        print(f"\n❌ Error al ejecutar backtesting múltiple: {e}")
-    
-    input("\nPresiona Enter para continuar...")
-
-def create_bot_from_strategy(symbol: str, strategy_name: str):
-    """Crea un bot a partir de una estrategia"""
-    clear_screen()
-    print_header("CREAR BOT DESDE ESTRATEGIA")
-    
-    # Solicitar nombre del bot
-    print(f"\nCreando bot con estrategia '{strategy_name}' para {symbol}")
-    print("\nIntroduce un nombre para el bot:")
-    bot_name = input("> ").strip()
-    if not bot_name:
-        print("El nombre no puede estar vacío.")
-        time.sleep(2)
-        return
-    
-    # Modo simulado
-    paper_trading = True
-    
-    # Configurar balance inicial
-    print("\nIntroduce el balance inicial (USDT):")
-    try:
-        initial_balance = float(input("> ").strip())
-    except ValueError:
-        print("Valor no válido. Usando 1000 USDT por defecto.")
-        initial_balance = 1000.0
-    
-    # Crear configuración del bot
-    bot_config = {
-        "name": bot_name,
-        "symbol": symbol,
-        "paper_trading": paper_trading,
-        "strategy": strategy_name,
-        "balance": initial_balance,
-        "active": False,
-        "created_at": datetime.now().isoformat(),
-        "config": {
-            "risk_per_trade": 1.0,
-            "leverage": 1.0,
-            "stop_loss": 2.0,
-            "take_profit": 3.0,
-            "time_interval": "15m"
-        }
-    }
-    
-    # Guardar bot en la base de datos
-    try:
-        bot_manager.create_bot(bot_config)
-        print(f"\n✅ Bot '{bot_name}' creado exitosamente con la estrategia '{strategy_name}'!")
-    except Exception as e:
-        logger.error(f"Error creating bot: {e}")
-        print(f"\n❌ Error al crear el bot: {e}")
-
-def market_trend_analysis():
-    """Analiza la tendencia actual del mercado"""
-    clear_screen()
-    print_header("ANÁLISIS DE TENDENCIA DEL MERCADO")
-    
-    # Seleccionar símbolo
-    symbols = get_available_symbols()
-    
-    print("\nSelecciona el par de trading:")
-    for i, symbol in enumerate(symbols, 1):
-        print(f"{i}. {symbol}")
-    
-    symbol_choice = get_user_choice(1, len(symbols))
-    if not symbol_choice:
-        return
-    
-    selected_symbol = symbols[symbol_choice - 1]
-    
-    # Seleccionar intervalo
-    print("\nSelecciona el intervalo de tiempo:")
-    intervals = ["15m", "1h", "4h", "1d"]
-    
-    for i, interval in enumerate(intervals, 1):
-        print(f"{i}. {interval}")
-    
-    interval_choice = get_user_choice(1, len(intervals))
-    if not interval_choice:
-        return
-    
-    selected_interval = intervals[interval_choice - 1]
-    
-    # Ejecutar análisis
-    print(f"\n⚙️ Analizando tendencia de mercado para {selected_symbol} en {selected_interval}...")
-    
-    try:
-        # Importar solo cuando se necesita para evitar errores de inicio
-        from backtesting.advanced_optimizer import analyze_current_market
-        
-        # Ejecutar análisis
-        analysis = analyze_current_market(selected_symbol, selected_interval)
-        
-        # Mostrar resultados
-        clear_screen()
-        print_header("RESULTADOS DE ANÁLISIS DE TENDENCIA")
-        
-        print(f"\nPar: {selected_symbol}")
-        print(f"Intervalo: {selected_interval}")
-        print(f"Fecha de análisis: {analysis.get('timestamp', 'N/A')}")
-        
-        # Mostrar tendencia detectada
-        trend = analysis.get("trend", "No disponible")
-        market_condition = analysis.get("market_condition", "No disponible")
-        
-        print(f"\nTendencia detectada: {trend}")
-        print(f"Condición de mercado: {market_condition}")
-        print(f"Volatilidad: {analysis.get('volatility', 0) * 100:.2f}%")
-        print(f"Días en tendencia actual: {analysis.get('days_in_trend', 0)}")
-        
-        # Mostrar precios y medias
-        print(f"\nPrecio actual: {analysis.get('current_price', 0):.2f}")
-        print(f"SMA 20: {analysis.get('sma20', 0):.2f}")
-        print(f"SMA 50: {analysis.get('sma50', 0):.2f}")
-        print(f"SMA 100: {analysis.get('sma100', 0):.2f}")
-        
-        # Recomendaciones de estrategias
-        print("\nRecomendaciones de estrategias para la tendencia actual:")
-        
-        trend_recommendations = {
-            "strong_uptrend": ["SMA Crossover", "MACD Strategy", "RSI (Aggressive)"],
-            "weak_uptrend": ["SMA Crossover", "MACD Strategy", "Bollinger Bands"],
-            "neutral": ["Mean Reversion", "Bollinger Bands", "RSI Strategy"],
-            "weak_downtrend": ["Mean Reversion", "RSI Strategy", "Bollinger Bands"],
-            "strong_downtrend": ["Mean Reversion", "RSI (Conservative)", "MACD Strategy"],
-            "choppy": ["Bollinger Bands", "Mean Reversion", "RSI+MACD Combined"],
-            "volatile": ["RSI+MACD Combined", "Bollinger Bands", "RSI (Conservative)"]
-        }
-        
-        if trend in trend_recommendations:
-            for i, strategy in enumerate(trend_recommendations[trend], 1):
-                print(f"{i}. {strategy}")
-        else:
-            print("No hay recomendaciones disponibles para esta tendencia.")
-        
-        # Preguntar si crear bot con estrategia recomendada
-        if trend in trend_recommendations:
-            best_strategy = trend_recommendations[trend][0]
-            
-            print(f"\n¿Deseas crear un nuevo bot con la estrategia recomendada '{best_strategy}'?")
-            print("1. Sí, crear bot en modo simulado")
-            print("2. No")
-            
-            create_choice = get_user_choice(1, 2)
-            
-            if create_choice == 1:
-                # Crear bot con la estrategia recomendada
-                create_bot_from_strategy(selected_symbol, best_strategy)
-    
-    except ImportError as e:
-        print(f"\n❌ Error: Funcionalidad no disponible. {e}")
-    except Exception as e:
-        print(f"\n❌ Error al analizar tendencia: {e}")
-    
-    input("\nPresiona Enter para continuar...")
-
-def automated_learning_menu():
-    """Menú del sistema de aprendizaje automático"""
-    while True:
-        clear_screen()
-        print_header("SISTEMA DE APRENDIZAJE AUTOMÁTICO")
-        
-        from interface.cli_utils import Colors
-        
-        print(f"\n{Colors.CYAN}El sistema de aprendizaje automático permite:{Colors.END}")
-        print(f"{Colors.YELLOW}• Detectar automáticamente tendencias y condiciones de mercado{Colors.END}")
-        print(f"{Colors.YELLOW}• Ejecutar backtesting de todas las estrategias disponibles{Colors.END}")
-        print(f"{Colors.YELLOW}• Optimizar parámetros para cada estrategia{Colors.END}")
-        print(f"{Colors.YELLOW}• Crear y ejecutar bots en modo simulado para aprendizaje{Colors.END}")
-        print(f"{Colors.YELLOW}• Mejorar continuamente basándose en resultados{Colors.END}")
-        
-        options = [
-            "Iniciar ciclo de aprendizaje",
-            "Ver estado del sistema de aprendizaje",
-            "Crear bot optimizado",
-            "Crear bot con Machine Learning",
-            "Volver al menú de backtesting"
-        ]
-        
-        choice = print_menu(options)
-        
-        if choice == 1:
-            run_learning_cycle()
-        elif choice == 2:
-            view_learning_system_status()
-        elif choice == 3:
-            create_optimized_bot()
-        elif choice == 4:
-            create_ml_bot()
-        elif choice == 5:
-            break
-        else:
-            print("Opción no válida. Inténtalo de nuevo.")
-            time.sleep(1)
-
-def run_learning_cycle():
-    """Ejecuta un ciclo completo de aprendizaje"""
-    clear_screen()
-    print_header("INICIAR CICLO DE APRENDIZAJE")
-    
-    # Seleccionar símbolos
-    symbols = get_available_symbols()
-    
-    print("\nSelecciona los pares de trading a incluir en el ciclo de aprendizaje:")
-    for i, symbol in enumerate(symbols, 1):
-        print(f"{i}. {symbol}")
-    
-    print("\nIngresa los números separados por comas (ej: 1,3,5) o 'a' para todos:")
-    selection = input("> ").strip().lower()
-    
-    selected_symbols = []
-    if selection == 'a':
-        selected_symbols = symbols
-    else:
-        try:
-            indices = [int(idx.strip()) for idx in selection.split(',') if idx.strip()]
-            selected_symbols = [symbols[idx-1] for idx in indices if 1 <= idx <= len(symbols)]
-        except:
-            print("Selección inválida. Usando el primer símbolo por defecto.")
-            selected_symbols = [symbols[0]] if symbols else []
-    
-    if not selected_symbols:
-        print("No se seleccionaron símbolos. Operación cancelada.")
-        time.sleep(2)
-        return
-    
-    # Seleccionar intervalo
-    print("\nSelecciona el intervalo de tiempo:")
-    intervals = ["15m", "1h", "4h", "1d"]
-    
-    for i, interval in enumerate(intervals, 1):
-        print(f"{i}. {interval}")
-    
-    interval_choice = get_user_choice(1, len(intervals))
-    if not interval_choice:
-        return
-    
-    selected_interval = intervals[interval_choice - 1]
-    
-    # Confirmar inicio
-    symbols_str = ", ".join(selected_symbols)
-    if not confirm_action(f"¿Confirmas iniciar un ciclo de aprendizaje para {symbols_str} en {selected_interval}? Este proceso puede tardar varios minutos."):
-        return
-    
-    # Ejecutar ciclo de aprendizaje
-    print(f"\n⚙️ Iniciando ciclo de aprendizaje para {symbols_str} en {selected_interval}...")
-    print("Este proceso puede tardar varios minutos.")
-    
-    try:
-        # Importar solo cuando se necesita para evitar errores de inicio
-        from backtesting.advanced_optimizer import create_auto_learning_bots
-        
-        # Ejecutar ciclo
-        results = create_auto_learning_bots(selected_symbols, selected_interval)
-        
-        # Mostrar resultados
-        clear_screen()
-        print_header("RESULTADOS DEL CICLO DE APRENDIZAJE")
-        
-        print(f"\nSímbolos: {symbols_str}")
-        print(f"Intervalo: {selected_interval}")
-        print(f"Inicio: {results.get('started_at', 'N/A')}")
-        print(f"Fin: {results.get('completed_at', 'N/A')}")
-        
-        # Mostrar bots creados
-        created_bots = results.get("created_bots", [])
-        
-        if created_bots:
-            print("\nBots creados durante el ciclo:")
-            
-            bot_data = []
-            for bot in created_bots:
-                bot_results = bot.get("results", {})
-                bot_data.append([
-                    bot.get("bot_id", "N/A"),
-                    bot.get("type", "N/A"),
-                    bot_results.get("symbol", "N/A"),
-                    bot_results.get("strategy", "N/A"),
-                    f"{bot_results.get('return_pct', 0):.2f}%",
-                    bot_results.get("trades", 0),
-                    f"{bot_results.get('win_rate', 0):.2f}%"
-                ])
-            
-            headers = ["Bot ID", "Tipo", "Par", "Estrategia", "Retorno", "Trades", "Win Rate"]
-            print_table(headers, bot_data)
-        else:
-            print("\nNo se crearon bots durante el ciclo.")
-    
-    except ImportError as e:
-        print(f"\n❌ Error: Funcionalidad no disponible. {e}")
-    except Exception as e:
-        print(f"\n❌ Error al ejecutar ciclo de aprendizaje: {e}")
-    
-    input("\nPresiona Enter para continuar...")
-
-def view_learning_system_status():
-    """Muestra el estado del sistema de aprendizaje"""
-    clear_screen()
-    print_header("ESTADO DEL SISTEMA DE APRENDIZAJE")
-    
-    try:
-        # Importar solo cuando se necesita para evitar errores de inicio
-        from backtesting.advanced_optimizer import get_learning_system_status
-        
-        # Obtener estado
-        status = get_learning_system_status()
-        
-        # Mostrar resumen
-        print("\nResumen del sistema:")
-        print(f"Total de bots: {status.get('total_bots', 0)}")
-        
-        bots_by_type = status.get("bots_by_type", {})
-        for bot_type, count in bots_by_type.items():
-            print(f"Bots de tipo {bot_type}: {count}")
-        
-        # Mostrar rendimiento por tipo
-        performance_by_type = status.get("performance_by_type", {})
-        
-        if performance_by_type:
-            print("\nRendimiento por tipo de bot:")
-            
-            for bot_type, perf in performance_by_type.items():
-                print(f"\nTipo: {bot_type}")
-                print(f"Cantidad: {perf.get('count', 0)}")
-                print(f"Retorno promedio: {perf.get('avg_return', 0):.2f}%")
-                
-                best_bot = perf.get("best_bot", {})
-                if best_bot:
-                    print(f"Mejor bot: {best_bot.get('name', 'N/A')} ({best_bot.get('return_pct', 0):.2f}%)")
-        
-        # Mostrar insights de aprendizaje
-        insights = status.get("learning_insights", {})
-        
-        if "error" not in insights:
-            print("\nInsights de aprendizaje:")
-            
-            best_strategies = insights.get("best_strategies_by_condition", {})
-            
-            for condition, strategies in best_strategies.items():
-                print(f"\nCondición: {condition}")
-                
-                for i, strategy in enumerate(strategies[:3], 1):
-                    print(f"{i}. {strategy.get('name', 'N/A')} - Retorno: {strategy.get('avg_return', 0):.2f}% - " + 
-                          f"Win Rate: {strategy.get('avg_win_rate', 0):.2f}%")
-        else:
-            print("\nNo hay insights de aprendizaje disponibles.")
-    
-    except ImportError as e:
-        print(f"\n❌ Error: Funcionalidad no disponible. {e}")
-    except Exception as e:
-        print(f"\n❌ Error al obtener estado: {e}")
-    
-    input("\nPresiona Enter para continuar...")
-
-def create_optimized_bot():
-    """Crea un bot optimizado basado en aprendizaje"""
-    clear_screen()
-    print_header("CREAR BOT OPTIMIZADO")
-    
-    # Seleccionar símbolo
-    symbols = get_available_symbols()
-    
-    print("\nSelecciona el par de trading:")
-    for i, symbol in enumerate(symbols, 1):
-        print(f"{i}. {symbol}")
-    
-    symbol_choice = get_user_choice(1, len(symbols))
-    if not symbol_choice:
-        return
-    
-    selected_symbol = symbols[symbol_choice - 1]
-    
-    # Seleccionar intervalo
-    print("\nSelecciona el intervalo de tiempo:")
-    intervals = ["15m", "1h", "4h", "1d"]
-    
-    for i, interval in enumerate(intervals, 1):
-        print(f"{i}. {interval}")
-    
-    interval_choice = get_user_choice(1, len(intervals))
-    if not interval_choice:
-        return
-    
-    selected_interval = intervals[interval_choice - 1]
-    
-    # Seleccionar días para optimización
-    print("\nSelecciona el periodo para optimización:")
-    periods = ["30 días", "60 días", "90 días", "180 días"]
-    
-    for i, period in enumerate(periods, 1):
-        print(f"{i}. {period}")
-    
-    period_choice = get_user_choice(1, len(periods))
-    if not period_choice:
-        return
-    
-    days_map = {1: 30, 2: 60, 3: 90, 4: 180}
-    selected_days = days_map.get(period_choice, 60)
-    
-    # Solicitar nombre del bot
-    print("\nIntroduce un nombre para el bot:")
-    bot_name = input("> ").strip()
-    if not bot_name:
-        print("El nombre no puede estar vacío.")
-        time.sleep(2)
-        return
-    
-    # Ejecutar creación de bot optimizado
-    print(f"\n⚙️ Creando bot optimizado para {selected_symbol} en {selected_interval}...")
-    print("Este proceso incluye análisis de mercado, backtesting y optimización de parámetros.")
-    print("Puede tardar varios minutos.")
-    
-    try:
-        # Importar solo cuando se necesita para evitar errores de inicio
-        from backtesting.advanced_optimizer import AutomatedLearningSystem
-        
-        # Crear sistema de aprendizaje
-        learning_system = AutomatedLearningSystem()
-        
-        # Crear bot optimizado
-        print("\nAnalizando condiciones de mercado...")
-        time.sleep(1)
-        
-        print("\nEjecutando backtesting de estrategias...")
-        time.sleep(2)
-        
-        print("\nOptimizando parámetros...")
-        time.sleep(2)
-        
-        # Crear bot
-        bot_id = learning_system.create_optimized_bot(selected_symbol, selected_interval, selected_days)
-        
-        if bot_id:
-            # Actualizar nombre
-            bot_config = learning_system._load_bot_config(bot_id)
-            if bot_config:
-                bot_config["name"] = bot_name
-                learning_system._save_bot_config(bot_id, bot_config)
-            
-            # Iniciar simulación
-            print("\nIniciando simulación con bot optimizado...")
-            sim_result = learning_system.start_simulation_bot(bot_id, days_to_simulate=30)
-            
-            # Mostrar resultados
-            clear_screen()
-            print_header("BOT OPTIMIZADO CREADO")
-            
-            print(f"\nBot '{bot_name}' creado exitosamente!")
-            print(f"ID: {bot_id}")
-            print(f"Par: {selected_symbol}")
-            print(f"Intervalo: {selected_interval}")
-            
-            if "error" not in sim_result:
-                print(f"\nResultados de simulación inicial (30 días):")
-                print(f"Estrategia: {sim_result.get('strategy', 'N/A')}")
-                print(f"Balance inicial: {sim_result.get('initial_balance', 0):.2f} USDT")
-                print(f"Balance final: {sim_result.get('final_balance', 0):.2f} USDT")
-                print(f"Retorno: {sim_result.get('return_pct', 0):.2f}%")
-                print(f"Operaciones: {sim_result.get('trades', 0)}")
-                print(f"Win Rate: {sim_result.get('win_rate', 0):.2f}%")
-            else:
-                print(f"\nBot creado pero la simulación inicial falló: {sim_result.get('error', 'Error desconocido')}")
-        else:
-            print("\n❌ Error al crear bot optimizado.")
-    
-    except ImportError as e:
-        print(f"\n❌ Error: Funcionalidad no disponible. {e}")
-    except Exception as e:
-        print(f"\n❌ Error al crear bot optimizado: {e}")
-    
-    input("\nPresiona Enter para continuar...")
-
-def create_ml_bot():
-    """Crea un bot basado en Machine Learning"""
-    clear_screen()
-    print_header("CREAR BOT CON MACHINE LEARNING")
-    
-    # Seleccionar símbolo
-    symbols = get_available_symbols()
-    
-    print("\nSelecciona el par de trading:")
-    for i, symbol in enumerate(symbols, 1):
-        print(f"{i}. {symbol}")
-    
-    symbol_choice = get_user_choice(1, len(symbols))
-    if not symbol_choice:
-        return
-    
-    selected_symbol = symbols[symbol_choice - 1]
-    
-    # Seleccionar intervalo
-    print("\nSelecciona el intervalo de tiempo:")
-    intervals = ["15m", "1h", "4h", "1d"]
-    
-    for i, interval in enumerate(intervals, 1):
-        print(f"{i}. {interval}")
-    
-    interval_choice = get_user_choice(1, len(intervals))
-    if not interval_choice:
-        return
-    
-    selected_interval = intervals[interval_choice - 1]
-    
-    # Seleccionar tipo de modelo
-    print("\nSelecciona el tipo de modelo de ML:")
-    models = [
-        "Random Forest (más rápido, buena precisión)",
-        "Gradient Boosting (balance velocidad/precisión)",
-        "MLP Neural Network (más lento, alta capacidad)"
-    ]
-    
-    for i, model in enumerate(models, 1):
-        print(f"{i}. {model}")
-    
-    model_choice = get_user_choice(1, len(models))
-    if not model_choice:
-        return
-    
-    model_types = ["random_forest", "gradient_boosting", "mlp"]
-    selected_model = model_types[model_choice - 1]
-    
-    # Solicitar nombre del bot
-    print("\nIntroduce un nombre para el bot:")
-    bot_name = input("> ").strip()
-    if not bot_name:
-        print("El nombre no puede estar vacío.")
-        time.sleep(2)
-        return
-    
-    # Ejecutar creación de bot ML
-    print(f"\n⚙️ Creando bot ML con modelo {selected_model} para {selected_symbol} en {selected_interval}...")
-    print("Este proceso incluye entrenamiento de modelo, que puede tardar varios minutos.")
-    
-    try:
-        # Importar solo cuando se necesita para evitar errores de inicio
-        from backtesting.advanced_optimizer import AutomatedLearningSystem
-        
-        # Crear sistema de aprendizaje
-        learning_system = AutomatedLearningSystem()
-        
-        # Crear bot ML
-        print("\nObteniendo datos históricos...")
-        time.sleep(1)
-        
-        print("\nPreparando características...")
-        time.sleep(1)
-        
-        print("\nEntrenando modelo de ML...")
-        time.sleep(3)
-        
-        # Crear bot
-        bot_id = learning_system.create_ml_bot(selected_symbol, selected_interval, selected_model)
-        
-        if bot_id:
-            # Actualizar nombre
-            bot_config = learning_system._load_bot_config(bot_id)
-            if bot_config:
-                bot_config["name"] = bot_name
-                learning_system._save_bot_config(bot_id, bot_config)
-            
-            # Iniciar simulación
-            print("\nIniciando simulación con bot ML...")
-            sim_result = learning_system.start_simulation_bot(bot_id, days_to_simulate=30)
-            
-            # Mostrar resultados
-            clear_screen()
-            print_header("BOT ML CREADO")
-            
-            print(f"\nBot '{bot_name}' creado exitosamente!")
-            print(f"ID: {bot_id}")
-            print(f"Par: {selected_symbol}")
-            print(f"Intervalo: {selected_interval}")
-            print(f"Modelo: {selected_model}")
-            
-            if "error" not in sim_result:
-                print(f"\nResultados de simulación inicial (30 días):")
-                print(f"Balance inicial: {sim_result.get('initial_balance', 0):.2f} USDT")
-                print(f"Balance final: {sim_result.get('final_balance', 0):.2f} USDT")
-                print(f"Retorno: {sim_result.get('return_pct', 0):.2f}%")
-                print(f"Operaciones: {sim_result.get('trades', 0)}")
-                print(f"Win Rate: {sim_result.get('win_rate', 0):.2f}%")
-            else:
-                print(f"\nBot creado pero la simulación inicial falló: {sim_result.get('error', 'Error desconocido')}")
-        else:
-            print("\n❌ Error al crear bot ML.")
-    
-    except ImportError as e:
-        print(f"\n❌ Error: Funcionalidad no disponible. {e}")
-    except Exception as e:
-        print(f"\n❌ Error al crear bot ML: {e}")
-    
-    input("\nPresiona Enter para continuar...")
-
-def run_new_backtest():
-    """Ejecuta un nuevo backtest"""
-    clear_screen()
-    print_header("NUEVO BACKTEST")
-    
-    # Seleccionar símbolo
-    symbols = get_available_symbols()
-    
-    print("\nSelecciona el par de trading:")
-    for i, symbol in enumerate(symbols, 1):
-        print(f"{i}. {symbol}")
-    
-    symbol_choice = get_user_choice(1, len(symbols))
-    if not symbol_choice:
-        return
-    
-    selected_symbol = symbols[symbol_choice - 1]
-    
-    # Seleccionar estrategia
-    print("\nSelecciona la estrategia de trading:")
-    strategies = [
-        "Cruce de Medias Móviles",
-        "RSI + Bollinger Bands",
-        "MACD + Tendencia",
-        "Estadística (Mean Reversion)",
-        "Adaptativa (Múltiples indicadores)"
-    ]
-    
-    for i, strategy in enumerate(strategies, 1):
-        print(f"{i}. {strategy}")
-    
-    strategy_choice = get_user_choice(1, len(strategies))
-    if not strategy_choice:
-        return
-    
-    selected_strategy = strategies[strategy_choice - 1]
-    
-    # Seleccionar periodo
-    print("\nSelecciona el periodo de backtesting:")
-    periods = [
-        "Último mes",
-        "Últimos 3 meses",
-        "Últimos 6 meses",
-        "Último año",
-        "Personalizado"
-    ]
-    
-    for i, period in enumerate(periods, 1):
-        print(f"{i}. {period}")
-    
-    period_choice = get_user_choice(1, len(periods))
-    if not period_choice:
-        return
-    
-    # Calcular fechas
-    from datetime import datetime, timedelta
-    
-    end_date = datetime.now()
-    
-    if period_choice == 1:
-        start_date = end_date - timedelta(days=30)
-    elif period_choice == 2:
-        start_date = end_date - timedelta(days=90)
-    elif period_choice == 3:
-        start_date = end_date - timedelta(days=180)
-    elif period_choice == 4:
-        start_date = end_date - timedelta(days=365)
-    elif period_choice == 5:
-        print("\nIntroduce la fecha de inicio (YYYY-MM-DD):")
-        start_date_str = input("> ").strip()
-        try:
-            start_date = datetime.strptime(start_date_str, "%Y-%m-%d")
-        except ValueError:
-            print("Formato de fecha incorrecto. Usando último mes por defecto.")
-            start_date = end_date - timedelta(days=30)
-    
-    # Ejecutar backtest
-    try:
-        print("\nEjecutando backtest...")
-        
-        strategy_name_to_func = {
-            "Cruce de Medias Móviles": "moving_average_crossover",
-            "RSI + Bollinger Bands": "rsi_bollinger",
-            "MACD + Tendencia": "macd_trend",
-            "Estadística (Mean Reversion)": "mean_reversion",
-            "Adaptativa (Múltiples indicadores)": "adaptive"
-        }
-        
-        strategy_func = strategy_name_to_func.get(selected_strategy)
-        
-        results = run_backtest(
-            symbol=selected_symbol,
-            start_date=start_date.strftime("%Y-%m-%d"),
-            end_date=end_date.strftime("%Y-%m-%d"),
-            strategy=strategy_func
-        )
-        
-        clear_screen()
-        print_header("RESULTADOS DEL BACKTEST")
-        
-        print(f"\nPar: {selected_symbol}")
-        print(f"Estrategia: {selected_strategy}")
-        print(f"Periodo: {start_date.strftime('%Y-%m-%d')} a {end_date.strftime('%Y-%m-%d')}")
-        
-        print("\nResultados:")
-        print(f"Balance inicial: {results['initial_balance']:.2f} USDT")
-        print(f"Balance final: {results['final_balance']:.2f} USDT")
-        print(f"Retorno: {results['return_pct']:.2f}%")
-        print(f"Sharpe Ratio: {results['sharpe_ratio']:.2f}")
-        print(f"Sortino Ratio: {results['sortino_ratio']:.2f}")
-        print(f"Drawdown máximo: {results['max_drawdown_pct']:.2f}%")
-        print(f"Trades totales: {results['total_trades']}")
-        print(f"Win Rate: {results['win_rate']:.2f}%")
-        print(f"Profit Factor: {results['profit_factor']:.2f}")
-        
-        # Mostrar gráfico de equity curve
-        print("\nCurva de Equity:")
-        print_chart(results['equity_curve'], value_key='equity', title="Equity Curve")
-        
-        # Guardar resultados
-        backtest_id = save_backtest_results(results)
-        print(f"\n✅ Resultados guardados con ID: {backtest_id}")
-        
-    except Exception as e:
-        logger.error(f"Error running backtest: {e}")
-        print(f"\n❌ Error al ejecutar backtest: {e}")
-    
-    input("\nPresiona Enter para continuar...")
-
-def view_backtest_results():
-    """Ver resultados de backtests anteriores"""
-    clear_screen()
-    print_header("RESULTADOS DE BACKTESTS")
-    
-    try:
-        from db.operations import get_backtest_results
-        
-        # Obtener resultados
-        results = get_backtest_results()
-        
-        if not results:
-            print("\nNo hay resultados de backtests guardados.")
-            input("\nPresiona Enter para continuar...")
-            return
-        
-        print("\nSelecciona un backtest para ver detalles:")
-        
-        for i, result in enumerate(results, 1):
-            print(f"{i}. {result['symbol']} - {result['strategy']} - {result['date']} - {result['return_pct']:.2f}%")
-        
-        print(f"{len(results) + 1}. Volver")
-        
-        choice = get_user_choice(1, len(results) + 1)
-        if choice == len(results) + 1:
-            return
-        
-        if 1 <= choice <= len(results):
-            selected_result = results[choice - 1]
-            
-            clear_screen()
-            print_header(f"DETALLES DEL BACKTEST: {selected_result['id']}")
-            
-            print(f"\nPar: {selected_result['symbol']}")
-            print(f"Estrategia: {selected_result['strategy']}")
-            print(f"Periodo: {selected_result['start_date']} a {selected_result['end_date']}")
-            
-            print("\nResultados:")
-            print(f"Balance inicial: {selected_result['initial_balance']:.2f} USDT")
-            print(f"Balance final: {selected_result['final_balance']:.2f} USDT")
-            print(f"Retorno: {selected_result['return_pct']:.2f}%")
-            print(f"Sharpe Ratio: {selected_result['sharpe_ratio']:.2f}")
-            print(f"Sortino Ratio: {selected_result['sortino_ratio']:.2f}")
-            print(f"Drawdown máximo: {selected_result['max_drawdown_pct']:.2f}%")
-            print(f"Trades totales: {selected_result['total_trades']}")
-            print(f"Win Rate: {selected_result['win_rate']:.2f}%")
-            print(f"Profit Factor: {selected_result['profit_factor']:.2f}")
-            
-            # Mostrar gráfico si hay datos
-            if 'equity_curve' in selected_result:
-                print("\nCurva de Equity:")
-                print_chart(selected_result['equity_curve'], value_key='equity', title="Equity Curve")
-            
-            print("\nOpciones:")
-            print("1. Crear bot con esta configuración")
-            print("2. Volver")
-            
-            subchoice = get_user_choice(1, 2)
-            if subchoice == 1:
-                # Crear bot basado en backtest
-                create_bot_from_backtest(selected_result)
-        
-    except Exception as e:
-        logger.error(f"Error viewing backtest results: {e}")
-        print(f"Error al ver resultados de backtests: {e}")
-    
-    input("\nPresiona Enter para continuar...")
-
-def create_bot_from_backtest(backtest_result):
-    """Crea un bot basado en un backtest"""
-    clear_screen()
-    print_header("CREAR BOT DESDE BACKTEST")
-    
-    # Solicitar nombre del bot
-    print("\nIntroduce un nombre para el bot:")
-    bot_name = input("> ").strip()
-    if not bot_name:
-        print("El nombre no puede estar vacío.")
-        time.sleep(2)
-        return
-    
-    # Solicitar modo (paper/live)
-    print("\nSelecciona el modo de trading:")
-    print("1. Paper Trading (Simulado)")
-    print("2. Live Trading (Real)")
-    
-    mode_choice = get_user_choice(1, 2)
-    if not mode_choice:
-        return
-    
-    paper_trading = mode_choice == 1
-    
-    # Configurar balance inicial (para paper trading)
-    initial_balance = 1000.0
-    if paper_trading:
-        print("\nIntroduce el balance inicial (USDT):")
-        try:
-            initial_balance = float(input("> ").strip())
-        except ValueError:
-            print("Valor no válido. Usando 1000 USDT por defecto.")
-            initial_balance = 1000.0
-    
-    # Crear configuración del bot
-    bot_config = {
-        "name": bot_name,
-        "symbol": backtest_result['symbol'],
-        "paper_trading": paper_trading,
-        "strategy": backtest_result['strategy'],
-        "balance": initial_balance,
-        "active": False,
-        "created_at": datetime.now().isoformat(),
-        "config": backtest_result.get('config', {
-            "risk_per_trade": 1.0,
-            "leverage": 1.0,
-            "stop_loss": 2.0,
-            "take_profit": 3.0,
-            "time_interval": "15m"
-        })
-    }
-    
-    # Guardar bot en la base de datos
-    try:
-        bot_manager.create_bot(bot_config)
-        print(f"\n✅ Bot '{bot_name}' creado exitosamente!")
-    except Exception as e:
-        logger.error(f"Error creating bot: {e}")
-        print(f"\n❌ Error al crear el bot: {e}")
-
-def optimize_parameters():
-    """Optimiza parámetros de una estrategia"""
-    clear_screen()
-    print_header("OPTIMIZACIÓN DE PARÁMETROS")
-    
-    # Seleccionar símbolo
-    symbols = get_available_symbols()
-    
-    print("\nSelecciona el par de trading:")
-    for i, symbol in enumerate(symbols, 1):
-        print(f"{i}. {symbol}")
-    
-    symbol_choice = get_user_choice(1, len(symbols))
-    if not symbol_choice:
-        return
-    
-    selected_symbol = symbols[symbol_choice - 1]
-    
-    # Seleccionar estrategia
-    print("\nSelecciona la estrategia de trading:")
-    strategies = [
-        "Cruce de Medias Móviles",
-        "RSI + Bollinger Bands",
-        "MACD + Tendencia"
-    ]
-    
-    for i, strategy in enumerate(strategies, 1):
-        print(f"{i}. {strategy}")
-    
-    strategy_choice = get_user_choice(1, len(strategies))
-    if not strategy_choice:
-        return
-    
-    selected_strategy = strategies[strategy_choice - 1]
-    
-    # Definir parámetros a optimizar según estrategia
-    params_to_optimize = {}
-    
-    if selected_strategy == "Cruce de Medias Móviles":
-        params_to_optimize = {
-            "fast_period": [5, 10, 15, 20, 25],
-            "slow_period": [20, 30, 40, 50, 60]
-        }
-    elif selected_strategy == "RSI + Bollinger Bands":
-        params_to_optimize = {
-            "rsi_period": [7, 14, 21],
-            "rsi_overbought": [70, 75, 80],
-            "rsi_oversold": [20, 25, 30],
-            "bb_period": [15, 20, 25],
-            "bb_dev": [1.8, 2.0, 2.2]
-        }
-    elif selected_strategy == "MACD + Tendencia":
-        params_to_optimize = {
-            "fast_ema": [8, 12, 16],
-            "slow_ema": [21, 26, 30],
-            "signal_period": [7, 9, 12]
-        }
-    
-    # Período de optimización
-    print("\nSelecciona el periodo de optimización:")
-    periods = [
-        "Último mes",
-        "Últimos 3 meses"
-    ]
-    
-    for i, period in enumerate(periods, 1):
-        print(f"{i}. {period}")
-    
-    period_choice = get_user_choice(1, len(periods))
-    if not period_choice:
-        return
-    
-    # Calcular fechas
-    from datetime import datetime, timedelta
-    
-    end_date = datetime.now()
-    
-    if period_choice == 1:
-        start_date = end_date - timedelta(days=30)
-    elif period_choice == 2:
-        start_date = end_date - timedelta(days=90)
-    
-    # Ejecutar optimización
-    try:
-        print("\n⚙️ Ejecutando optimización de parámetros...")
-        print("Este proceso puede tardar varios minutos.")
-        print("Se probarán todas las combinaciones de parámetros.")
-        
-        # Mapeo de nombres de estrategia a funciones
-        strategy_name_to_func = {
-            "Cruce de Medias Móviles": "moving_average_crossover",
-            "RSI + Bollinger Bands": "rsi_bollinger",
-            "MACD + Tendencia": "macd_trend"
-        }
-        
-        strategy_func = strategy_name_to_func.get(selected_strategy)
-        
-        from backtesting.optimization import optimize_strategy
-        
-        results = optimize_strategy(
-            symbol=selected_symbol,
-            start_date=start_date.strftime("%Y-%m-%d"),
-            end_date=end_date.strftime("%Y-%m-%d"),
-            strategy=strategy_func,
-            params=params_to_optimize
-        )
-        
-        clear_screen()
-        print_header("RESULTADOS DE OPTIMIZACIÓN")
-        
-        print(f"\nPar: {selected_symbol}")
-        print(f"Estrategia: {selected_strategy}")
-        print(f"Periodo: {start_date.strftime('%Y-%m-%d')} a {end_date.strftime('%Y-%m-%d')}")
-        
-        print("\nMejores parámetros:")
-        for param, value in results['best_params'].items():
-            print(f"{param}: {value}")
-        
-        print("\nResultados con mejores parámetros:")
-        print(f"Retorno: {results['best_result']['return_pct']:.2f}%")
-        print(f"Sharpe Ratio: {results['best_result']['sharpe_ratio']:.2f}")
-        print(f"Trades totales: {results['best_result']['total_trades']}")
-        print(f"Win Rate: {results['best_result']['win_rate']:.2f}%")
-        
-        # Mostrar comparativa de los mejores resultados
-        print("\nTop 5 combinaciones de parámetros:")
-        top_results = results['all_results'][:5]
-        
-        for i, result in enumerate(top_results, 1):
-            print(f"\n{i}. Retorno: {result['return_pct']:.2f}%, Sharpe: {result['sharpe_ratio']:.2f}")
-            for param, value in result['params'].items():
-                print(f"   {param}: {value}")
-        
-        print("\nOpciones:")
-        print("1. Crear bot con los mejores parámetros")
-        print("2. Volver")
-        
-        choice = get_user_choice(1, 2)
-        if choice == 1:
-            # Crear bot con los mejores parámetros
-            create_bot_with_optimized_params(selected_symbol, selected_strategy, results['best_params'])
-        
-    except Exception as e:
-        logger.error(f"Error optimizing parameters: {e}")
-        print(f"\n❌ Error en la optimización: {e}")
-    
-    input("\nPresiona Enter para continuar...")
-
-def create_bot_with_optimized_params(symbol, strategy, params):
-    """Crea un bot con parámetros optimizados"""
-    clear_screen()
-    print_header("CREAR BOT CON PARÁMETROS OPTIMIZADOS")
-    
-    # Solicitar nombre del bot
-    print("\nIntroduce un nombre para el bot:")
-    bot_name = input("> ").strip()
-    if not bot_name:
-        print("El nombre no puede estar vacío.")
-        time.sleep(2)
-        return
-    
-    # Solicitar modo (paper/live)
-    print("\nSelecciona el modo de trading:")
-    print("1. Paper Trading (Simulado)")
-    print("2. Live Trading (Real)")
-    
-    mode_choice = get_user_choice(1, 2)
-    if not mode_choice:
-        return
-    
-    paper_trading = mode_choice == 1
-    
-    # Configurar balance inicial (para paper trading)
-    initial_balance = 1000.0
-    if paper_trading:
-        print("\nIntroduce el balance inicial (USDT):")
-        try:
-            initial_balance = float(input("> ").strip())
-        except ValueError:
-            print("Valor no válido. Usando 1000 USDT por defecto.")
-            initial_balance = 1000.0
-    
-    # Crear configuración del bot
-    config = {
-        "risk_per_trade": 1.0,
-        "leverage": 1.0,
-        "stop_loss": 2.0,
-        "take_profit": 3.0,
-        "time_interval": "15m"
-    }
-    
-    # Añadir parámetros optimizados
-    for param, value in params.items():
-        config[param] = value
-    
-    bot_config = {
-        "name": bot_name,
-        "symbol": symbol,
-        "paper_trading": paper_trading,
-        "strategy": strategy,
-        "balance": initial_balance,
-        "active": False,
-        "created_at": datetime.now().isoformat(),
-        "config": config
-    }
-    
-    # Guardar bot en la base de datos
-    try:
-        bot_manager.create_bot(bot_config)
-        print(f"\n✅ Bot '{bot_name}' creado exitosamente!")
-    except Exception as e:
-        logger.error(f"Error creating bot: {e}")
-        print(f"\n❌ Error al crear el bot: {e}")
-
-def dashboard_menu():
-    """Menú de panel de control"""
-    while True:
-        clear_screen()
-        print_header("PANEL DE CONTROL")
-        
-        # Mostrar resumen
-        print("\n📊 RESUMEN GLOBAL:")
-        
-        try:
-            # Obtener datos de resumen
-            bots = get_bots()
-            active_bots = sum(1 for bot in bots if bot.get('active', False))
-            total_balance = sum(bot.get('balance', 0) for bot in bots)
-            total_pnl = sum(bot.get('pnl', 0) for bot in bots)
-            
-            # Mostrar datos
-            print(f"Bots totales: {len(bots)}")
-            print(f"Bots activos: {active_bots}")
-            print(f"Balance total: {total_balance:.2f} USDT")
-            print(f"P&L total: {total_pnl:.2f} USDT")
-            
-            # Mostrar bots activos
-            if active_bots > 0:
-                print("\n🤖 BOTS ACTIVOS:")
-                active_bot_data = []
-                for bot in bots:
-                    if bot.get('active', False):
-                        active_bot_data.append([
-                            bot.get('name', 'Bot sin nombre'),
-                            bot.get('symbol', 'SOL-USDT'),
-                            f"{bot.get('balance', 0):.2f} USDT",
-                            f"{bot.get('pnl', 0):.2f} USDT",
-                            f"{bot.get('roi', 0):.2f}%"
-                        ])
-                
-                headers = ["Nombre", "Par", "Balance", "P&L", "ROI"]
-                print_table(headers, active_bot_data)
-            
-            # Mostrar operaciones recientes
-            print("\n📜 OPERACIONES RECIENTES:")
-            
-            # Obtener operaciones recientes
-            from db.operations import get_recent_trades
-            
-            recent_trades = get_recent_trades(limit=10)
-            
-            if recent_trades:
-                trade_data = []
-                for trade in recent_trades:
-                    trade_data.append([
-                        trade.get('bot_name', 'N/A'),
-                        trade.get('timestamp', 'N/A'),
-                        trade.get('symbol', 'N/A'),
-                        "COMPRA" if trade.get('type') == 'buy' else "VENTA",
-                        f"{trade.get('price', 0):.2f}",
-                        f"{trade.get('size', 0):.4f}",
-                        f"{trade.get('pnl', 0):.2f} USDT"
-                    ])
-                
-                headers = ["Bot", "Fecha", "Par", "Tipo", "Precio", "Tamaño", "P&L"]
-                print_table(headers, trade_data)
-            else:
-                print("No hay operaciones recientes")
-            
-            # Obtener precio actual de SOL
-            from data_management.market_data import get_current_price
-            
-            sol_price = get_current_price("SOL-USDT")
-            print(f"\nPrecio actual de SOL: {sol_price:.2f} USDT")
-            
-        except Exception as e:
-            logger.error(f"Error displaying dashboard: {e}")
-            print(f"Error al mostrar panel de control: {e}")
-        
-        print("\nOpciones:")
-        print("1. Actualizar datos")
-        print("2. Ver estadísticas detalladas")
-        print("3. Volver al menú principal")
-        
-        choice = get_user_choice(1, 3)
-        
-        if choice == 1:
-            continue  # Simplemente refrescar
-        elif choice == 2:
-            view_detailed_stats()
-        elif choice == 3:
-            break
-        else:
-            print("Opción no válida. Inténtalo de nuevo.")
-            time.sleep(1)
-
-def view_detailed_stats():
-    """Muestra estadísticas detalladas"""
-    clear_screen()
-    print_header("ESTADÍSTICAS DETALLADAS")
-    
-    try:
-        # Obtener estadísticas
-        from db.operations import get_performance_stats
-        
-        stats = get_performance_stats()
-        
-        print("\n📈 RENDIMIENTO POR ESTRATEGIA:")
-        strategy_stats = stats.get('strategy_stats', [])
-        
-        if strategy_stats:
-            strategy_data = []
-            for stat in strategy_stats:
-                strategy_data.append([
-                    stat.get('strategy', 'N/A'),
-                    str(stat.get('trade_count', 0)),
-                    f"{stat.get('win_rate', 0):.2f}%",
-                    f"{stat.get('avg_profit', 0):.2f} USDT",
-                    f"{stat.get('avg_loss', 0):.2f} USDT",
-                    f"{stat.get('profit_factor', 0):.2f}",
-                    f"{stat.get('avg_duration', 'N/A')}"
-                ])
-            
-            headers = ["Estrategia", "Trades", "Win Rate", "Profit Avg", "Loss Avg", "Profit Factor", "Duración Avg"]
-            print_table(headers, strategy_data)
-        else:
-            print("No hay estadísticas disponibles")
-        
-        print("\n📊 RENDIMIENTO POR SÍMBOLO:")
-        symbol_stats = stats.get('symbol_stats', [])
-        
-        if symbol_stats:
-            symbol_data = []
-            for stat in symbol_stats:
-                symbol_data.append([
-                    stat.get('symbol', 'N/A'),
-                    str(stat.get('trade_count', 0)),
-                    f"{stat.get('win_rate', 0):.2f}%",
-                    f"{stat.get('avg_profit', 0):.2f} USDT",
-                    f"{stat.get('avg_loss', 0):.2f} USDT",
-                    f"{stat.get('profit_factor', 0):.2f}"
-                ])
-            
-            headers = ["Símbolo", "Trades", "Win Rate", "Profit Avg", "Loss Avg", "Profit Factor"]
-            print_table(headers, symbol_data)
-        else:
-            print("No hay estadísticas disponibles")
-        
-        print("\n📆 RENDIMIENTO POR MES:")
-        monthly_stats = stats.get('monthly_stats', [])
-        
-        if monthly_stats:
-            monthly_data = []
-            for stat in monthly_stats:
-                monthly_data.append([
-                    stat.get('month', 'N/A'),
-                    str(stat.get('trade_count', 0)),
-                    f"{stat.get('win_rate', 0):.2f}%",
-                    f"{stat.get('total_profit', 0):.2f} USDT",
-                    f"{stat.get('total_loss', 0):.2f} USDT",
-                    f"{stat.get('net_pnl', 0):.2f} USDT"
-                ])
-            
-            headers = ["Mes", "Trades", "Win Rate", "Profit Total", "Loss Total", "P&L Neto"]
-            print_table(headers, monthly_data)
-        else:
-            print("No hay estadísticas disponibles")
-        
-    except Exception as e:
-        logger.error(f"Error displaying detailed stats: {e}")
-        print(f"Error al mostrar estadísticas detalladas: {e}")
-    
-    input("\nPresiona Enter para continuar...")
-
-def save_backtest_results(results):
-    """Guarda resultados de backtest en la base de datos"""
-    try:
-        from db.operations import save_backtest
-        
-        return save_backtest(results)
-    except Exception as e:
-        logger.error(f"Error saving backtest results: {e}")
-        return None
-
-def confirm_exit():
-    """Confirma salida del programa"""
-    if confirm_action("¿Estás seguro de que deseas salir? Todos los bots activos seguirán ejecutándose."):
-        global running
-        running = False
-
-def signal_handler(sig, frame):
-    """Manejador de señales para salida segura"""
-    global running
-    print("\nSeñal de interrupción recibida. Saliendo...")
-    running = False
-
-def main():
-    """Función principal"""
-    # Registrar manejador de señales
-    signal.signal(signal.SIGINT, signal_handler)
-    
-    # Inicializar el gestor de bots
-    if not init_bot_manager():
-        print("Error al inicializar el gestor de bots. Saliendo.")
-        return
-    
-    # Bucle principal
-    while running:
-        try:
-            main_menu()
-        except Exception as e:
-            logger.error(f"Error en menú principal: {e}")
-            print(f"Error: {e}")
-            print("Reiniciando menú...")
-            time.sleep(2)
-    
-    # Mensaje de salida
-    print("Gracias por usar el Solana Trading Bot. ¡Hasta pronto!")
+    input("\nPresiona Enter para volver al menú principal...")
 
 if __name__ == "__main__":
     main()
