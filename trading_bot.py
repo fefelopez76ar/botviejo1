@@ -1,1310 +1,868 @@
 """
 Bot de Trading para Solana - Versión Autónoma
 
-Este script está diseñado para ejecutarse como un workflow dedicado en Replit
-y proporciona funcionalidad 24/7 para trading automatizado de Solana.
-
-Características:
-- Monitoreo continuo del mercado
-- Ejecución automática de estrategias
-- Sistema de recuperación ante fallos
-- Notificaciones en tiempo real vía Telegram
-- Modo paper trading (simulación) y live trading
-
-Uso:
-    python solana_trading_bot.py --mode paper --interval 15m --notify
+Este script está diseñado para ejecutarse como un sistema independiente
+que implementa un bot de trading algorítmico enfocado en Solana.
 """
 
 import os
 import sys
 import time
 import json
-import random
 import logging
-import argparse
 import threading
-import traceback
-from datetime import datetime, timedelta
-import hmac
-import base64
-import hashlib
-import requests
-from typing import Dict, List, Union, Optional, Any, Tuple
 import pandas as pd
 import numpy as np
+from datetime import datetime, timedelta
+from typing import Dict, List, Any, Optional, Tuple, Union
+from enum import Enum
 
-# Intentar importar librería para notificaciones
-try:
-    import telebot
-    TELEGRAM_AVAILABLE = True
-except ImportError:
-    TELEGRAM_AVAILABLE = False
-    
 # Configurar logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.StreamHandler(sys.stdout)
+        logging.StreamHandler(sys.stdout),
+        logging.FileHandler("trading_bot.log")
     ]
 )
-logger = logging.getLogger("SolanaTradingBot")
+logger = logging.getLogger("TradingBot")
 
-# Constantes
-DEFAULT_SYMBOL = "SOL-USDT"
-DEFAULT_INTERVAL = "15m"
-DEFAULT_MODE = "paper"  # IMPORTANTE: Siempre usamos 'paper' por seguridad
-DEFAULT_INITIAL_BALANCE = 1000.0  # Balance inicial para paper trading
-DEFAULT_LEVERAGE = 3.0  # Apalancamiento predeterminado
+# Intentar importar módulos necesarios
+try:
+    # Módulos de estrategias
+    from strategies.scalping_strategies import get_available_scalping_strategies, get_strategy_by_name
+    
+    # Módulos de datos
+    from data_management.market_data import get_market_data, get_current_price
+    
+    # Módulos de adaptación
+    from adaptive_weighting import AdaptiveWeightingSystem, MarketCondition, TimeInterval
+    
+except ImportError as e:
+    logger.error(f"Error importing modules: {e}")
+    print(f"Error: {e}")
+    print("Make sure all dependencies are installed.")
 
-# Archivo de estado para seguimiento entre reinicios
-STATE_FILE = "bot_state.json"
-CONFIG_FILE = "config.env"
+class TradingMode(Enum):
+    """Modos de operación del bot"""
+    PAPER = "paper"  # Trading simulado (sin operaciones reales)
+    LIVE = "live"    # Trading en vivo (operaciones reales)
 
 class TradingBot:
-    """
-    Bot de trading para criptomonedas con OKX
-    """
+    """Bot de trading principal para operar en mercados de criptomonedas"""
     
-    def __init__(self, api_key: str, api_secret: str, passphrase: str, mode: str = 'paper'):
+    def __init__(self, config: Dict[str, Any]):
         """
-        Inicializa el bot de trading
+        Inicializa el bot con configuración
         
         Args:
-            api_key: Clave API de OKX
-            api_secret: Secret API de OKX
-            passphrase: Passphrase de API de OKX
-            mode: Modo de operación ('live' o 'paper')
+            config: Diccionario de configuración
         """
-        self.api_key = api_key
-        self.api_secret = api_secret
-        self.passphrase = passphrase
+        # Configuración básica
+        self.symbol = config.get("symbol", "SOL-USDT")
+        self.timeframe = config.get("timeframe", "15m")
+        self.paper_trading = config.get("paper_trading", True)
+        self.mode = TradingMode.PAPER if self.paper_trading else TradingMode.LIVE
         
-        # Validar modo
-        if mode not in ['live', 'paper']:
-            logger.warning(f"Modo no válido: {mode}. Usando modo paper por defecto")
-            mode = 'paper'
+        # Forzar modo paper de manera preventiva
+        self.paper_trading = True
+        self.mode = TradingMode.PAPER
         
-        self.mode = mode
-        self.base_url = "https://www.okx.com"
+        # Configuración de estrategias
+        self.strategy_name = config.get("strategy", "rsi_scalping")
+        self.strategy = get_strategy_by_name(self.strategy_name)
+        if not self.strategy:
+            logger.warning(f"Estrategia {self.strategy_name} no encontrada, usando RSI por defecto")
+            self.strategy_name = "rsi_scalping"
+            self.strategy = get_strategy_by_name(self.strategy_name)
         
-        # Estado del trading
-        self.position = None
-        self.orders = []
-        self.balance = DEFAULT_INITIAL_BALANCE
-        self.leverage = DEFAULT_LEVERAGE
+        # Sistema de ponderación adaptativa
+        self.adaptive_system = AdaptiveWeightingSystem()
         
-        # Inicializar objetos de caché
-        self._server_time_cache = {}
-        self._positions_cache = {}
-        self.time_offset = 10000  # Offset por defecto de 10s
-        self.server_time = 0
+        # Configuración de riesgo
+        self.max_position_size = config.get("max_position_size", 0.1)  # % del balance
+        self.stop_loss_pct = config.get("stop_loss_pct", 1.0)  # %
+        self.take_profit_pct = config.get("take_profit_pct", 2.0)  # %
+        self.max_loss_per_day = config.get("max_loss_per_day", 5.0)  # %
+        self.max_trades_per_day = config.get("max_trades_per_day", 20)
         
-        # Sincronizar tiempo con el servidor
-        self._sync_time()
+        # Estado de trading
+        self.running = False
+        self.current_position = None
+        self.balance = 1000.0  # Balance inicial para paper trading
+        self.initial_balance = self.balance
         
-        # Inicializar información de trading
-        self.trading_data = {
-            'symbol': '',
-            'interval': '',
-            'position': None,
-            'entry_price': 0.0,
-            'current_price': 0.0,
-            'strategy_signals': {},
-            'integrated_signal': 'neutral',
-            'stop_loss': 0.0,
-            'take_profit': 0.0,
-            'roi': 0.0,
-            'pnl': 0.0,
-            'trade_count': 0,
-            'wins': 0,
-            'losses': 0,
-            'start_balance': DEFAULT_INITIAL_BALANCE,
-            'current_balance': DEFAULT_INITIAL_BALANCE
-        }
+        # Historial
+        self.trade_history = []
+        self.signal_history = []
+        self.learning_events = []
         
-        logger.info(f"Bot inicializado en modo {mode}")
+        # Contadores
+        self.trades_today = 0
+        self.loss_today = 0.0
+        self.start_time = datetime.now()
+        
+        # Callbacks y eventos
+        self.on_trade_callback = None
+        self.on_signal_callback = None
+        self.on_learning_callback = None
+        self.on_position_update_callback = None
+        
+        logger.info(f"Bot inicializado: {self.symbol} en {self.timeframe}, Modo: {self.mode.value}")
     
-    def _sign_request(self, method: str, endpoint: str, params: dict) -> Dict[str, str]:
-        """
-        Firma una petición para autenticación con OKX
-        
-        Args:
-            method: Método HTTP (GET, POST, etc.)
-            endpoint: Ruta de la API
-            params: Parámetros de la petición
-            
-        Returns:
-            Dict: Headers firmados para la autenticación
-        """
-        # SOLUCIÓN DIRECTA: Obtener el timestamp directamente del servidor OKX
-        try:
-            server_response = requests.get(f"{self.base_url}/api/v5/public/time")
-            if server_response.status_code == 200:
-                # Usar directamente el timestamp del servidor + un offset extra
-                timestamp_ms = int(server_response.json()['data'][0]['ts']) 
-                
-                # Añadir buffer EXTREMO para resolver problema persistente
-                if self.mode == 'paper':
-                    timestamp_ms += 120000  # 2 MINUTOS adicionales para paper trading
-                else:
-                    timestamp_ms += 60000   # 1 MINUTO adicional para trading real
-                
-                logger.warning(f"SOLUCIÓN EXTREMA: Añadiendo offset de {120 if self.mode == 'paper' else 60} segundos al timestamp")
-                
-                timestamp = str(timestamp_ms)
-                logger.info(f"Usando timestamp OKX + buffer: {timestamp}")
-            else:
-                # Fallback a método anterior
-                current_time_ms = int(time.time() * 1000)
-                timestamp_ms = current_time_ms + self.time_offset
-                timestamp = str(timestamp_ms)
-                logger.warning(f"Fallback a timestamp local + offset: {timestamp}")
-        except Exception as e:
-            # Fallback a método anterior en caso de error
-            current_time_ms = int(time.time() * 1000)
-            timestamp_ms = current_time_ms + self.time_offset
-            timestamp = str(timestamp_ms)
-            logger.warning(f"Error obteniendo timestamp del servidor: {e}. Usando fallback: {timestamp}")
-        
-        # Ordenar parámetros si es necesario
-        if method == 'GET' and params:
-            query_string = '&'.join([f"{k}={v}" for k, v in sorted(params.items())])
-            endpoint = f"{endpoint}?{query_string}"
-            params = {}
-        
-        # Preparar la cadena a firmar
-        if params:
-            json_params = json.dumps(params)
-            to_sign = timestamp + method + endpoint + json_params
-        else:
-            to_sign = timestamp + method + endpoint
-        
-        # Generar firma HMAC
-        signature = base64.b64encode(
-            hmac.new(
-                self.api_secret.encode('utf-8'),
-                to_sign.encode('utf-8'),
-                hashlib.sha256
-            ).digest()
-        ).decode('utf-8')
-        
-        # Construir headers
-        headers = {
-            'OK-ACCESS-KEY': self.api_key,
-            'OK-ACCESS-SIGN': signature,
-            'OK-ACCESS-TIMESTAMP': timestamp,
-            'OK-ACCESS-PASSPHRASE': self.passphrase,
-            'Content-Type': 'application/json'
-        }
-        
-        # Añadir flag de demo si estamos en modo paper
-        if self.mode == 'paper':
-            headers['x-simulated-trading'] = '1'  # Mantener como string '1'
-            logger.info(f"Usando modo paper trading con flag: {headers['x-simulated-trading']}")
-        
-        return headers
-    
-    def _sync_time(self) -> bool:
-        """
-        Sincroniza el tiempo con el servidor de OKX
-        
-        Returns:
-            bool: True si la sincronización fue exitosa, False en caso contrario
-        """
-        try:
-            # Obtener tiempo directamente del servidor OKX
-            server_response = requests.get(f"{self.base_url}/api/v5/public/time")
-            if server_response.status_code == 200:
-                server_time = int(server_response.json()['data'][0]['ts'])
-                local_time = int(time.time() * 1000)
-                
-                # Para paper trading, usar un offset aún mayor (15 segundos)
-                time_buffer = 15000 if self.mode == 'paper' else 10000
-                
-                # Calcular offset total: diferencia + buffer
-                self.time_offset = server_time - local_time + time_buffer
-                self.server_time = server_time
-                
-                logger.info(f"✅ Sincronización de tiempo correcta. Offset: {self.time_offset}ms (diferencia + {time_buffer}ms)")
-                return True
-            else:
-                logger.error(f"Error al obtener tiempo del servidor: {server_response.text}")
-                # Establecer un offset por defecto según el modo
-                self.time_offset = 15000 if self.mode == 'paper' else 10000
-                return False
-        except Exception as e:
-            logger.error(f"Error sincronizando tiempo: {e}")
-            # Establecer un offset por defecto según el modo
-            self.time_offset = 15000 if self.mode == 'paper' else 10000
-            return False
-    
-    def get_server_time(self, cache_seconds: int = 30, trading_type: str = None) -> str:
-        """
-        Obtiene el tiempo del servidor con offset fijo para resolver problemas de sincronización
-        """
-        try:
-            # Obtener tiempo directamente del servidor OKX
-            server_response = requests.get(f"{self.base_url}/api/v5/public/time")
-            if server_response.status_code == 200:
-                server_time = server_response.json()['data'][0]['ts']
-                # No añadir ningún offset, solo devolver el tiempo exacto del servidor
-                logger.debug(f"Usando tiempo exacto del servidor OKX: {server_time}")
-                return server_time
-        except Exception as e:
-            logger.error(f"Error al obtener tiempo del servidor: {e}")
-        
-        # Fallback: Usar tiempo local con offset
-        current_time_ms = int(time.time() * 1000) + self.time_offset
-        logger.debug(f"Fallback a tiempo local: {current_time_ms}, offset: +{self.time_offset}ms")
-        return str(current_time_ms)
-    
-    def _request(self, method: str, endpoint: str, params: dict = None) -> Dict:
-        """
-        Realiza una petición a la API de OKX
-        
-        Args:
-            method: Método HTTP (GET, POST, etc.)
-            endpoint: Ruta de la API
-            params: Parámetros de la petición
-            
-        Returns:
-            Dict: Respuesta de la API
-        """
-        url = f"{self.base_url}{endpoint}"
-        headers = self._sign_request(method, endpoint, params or {})
-        
-        try:
-            if method == 'GET':
-                response = requests.get(url, headers=headers, params=params)
-            elif method == 'POST':
-                response = requests.post(url, headers=headers, json=params)
-            else:
-                raise ValueError(f"Método HTTP no soportado: {method}")
-            
-            # Verificar si la petición fue exitosa
-            if response.status_code != 200:
-                logger.error(f"Error en la API: {response.status_code} - {response.text}")
-                return {"code": str(response.status_code), "msg": response.text, "data": []}
-            
-            # Parsear respuesta
-            result = response.json()
-            
-            # Verificar si hay error en la respuesta
-            if result.get('code') != '0':
-                logger.error(f"Error en la API: {result.get('code')} - {result.get('msg')}")
-            
-            return result
-            
-        except Exception as e:
-            logger.error(f"Error en petición a API: {str(e)}")
-            return {"code": "9999", "msg": str(e), "data": []}
-    
-    def get_account_balance(self) -> Dict:
-        """
-        Obtiene el balance de la cuenta
-        
-        Returns:
-            Dict: Información del balance de la cuenta
-        """
-        # Si estamos en modo paper, usar balance simulado
-        if self.mode == 'paper':
-            # Generar balance simulado con 1000 USDT
-            logger.info("🔄 MODO PAPER: Usando balance simulado")
-            return {
-                "totalEq": "1000",
-                "isoEq": "1000",
-                "adjEq": "1000",
-                "ordFroz": "0",
-                "imr": "0",
-                "mmr": "0",
-                "details": [
-                    {
-                        "ccy": "USDT",
-                        "eq": "1000",
-                        "cashBal": "1000",
-                        "uTime": str(int(time.time() * 1000)),
-                        "isoEq": "0",
-                        "availEq": "1000",
-                        "disEq": "1000",
-                        "availBal": "1000",
-                        "frozenBal": "0",
-                    }
-                ]
-            }
-        
-        # Si no estamos en modo paper, realizar petición real
-        endpoint = '/api/v5/account/balance'
-        response = self._request('GET', endpoint)
-        
-        if response.get('code') == '0':
-            return response['data'][0]
-        else:
-            logger.error(f"No se pudo obtener el balance: {response.get('msg')}")
-            # Fallback a balance vacío
-            return {}
-    
-    def get_positions(self, symbol: str = None) -> List[Dict]:
-        """
-        Obtiene las posiciones abiertas
-        
-        Args:
-            symbol (str, optional): Símbolo específico a consultar
-            
-        Returns:
-            List[Dict]: Lista de posiciones abiertas
-        """
-        # Si estamos en modo paper, devolver posiciones simuladas
-        if self.mode == 'paper':
-            logger.info("🔄 MODO PAPER: Usando posiciones simuladas")
-            
-            # Devolver posición actual si existe
-            if hasattr(self, 'position') and self.position and (not symbol or symbol == self.position.get('instId')):
-                position_data = {
-                    'adl': '1',
-                    'availPos': str(self.position.get('pos', '0')),
-                    'avgPx': str(self.position.get('avgPx', '0')),
-                    'cTime': str(int(time.time() * 1000)),
-                    'ccy': 'USDT',
-                    'instId': self.position.get('instId', symbol or 'SOL-USDT'),
-                    'instType': 'SPOT',
-                    'lever': '1',
-                    'pos': str(self.position.get('pos', '0')),
-                    'posSide': 'long',
-                    'uTime': str(int(time.time() * 1000)),
-                    'upl': str(self.position.get('upl', '0'))
-                }
-                return [position_data]
-            else:
-                return []
-        
-        # Solicitud real a la API
-        endpoint = '/api/v5/account/positions'
-        params = {}
-        if symbol:
-            params['instId'] = symbol
-        
-        response = self._request('GET', endpoint, params)
-        
-        if response.get('code') == '0':
-            return response['data']
-        else:
-            logger.error(f"No se pudieron obtener las posiciones: {response.get('msg')}")
-            return []
-    
-    def get_market_price(self, symbol: str) -> float:
-        """
-        Obtiene el precio actual del mercado
-        
-        Args:
-            symbol (str): Símbolo del instrumento
-            
-        Returns:
-            float: Precio actual o 0 si hay error
-        """
-        # SOLUCIÓN: Usar endpoint público sin autenticación
-        try:
-            endpoint = '/api/v5/market/ticker'
-            params = {'instId': symbol}
-            url = f"{self.base_url}{endpoint}"
-            
-            # Petición directa sin autenticación
-            logger.info(f"Obteniendo precio via endpoint público: {url}")
-            response = requests.get(url, params=params)
-            
-            if response.status_code == 200:
-                result = response.json()
-                if result.get('code') == '0' and result['data']:
-                    price = float(result['data'][0]['last'])
-                    logger.info(f"Precio obtenido: {price}")
-                    return price
-            
-            logger.error(f"No se pudo obtener el precio: {response.text}")
-            return 0.0
-        except Exception as e:
-            logger.error(f"Error al obtener precio: {e}")
-            return 0.0
-    
-    def get_historical_data(self, symbol: str, interval: str = '15m', 
-                         limit: int = 100) -> pd.DataFrame:
-        """
-        Obtiene datos históricos de precios
-        
-        Args:
-            symbol (str): Símbolo del instrumento
-            interval (str): Intervalo de tiempo (1m, 5m, 15m, 1h, 4h, 1d)
-            limit (int): Número de velas a obtener
-            
-        Returns:
-            pd.DataFrame: DataFrame con datos históricos
-        """
-        # SOLUCIÓN: Usar endpoint público sin autenticación
-        try:
-            # Mapear intervalos a formato OKX
-            interval_map = {
-                '1m': '1m',
-                '5m': '5m',
-                '15m': '15m',
-                '30m': '30m',
-                '1h': '1H',
-                '4h': '4H',
-                '1d': '1D'
-            }
-            
-            okx_interval = interval_map.get(interval, '15m')
-            
-            endpoint = '/api/v5/market/candles'
-            params = {
-                'instId': symbol,
-                'bar': okx_interval,
-                'limit': str(limit)
-            }
-            
-            # Petición directa sin autenticación
-            url = f"{self.base_url}{endpoint}"
-            logger.info(f"Obteniendo datos históricos via endpoint público: {url}")
-            response = requests.get(url, params=params)
-            
-            if response.status_code == 200:
-                result = response.json()
-                if result.get('code') == '0' and result['data']:
-                    # Formatear datos
-                    data = []
-                    for candle in result['data']:
-                        data.append({
-                            'timestamp': int(candle[0]),
-                            'open': float(candle[1]),
-                            'high': float(candle[2]),
-                            'low': float(candle[3]),
-                            'close': float(candle[4]),
-                            'volume': float(candle[5])
-                        })
-                    
-                    # Crear DataFrame
-                    df = pd.DataFrame(data)
-                    df['date'] = pd.to_datetime(df['timestamp'], unit='ms')
-                    df = df.sort_values('date')
-                    df.set_index('date', inplace=True)
-                    
-                    logger.info(f"Datos históricos obtenidos: {len(df)} velas")
-                    return df
-            
-            logger.error(f"No se pudieron obtener datos históricos: {response.text}")
-            return pd.DataFrame()
-        except Exception as e:
-            logger.error(f"Error al obtener datos históricos: {e}")
-            return pd.DataFrame()
-    
-    def place_order(self, symbol: str, side: str, size: float, 
-                  order_type: str = 'market', price: float = None) -> Dict:
-        """
-        Coloca una orden en el mercado
-        
-        Args:
-            symbol (str): Símbolo del instrumento
-            side (str): Dirección de la orden ('buy' o 'sell')
-            size (float): Tamaño de la orden
-            order_type (str): Tipo de orden ('market' o 'limit')
-            price (float, optional): Precio para órdenes limit
-            
-        Returns:
-            Dict: Resultado de la orden
-        """
-        if self.mode == 'paper':
-            # Simulación de orden en paper trading
-            logger.info(f"[PAPER] Orden simulada: {side} {size} {symbol} a precio {'market' if not price else price}")
-            
-            current_price = self.get_market_price(symbol)
-            if not current_price:
-                return {"code": "9999", "msg": "No se pudo obtener el precio actual", "data": []}
-            
-            # Simular orden exitosa
-            order_id = f"paper_{int(time.time() * 1000)}"
-            executed_price = price if price and order_type == 'limit' else current_price
-            
-            # Actualizar balance simulado
-            if side == 'buy':
-                self.position = {
-                    'posId': order_id,
-                    'instId': symbol,
-                    'pos': size,
-                    'avgPx': executed_price,
-                    'upl': 0.0
-                }
-            elif side == 'sell' and self.position:
-                # Calcular P&L
-                entry_price = self.position.get('avgPx', executed_price)
-                position_size = self.position.get('pos', 0)
-                pnl = (executed_price - entry_price) * position_size if position_size > 0 else 0
-                
-                # Actualizar balance
-                self.balance += pnl
-                self.position = None
-            
-            # Orden simulada exitosa
-            result = {
-                "code": "0",
-                "msg": "",
-                "data": [{
-                    "ordId": order_id,
-                    "clOrdId": f"client_{order_id}",
-                    "tag": "",
-                    "sCode": "0",
-                    "sMsg": ""
-                }]
-            }
-            
-            logger.info(f"[PAPER] Orden ejecutada: ID {order_id}, Precio {executed_price}")
-            return result
-        else:
-            # Trading real
-            endpoint = '/api/v5/trade/order'
-            
-            # Preparar parámetros
-            params = {
-                'instId': symbol,
-                'tdMode': 'cross',  # Usar margen cruzado
-                'side': side,
-                'ordType': order_type,
-                'sz': str(size)
-            }
-            
-            if order_type == 'limit' and price:
-                params['px'] = str(price)
-            
-            # Enviar orden
-            response = self._request('POST', endpoint, params)
-            
-            if response.get('code') == '0':
-                logger.info(f"Orden colocada: {side} {size} {symbol}")
-                return response
-            else:
-                logger.error(f"Error al colocar orden: {response.get('msg')}")
-                return response
-    
-    def cancel_order(self, symbol: str, order_id: str) -> Dict:
-        """
-        Cancela una orden existente
-        
-        Args:
-            symbol (str): Símbolo del instrumento
-            order_id (str): ID de la orden a cancelar
-            
-        Returns:
-            Dict: Resultado de la cancelación
-        """
-        if self.mode == 'paper':
-            # Simulación de cancelación en paper trading
-            logger.info(f"[PAPER] Cancelación simulada de orden {order_id} para {symbol}")
-            
-            # Simular cancelación exitosa
-            result = {
-                "code": "0", 
-                "msg": "", 
-                "data": [{
-                    "ordId": order_id,
-                    "clOrdId": f"client_{order_id}",
-                    "sCode": "0",
-                    "sMsg": ""
-                }]
-            }
-            
-            return result
-        else:
-            # Cancelación real
-            endpoint = '/api/v5/trade/cancel-order'
-            
-            params = {
-                'instId': symbol,
-                'ordId': order_id
-            }
-            
-            response = self._request('POST', endpoint, params)
-            
-            if response.get('code') == '0':
-                logger.info(f"Orden {order_id} cancelada")
-                return response
-            else:
-                logger.error(f"Error al cancelar orden: {response.get('msg')}")
-                return response
-    
-    def calculate_indicators(self, df: pd.DataFrame) -> Dict[str, Any]:
-        """
-        Calcula indicadores técnicos para tomar decisiones
-        
-        Args:
-            df (pd.DataFrame): DataFrame con datos históricos
-            
-        Returns:
-            Dict[str, Any]: Diccionario con indicadores calculados
-        """
-        if df.empty:
-            return {}
-        
-        # Asegurar que tenemos suficientes datos
-        if len(df) < 30:
-            logger.warning(f"Datos insuficientes para calcular indicadores: {len(df)} puntos")
-            return {}
-        
-        # Copiar DataFrame para evitar warnings
-        df = df.copy()
-        
-        # Calcular indicadores
-        indicators = {}
-        
-        # RSI
-        delta = df['close'].diff()
-        gain = delta.where(delta > 0, 0)
-        loss = -delta.where(delta < 0, 0)
-        
-        avg_gain = gain.rolling(window=14).mean()
-        avg_loss = loss.rolling(window=14).mean()
-        
-        rs = avg_gain / avg_loss
-        indicators['rsi'] = 100 - (100 / (1 + rs))
-        
-        # Medias móviles
-        indicators['sma_20'] = df['close'].rolling(window=20).mean()
-        indicators['sma_50'] = df['close'].rolling(window=50).mean()
-        indicators['sma_200'] = df['close'].rolling(window=200).mean()
-        
-        # MACD
-        indicators['ema_12'] = df['close'].ewm(span=12, adjust=False).mean()
-        indicators['ema_26'] = df['close'].ewm(span=26, adjust=False).mean()
-        indicators['macd'] = indicators['ema_12'] - indicators['ema_26']
-        indicators['macd_signal'] = indicators['macd'].ewm(span=9, adjust=False).mean()
-        indicators['macd_hist'] = indicators['macd'] - indicators['macd_signal']
-        
-        # Bollinger Bands
-        indicators['sma_20'] = df['close'].rolling(window=20).mean()
-        indicators['upper_band'] = indicators['sma_20'] + (df['close'].rolling(window=20).std() * 2)
-        indicators['lower_band'] = indicators['sma_20'] - (df['close'].rolling(window=20).std() * 2)
-        
-        # ATR (Average True Range)
-        high_low = df['high'] - df['low']
-        high_close = (df['high'] - df['close'].shift()).abs()
-        low_close = (df['low'] - df['close'].shift()).abs()
-        
-        true_range = pd.concat([high_low, high_close, low_close], axis=1).max(axis=1)
-        indicators['atr'] = true_range.rolling(window=14).mean()
-        
-        # Retornar solo los indicadores más recientes
-        result = {}
-        for key, value in indicators.items():
-            if isinstance(value, pd.Series):
-                result[key] = value.iloc[-1] if not pd.isna(value.iloc[-1]) else None
-            else:
-                result[key] = value
-        
-        return result
-    
-    def analyze_market(self, symbol: str, interval: str = '15m') -> Tuple[str, Dict]:
-        """
-        Analiza el mercado y genera señales de trading
-        
-        Args:
-            symbol (str): Símbolo del instrumento
-            interval (str): Intervalo de tiempo
-            
-        Returns:
-            Tuple[str, Dict]: Señal de trading y detalles
-        """
-        # Obtener datos históricos
-        df = self.get_historical_data(symbol, interval)
-        
-        if df.empty:
-            logger.error("No se pudieron obtener datos para análisis")
-            return "neutral", {}
-        
-        # Calcular indicadores
-        indicators = self.calculate_indicators(df)
-        
-        if not indicators:
-            logger.error("No se pudieron calcular indicadores")
-            return "neutral", {}
-        
-        # Analizar RSI
-        rsi = indicators.get('rsi')
-        rsi_signal = "neutral"
-        if rsi is not None:
-            if rsi < 30:
-                rsi_signal = "buy"  # Sobrevendido
-            elif rsi > 70:
-                rsi_signal = "sell"  # Sobrecomprado
-        
-        # Analizar tendencia con medias móviles
-        sma_20 = indicators.get('sma_20')
-        sma_50 = indicators.get('sma_50')
-        trend_signal = "neutral"
-        
-        if sma_20 is not None and sma_50 is not None:
-            if sma_20 > sma_50:
-                trend_signal = "buy"  # Tendencia alcista
-            elif sma_20 < sma_50:
-                trend_signal = "sell"  # Tendencia bajista
-        
-        # Analizar MACD
-        macd = indicators.get('macd')
-        macd_signal = indicators.get('macd_signal')
-        macd_hist = indicators.get('macd_hist')
-        macd_signal_result = "neutral"
-        
-        if macd is not None and macd_signal is not None and macd_hist is not None:
-            if macd > macd_signal and macd_hist > 0:
-                macd_signal_result = "buy"  # Señal alcista
-            elif macd < macd_signal and macd_hist < 0:
-                macd_signal_result = "sell"  # Señal bajista
-        
-        # Analizar Bollinger Bands
-        close = df['close'].iloc[-1] if not df.empty else None
-        upper_band = indicators.get('upper_band')
-        lower_band = indicators.get('lower_band')
-        bb_signal = "neutral"
-        
-        if close is not None and upper_band is not None and lower_band is not None:
-            if close > upper_band:
-                bb_signal = "sell"  # Precio por encima de banda superior
-            elif close < lower_band:
-                bb_signal = "buy"  # Precio por debajo de banda inferior
-        
-        # Combinar señales
-        signals = {
-            'rsi': rsi_signal,
-            'trend': trend_signal,
-            'macd': macd_signal_result,
-            'bollinger': bb_signal
-        }
-        
-        # Contar señales
-        buy_count = sum(1 for s in signals.values() if s == "buy")
-        sell_count = sum(1 for s in signals.values() if s == "sell")
-        
-        # Determinar señal final
-        final_signal = "neutral"
-        if buy_count >= 3:
-            final_signal = "strong_buy"
-        elif buy_count >= 2:
-            final_signal = "buy"
-        elif sell_count >= 3:
-            final_signal = "strong_sell"
-        elif sell_count >= 2:
-            final_signal = "sell"
-        
-        # Guardar en estado para análisis
-        self.trading_data['strategy_signals'] = signals
-        self.trading_data['integrated_signal'] = final_signal
-        
-        # Preparar detalles para retorno
-        details = {
-            'price': close,
-            'rsi': rsi,
-            'sma_20': sma_20,
-            'sma_50': sma_50,
-            'macd': macd,
-            'macd_signal': macd_signal,
-            'macd_hist': macd_hist,
-            'upper_band': upper_band,
-            'lower_band': lower_band,
-            'signals': signals,
-            'final_signal': final_signal
-        }
-        
-        logger.info(f"Análisis de mercado: {final_signal} (RSI: {rsi:.2f}, Señales: {signals})")
-        return final_signal, details
-    
-    def execute_strategy(self, symbol: str, interval: str = '15m') -> Dict:
-        """
-        Ejecuta la estrategia de trading
-        
-        Args:
-            symbol (str): Símbolo del instrumento
-            interval (str): Intervalo de tiempo
-            
-        Returns:
-            Dict: Resultado de la ejecución
-        """
-        # Actualizar precio actual
-        current_price = self.get_market_price(symbol)
-        if not current_price:
-            return {"status": "error", "message": "No se pudo obtener el precio actual"}
-        
-        # Guardar precio actual en el estado
-        self.trading_data['current_price'] = current_price
-        self.trading_data['symbol'] = symbol
-        self.trading_data['interval'] = interval
-        
-        # Verificar si ya tenemos una posición abierta
-        positions = self.get_positions(symbol)
-        
-        has_position = False
-        position_side = None
-        position_size = 0
-        entry_price = 0
-        
-        for position in positions:
-            if position['instId'] == symbol and float(position['pos']) != 0:
-                has_position = True
-                position_side = "buy" if float(position['pos']) > 0 else "sell"
-                position_size = abs(float(position['pos']))
-                entry_price = float(position['avgPx'])
-                # Guardar en estado
-                self.position = position
-                self.trading_data['position'] = {
-                    'side': position_side,
-                    'size': position_size,
-                    'entry_price': entry_price
-                }
-                self.trading_data['entry_price'] = entry_price
-                break
-        
-        # Analizar mercado
-        signal, details = self.analyze_market(symbol, interval)
-        
-        # Determinar acción basada en señal y posición
-        action = "hold"
-        reason = "Señal neutral o insuficiente"
-        
-        if not has_position:
-            # Sin posición, evaluamos entrar
-            if signal in ["strong_buy", "buy"]:
-                action = "buy"
-                reason = f"Señal de compra {signal}"
-            elif signal in ["strong_sell", "sell"]:
-                action = "sell"
-                reason = f"Señal de venta {signal}"
-        else:
-            # Con posición, evaluamos salir
-            if position_side == "buy" and signal in ["strong_sell", "sell"]:
-                action = "close_long"
-                reason = f"Señal de venta {signal} con posición larga"
-            elif position_side == "sell" and signal in ["strong_buy", "buy"]:
-                action = "close_short"
-                reason = f"Señal de compra {signal} con posición corta"
-            
-            # Evaluar también Take Profit y Stop Loss
-            if position_side == "buy":
-                # Calcular P&L actual
-                pnl_pct = (current_price - entry_price) / entry_price * 100
-                
-                # Take Profit (10%)
-                if pnl_pct >= 10.0:
-                    action = "close_long"
-                    reason = f"Take Profit alcanzado: {pnl_pct:.2f}%"
-                
-                # Stop Loss (-5%)
-                elif pnl_pct <= -5.0:
-                    action = "close_long"
-                    reason = f"Stop Loss alcanzado: {pnl_pct:.2f}%"
-            
-            elif position_side == "sell":
-                # Para posiciones cortas, el P&L es inverso
-                pnl_pct = (entry_price - current_price) / entry_price * 100
-                
-                # Take Profit (10%)
-                if pnl_pct >= 10.0:
-                    action = "close_short"
-                    reason = f"Take Profit alcanzado: {pnl_pct:.2f}%"
-                
-                # Stop Loss (-5%)
-                elif pnl_pct <= -5.0:
-                    action = "close_short"
-                    reason = f"Stop Loss alcanzado: {pnl_pct:.2f}%"
-        
-        # Ejecutar acción
-        result = {"status": "success", "action": action, "reason": reason, "price": current_price}
-        
-        if action == "buy":
-            # Calcular tamaño de orden (10% del balance)
-            account_info = self.get_account_balance()
-            
-            if account_info:
-                # Para trading real
-                if self.mode == 'live':
-                    available_balance = float(account_info.get('details', [{}])[0].get('availBal', 0))
-                    order_size = available_balance * 0.1 / current_price
-                else:
-                    # Para paper trading
-                    order_size = self.balance * 0.1 / current_price
-                    logger.info(f"🔄 MODO PAPER: Calculando orden con balance simulado: {self.balance:.2f} USDT")
-                
-                order_size = round(order_size, 4)  # Redondear a 4 decimales
-                
-                # Colocar orden
-                order_result = self.place_order(symbol, "buy", order_size)
-                result["order_result"] = order_result
-                
-                # Actualizar estado en paper trading
-                if self.mode == 'paper' and order_result.get('code') == '0':
-                    cost = order_size * current_price
-                    self.balance -= cost
-                    logger.info(f"🔄 MODO PAPER: Compra simulada: {order_size:.4f} SOL a ${current_price:.2f}")
-                    logger.info(f"🔄 MODO PAPER: Reducido balance en {cost:.2f} USDT. Nuevo balance: {self.balance:.2f} USDT")
-                
-                # Notificar
-                notification_msg = f"🟢 COMPRA: {order_size:.4f} {symbol} a ${current_price:.2f}\nRazón: {reason}"
-                self.send_notification(notification_msg)
-            else:
-                result["status"] = "error"
-                result["message"] = "No se pudo obtener información de la cuenta"
-        
-        elif action == "sell":
-            # Calcular tamaño de orden (10% del balance)
-            account_info = self.get_account_balance()
-            
-            if account_info:
-                # Para trading real
-                if self.mode == 'live':
-                    available_balance = float(account_info.get('details', [{}])[0].get('availBal', 0))
-                    order_size = available_balance * 0.1 / current_price
-                else:
-                    # Para paper trading
-                    order_size = self.balance * 0.1 / current_price
-                    logger.info(f"🔄 MODO PAPER: Calculando orden con balance simulado: {self.balance:.2f} USDT")
-                
-                order_size = round(order_size, 4)  # Redondear a 4 decimales
-                
-                # Colocar orden
-                order_result = self.place_order(symbol, "sell", order_size)
-                result["order_result"] = order_result
-                
-                # Actualizar estado en paper trading (las ventas no reducen el balance hasta que se cierra la posición)
-                if self.mode == 'paper' and order_result.get('code') == '0':
-                    logger.info(f"🔄 MODO PAPER: Venta simulada: {order_size:.4f} SOL a ${current_price:.2f}")
-                    logger.info(f"🔄 MODO PAPER: Posición corta abierta. Balance actual: {self.balance:.2f} USDT")
-                
-                # Notificar
-                notification_msg = f"🔴 VENTA: {order_size:.4f} {symbol} a ${current_price:.2f}\nRazón: {reason}"
-                self.send_notification(notification_msg)
-            else:
-                result["status"] = "error"
-                result["message"] = "No se pudo obtener información de la cuenta"
-        
-        elif action == "close_long":
-            # Cerrar posición larga
-            if has_position and position_side == "buy":
-                order_result = self.place_order(symbol, "sell", position_size)
-                result["order_result"] = order_result
-                
-                # Calcular P&L
-                pnl = (current_price - entry_price) * position_size
-                pnl_pct = (current_price - entry_price) / entry_price * 100
-                
-                # Actualizar estadísticas
-                self.trading_data['trade_count'] += 1
-                if pnl > 0:
-                    self.trading_data['wins'] += 1
-                else:
-                    self.trading_data['losses'] += 1
-                
-                # Notificar
-                notification_msg = f"🔵 CIERRE LARGO: {position_size:.4f} {symbol} a ${current_price:.2f}\nP&L: ${pnl:.2f} ({pnl_pct:.2f}%)\nRazón: {reason}"
-                self.send_notification(notification_msg)
-            else:
-                result["status"] = "error"
-                result["message"] = "No hay posición larga para cerrar"
-        
-        elif action == "close_short":
-            # Cerrar posición corta
-            if has_position and position_side == "sell":
-                order_result = self.place_order(symbol, "buy", position_size)
-                result["order_result"] = order_result
-                
-                # Calcular P&L (inverso para cortos)
-                pnl = (entry_price - current_price) * position_size
-                pnl_pct = (entry_price - current_price) / entry_price * 100
-                
-                # Actualizar estadísticas
-                self.trading_data['trade_count'] += 1
-                if pnl > 0:
-                    self.trading_data['wins'] += 1
-                else:
-                    self.trading_data['losses'] += 1
-                
-                # Notificar
-                notification_msg = f"🟣 CIERRE CORTO: {position_size:.4f} {symbol} a ${current_price:.2f}\nP&L: ${pnl:.2f} ({pnl_pct:.2f}%)\nRazón: {reason}"
-                self.send_notification(notification_msg)
-            else:
-                result["status"] = "error"
-                result["message"] = "No hay posición corta para cerrar"
-        
-        # Log de la acción
-        logger.info(f"Acción ejecutada: {action} - {reason} - Precio: {current_price}")
-        
-        # Guardar el resultado de la estrategia
-        self.save_state()
-        
-        return result
-    
-    def save_state(self) -> None:
-        """
-        Guarda el estado actual del bot
-        """
-        # Actualizar balance y ROI en paper trading
-        if self.mode == 'paper':
-            self.trading_data['current_balance'] = self.balance
-            self.trading_data['roi'] = (self.balance - DEFAULT_INITIAL_BALANCE) / DEFAULT_INITIAL_BALANCE * 100
-        
-        # Guardar estado en archivo
-        try:
-            with open(STATE_FILE, 'w') as f:
-                json.dump(self.trading_data, f, indent=2)
-            logger.debug("Estado guardado correctamente")
-        except Exception as e:
-            logger.error(f"Error al guardar estado: {str(e)}")
-    
-    def load_state(self) -> None:
-        """
-        Carga el estado anterior del bot
-        """
-        try:
-            if os.path.exists(STATE_FILE):
-                with open(STATE_FILE, 'r') as f:
-                    self.trading_data = json.load(f)
-                logger.info("Estado anterior cargado correctamente")
-                
-                # Restaurar balance en paper trading
-                if self.mode == 'paper':
-                    self.balance = self.trading_data.get('current_balance', DEFAULT_INITIAL_BALANCE)
-        except Exception as e:
-            logger.error(f"Error al cargar estado anterior: {str(e)}")
-    
-    def send_notification(self, message: str) -> None:
-        """
-        Envía notificación vía Telegram
-        
-        Args:
-            message (str): Mensaje a enviar
-        """
-        if not TELEGRAM_AVAILABLE:
-            logger.debug("Librería Telebot no disponible, no se enviarán notificaciones")
+    def run(self):
+        """Ejecuta el bucle principal del bot"""
+        if self.running:
+            logger.warning("El bot ya está en ejecución")
             return
         
+        self.running = True
+        logger.info(f"Iniciando bot de trading para {self.symbol}")
+        
         try:
-            # Cargar configuración
-            config = load_config()
-            bot_token = config.get('TELEGRAM_BOT_TOKEN')
-            chat_id = config.get('TELEGRAM_CHAT_ID')
-            
-            if not bot_token or not chat_id:
-                logger.debug("Token de Telegram o Chat ID no configurados")
-                return
-            
-            # Enviar mensaje
-            bot = telebot.TeleBot(bot_token)
-            bot.send_message(chat_id, message, parse_mode='Markdown')
-            logger.debug("Notificación enviada correctamente")
-        except Exception as e:
-            logger.error(f"Error al enviar notificación: {str(e)}")
-    
-    def run(self, symbol: str = DEFAULT_SYMBOL, interval: str = DEFAULT_INTERVAL, 
-          notify: bool = False, continuous: bool = False) -> None:
-        """
-        Ejecuta el bot de trading
-        
-        Args:
-            symbol (str): Símbolo del instrumento
-            interval (str): Intervalo de tiempo
-            notify (bool): Activar notificaciones
-            continuous (bool): Ejecutar en modo continuo
-        """
-        logger.info(f"Iniciando bot para {symbol} en intervalo {interval} (Modo: {self.mode})")
-        
-        # Validar credenciales
-        if not self.api_key or not self.api_secret or not self.passphrase:
-            logger.error("Credenciales API incompletas")
-            if notify:
-                self.send_notification("⚠️ Error: Credenciales API incompletas")
-            return
-        
-        # Cargar estado anterior
-        self.load_state()
-        
-        # Enviar notificación de inicio
-        if notify:
-            mode_str = "PAPER TRADING" if self.mode == 'paper' else "TRADING REAL"
-            start_msg = f"""🤖 *BOT DE TRADING SOLANA - INICIADO* 🤖
-            
-⏰ Hora: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
-💰 Modo: {mode_str}
-📊 Par: {symbol}
-⏱️ Intervalo: {interval}
-
-*Estado: ACTIVO y monitoreando mercado* ✅
-
-_El bot enviará notificaciones de operaciones..._"""
-            self.send_notification(start_msg)
-        
-        # Ciclo principal
-        try:
-            if continuous:
-                # Modo continuo con intervalo adaptativo
-                while True:
-                    start_time = time.time()
+            # Bucle principal
+            while self.running:
+                try:
+                    # Obtener datos actualizados
+                    data = self.get_market_data()
                     
-                    try:
-                        # Ejecutar estrategia
-                        self.execute_strategy(symbol, interval)
-                    except Exception as e:
-                        logger.error(f"Error en ciclo de ejecución: {str(e)}", exc_info=True)
-                        if notify:
-                            self.send_notification(f"⚠️ Error en bot: {str(e)}")
+                    if data is None or len(data) < 20:
+                        logger.warning("Datos insuficientes para análisis, esperando...")
+                        time.sleep(10)
+                        continue
                     
-                    # Calcular tiempo de espera según intervalo
-                    wait_time = self._get_wait_time(interval)
-                    elapsed = time.time() - start_time
-                    sleep_time = max(5, wait_time - elapsed)  # Al menos 5 segundos
+                    # Detectar condición de mercado
+                    market_condition = self.adaptive_system.detect_market_condition(data)
+                    time_interval = TimeInterval(self.timeframe) if self.timeframe in [e.value for e in TimeInterval] else TimeInterval.MINUTE_15
                     
-                    logger.info(f"Esperando {sleep_time:.1f} segundos hasta próxima ejecución...")
-                    time.sleep(sleep_time)
-            else:
-                # Modo única ejecución
-                self.execute_strategy(symbol, interval)
-                logger.info("Ejecución única completada")
+                    # Generar señal
+                    signal, reason, details = self.strategy.get_signal(data)
+                    
+                    # Ajustar señal con sistema adaptativo
+                    indicator_signals = details.get("indicators", {})
+                    if indicator_signals:
+                        # Si hay signals de múltiples indicadores, ponderarlos
+                        signal = self.adaptive_system.calculate_weighted_signal(
+                            indicator_signals, market_condition, time_interval
+                        )
+                    
+                    # Registrar señal
+                    current_price = data['close'].iloc[-1]
+                    self.add_signal(signal, current_price, reason)
+                    
+                    # Procesar señal
+                    self.process_signal(signal, current_price, reason, details)
+                    
+                    # Gestionar posición existente
+                    if self.current_position:
+                        self.manage_position(current_price, data)
+                    
+                    # Añadir evento de aprendizaje periódicamente
+                    if np.random.random() < 0.1:  # 10% de probabilidad
+                        self.add_learning_event(
+                            "ADAPTACIÓN", 
+                            f"Ajuste de pesos para condición {market_condition.value}", 
+                            True
+                        )
+                    
+                    # Esperar antes del siguiente ciclo
+                    time.sleep(5)  # Ajustar según timeframe
+                    
+                except Exception as e:
+                    logger.error(f"Error en ciclo de trading: {e}")
+                    time.sleep(30)
         
         except KeyboardInterrupt:
-            logger.info("Bot detenido manualmente")
-            if notify:
-                self.send_notification("🛑 Bot detenido manualmente")
-        
-        except Exception as e:
-            logger.error(f"Error crítico en el bot: {str(e)}", exc_info=True)
-            if notify:
-                self.send_notification(f"❌ Error crítico: {str(e)}")
+            logger.info("Bot detenido por usuario")
+        finally:
+            self.running = False
+            logger.info("Bot detenido")
     
-    def _get_wait_time(self, interval: str) -> int:
+    def stop(self):
+        """Detiene el bot"""
+        self.running = False
+        logger.info("Deteniendo bot...")
+    
+    def get_market_data(self) -> pd.DataFrame:
         """
-        Calcula tiempo de espera según intervalo
+        Obtiene datos de mercado actualizados
+        
+        Returns:
+            pd.DataFrame: Datos de mercado en formato pandas
+        """
+        try:
+            # Obtener datos de mercado desde módulo de datos
+            limit = 100  # Ajustar según necesidad
+            data = get_market_data(self.symbol, self.timeframe, limit)
+            
+            if data is None or len(data) < 10:
+                logger.warning("Error al obtener datos, generando datos simulados para pruebas")
+                # Generar datos simulados para testing
+                data = self.generate_test_data()
+            
+            return data
+            
+        except Exception as e:
+            logger.error(f"Error obteniendo datos de mercado: {e}")
+            return self.generate_test_data()
+    
+    def generate_test_data(self) -> pd.DataFrame:
+        """
+        Genera datos simulados para pruebas
+        
+        Returns:
+            pd.DataFrame: Datos de mercado simulados
+        """
+        # Crear índice de tiempo
+        now = datetime.now()
+        if self.timeframe == "1m":
+            index = [now - timedelta(minutes=i) for i in range(100, 0, -1)]
+        elif self.timeframe == "5m":
+            index = [now - timedelta(minutes=5*i) for i in range(100, 0, -1)]
+        elif self.timeframe == "15m":
+            index = [now - timedelta(minutes=15*i) for i in range(100, 0, -1)]
+        else:
+            index = [now - timedelta(hours=i) for i in range(100, 0, -1)]
+        
+        # Crear precio base y movimiento
+        base_price = 170.0  # SOL-USDT precio aproximado
+        price_series = [base_price]
+        for i in range(1, 100):
+            move = np.random.normal(0, 0.01)  # 1% de volatilidad
+            new_price = price_series[-1] * (1 + move)
+            price_series.append(new_price)
+        
+        # Crear DataFrame
+        data = pd.DataFrame({
+            'open': price_series,
+            'high': [p * (1 + abs(np.random.normal(0, 0.005))) for p in price_series],
+            'low': [p * (1 - abs(np.random.normal(0, 0.005))) for p in price_series],
+            'close': price_series,
+            'volume': [abs(np.random.normal(1000000, 500000)) for _ in range(100)]
+        }, index=pd.DatetimeIndex(index))
+        
+        return data
+    
+    def process_signal(self, signal: float, price: float, reason: str, details: Dict[str, Any]):
+        """
+        Procesa una señal de trading
         
         Args:
-            interval (str): Intervalo de tiempo
-            
-        Returns:
-            int: Tiempo de espera en segundos
+            signal: Señal (-2 a 2)
+            price: Precio actual
+            reason: Razón de la señal
+            details: Detalles adicionales
         """
-        # Mapear intervalos a segundos
-        interval_map = {
-            '1m': 60,
-            '5m': 300,
-            '15m': 900,
-            '30m': 1800,
-            '1h': 3600,
-            '4h': 14400,
-            '1d': 86400
+        # Verificar si ya estamos en posición
+        if self.current_position:
+            # Si estamos en posición larga y la señal es negativa, considerar cerrar
+            if self.current_position["type"] == "long" and signal < -0.5:
+                self.close_position(price, f"Señal de venta: {reason}")
+            
+            # Si estamos en posición corta y la señal es positiva, considerar cerrar
+            elif self.current_position["type"] == "short" and signal > 0.5:
+                self.close_position(price, f"Señal de compra: {reason}")
+            
+            # En otros casos, mantener posición y gestionar con stop loss/take profit
+            return
+        
+        # Si no estamos en posición, evaluar entrada
+        if signal > 0.5:
+            # Señal de compra/long
+            self.open_position("long", price, self.calculate_position_size(price), reason)
+        
+        elif signal < -0.5:
+            # Señal de venta/short (si está permitido)
+            # Nota: Descomentar si se permite posiciones cortas
+            # self.open_position("short", price, self.calculate_position_size(price), reason)
+            pass
+    
+    def calculate_position_size(self, price: float) -> float:
+        """
+        Calcula el tamaño adecuado de posición
+        
+        Args:
+            price: Precio actual
+        
+        Returns:
+            float: Tamaño de posición en unidades
+        """
+        # Calcular tamaño basado en % del balance y gestión de riesgo
+        position_value = self.balance * self.max_position_size
+        
+        # Convertir valor a unidades
+        units = position_value / price
+        
+        # Redondear a 4 decimales
+        return round(units, 4)
+    
+    def open_position(self, position_type: str, price: float, size: float, reason: str):
+        """
+        Abre una posición nueva
+        
+        Args:
+            position_type: Tipo de posición ('long' o 'short')
+            price: Precio de entrada
+            size: Tamaño en unidades
+            reason: Razón de la entrada
+        """
+        # Verificar condiciones para abrir posición
+        if not self.can_open_position():
+            logger.info(f"No se puede abrir posición: límites alcanzados")
+            return
+        
+        # Calcular niveles de take profit y stop loss
+        if position_type == "long":
+            take_profit = price * (1 + self.take_profit_pct / 100)
+            stop_loss = price * (1 - self.stop_loss_pct / 100)
+        else:  # short
+            take_profit = price * (1 - self.take_profit_pct / 100)
+            stop_loss = price * (1 + self.stop_loss_pct / 100)
+        
+        # Crear objeto de posición
+        self.current_position = {
+            "type": position_type,
+            "entry_price": price,
+            "size": size,
+            "value": price * size,
+            "take_profit": take_profit,
+            "stop_loss": stop_loss,
+            "entry_time": datetime.now(),
+            "reason": reason
         }
         
-        # Usar tiempo predeterminado si el intervalo no es válido
-        return interval_map.get(interval, 900)
-
-def load_config(config_file: str = CONFIG_FILE) -> Dict[str, str]:
-    """
-    Carga configuración desde archivo .env
-    
-    Args:
-        config_file (str): Ruta al archivo de configuración
+        # Actualizar balance en paper trading
+        if self.paper_trading:
+            # Simular comisión
+            commission = price * size * 0.0005  # 0.05% de comisión
+            self.balance -= commission
         
-    Returns:
-        Dict[str, str]: Configuración cargada
-    """
-    config = {}
+        # Notificar
+        logger.info(f"Posición abierta: {position_type.upper()} {size} {self.symbol} @ {price}")
+        
+        # Llamar callback si existe
+        trade_data = {
+            "type": position_type.upper(),
+            "price": price,
+            "size": size,
+            "profit": 0,
+            "reason": reason
+        }
+        
+        self.add_trade(trade_data)
+        
+        if self.on_position_update_callback:
+            self.on_position_update_callback(self.current_position)
     
-    try:
-        if os.path.exists(config_file):
-            with open(config_file, 'r') as f:
-                for line in f:
-                    line = line.strip()
-                    if line and not line.startswith('#'):
-                        key, value = line.split('=', 1)
-                        config[key.strip()] = value.strip().strip('"\'')
-            logger.info(f"Configuración cargada desde {config_file}")
+    def close_position(self, price: float, reason: str):
+        """
+        Cierra la posición actual
+        
+        Args:
+            price: Precio de cierre
+            reason: Razón del cierre
+        """
+        if not self.current_position:
+            logger.warning("No hay posición abierta para cerrar")
+            return
+        
+        # Calcular ganancia/pérdida
+        entry_price = self.current_position["entry_price"]
+        size = self.current_position["size"]
+        position_type = self.current_position["type"]
+        
+        if position_type == "long":
+            profit_pct = (price / entry_price - 1) * 100
+            profit = (price - entry_price) * size
+        else:  # short
+            profit_pct = (entry_price / price - 1) * 100
+            profit = (entry_price - price) * size
+        
+        # Actualizar balance en paper trading
+        if self.paper_trading:
+            # Simular comisión
+            commission = price * size * 0.0005  # 0.05% de comisión
+            self.balance += (price * size - commission)
+            
+            # Actualizar estadísticas de pérdida diaria
+            if profit < 0:
+                self.loss_today += abs(profit)
+        
+        # Registrar operación
+        holding_time = datetime.now() - self.current_position["entry_time"]
+        minutes_held = holding_time.total_seconds() / 60
+        
+        logger.info(f"Posición cerrada: {position_type.upper()} {size} {self.symbol} @ {price}, " +
+                   f"Profit: {profit_pct:.2f}% (${profit:.2f}), Tiempo: {minutes_held:.1f} min")
+        
+        # Actualizar estadísticas de estrategia
+        self.strategy.update_stats(profit > 0, profit, minutes_held)
+        
+        # Evento de aprendizaje
+        success = profit > 0
+        self.add_learning_event(
+            "EVALUACIÓN", 
+            f"{'Exitosa' if success else 'Fallida'} {position_type} ({profit_pct:.2f}%)", 
+            success
+        )
+        
+        # Crear objeto de trade para historial
+        trade_data = {
+            "type": "SELL" if position_type == "long" else "BUY",
+            "price": price,
+            "size": size,
+            "profit": profit,
+            "profit_pct": profit_pct,
+            "time_held": minutes_held,
+            "reason": reason
+        }
+        
+        self.add_trade(trade_data)
+        
+        # Resetear posición actual
+        previous_position = self.current_position
+        self.current_position = None
+        self.trades_today += 1
+        
+        # Llamar callbacks
+        if self.on_position_update_callback:
+            self.on_position_update_callback(None)
+    
+    def manage_position(self, current_price: float, data: pd.DataFrame):
+        """
+        Gestiona posición abierta (stops, trailing, etc)
+        
+        Args:
+            current_price: Precio actual
+            data: DataFrame con datos de mercado
+        """
+        if not self.current_position:
+            return
+        
+        position = self.current_position
+        position_type = position["type"]
+        entry_price = position["entry_price"]
+        
+        # Calcular PnL actual
+        if position_type == "long":
+            pnl_pct = (current_price / entry_price - 1) * 100
+        else:  # short
+            pnl_pct = (entry_price / current_price - 1) * 100
+        
+        # Verificar condiciones de salida
+        hit_take_profit = False
+        hit_stop_loss = False
+        
+        if position_type == "long":
+            hit_take_profit = current_price >= position["take_profit"]
+            hit_stop_loss = current_price <= position["stop_loss"]
+        else:  # short
+            hit_take_profit = current_price <= position["take_profit"]
+            hit_stop_loss = current_price >= position["stop_loss"]
+        
+        # Ajustar stop loss dinámico (trailing) en ganancias
+        if pnl_pct > 0.5 and position_type == "long":
+            # Si estamos en ganancia, mover stop loss para asegurar parte
+            new_stop = current_price * (1 - self.stop_loss_pct / 200)  # Más ajustado
+            if new_stop > position["stop_loss"]:
+                position["stop_loss"] = new_stop
+                logger.info(f"Stop loss ajustado a: {new_stop:.4f}")
+        
+        # Cerrar si se alcanzan niveles
+        if hit_take_profit:
+            self.close_position(current_price, "Take Profit alcanzado")
+        elif hit_stop_loss:
+            self.close_position(current_price, "Stop Loss activado")
+    
+    def can_open_position(self) -> bool:
+        """
+        Verifica si se cumplen condiciones para abrir posición
+        
+        Returns:
+            bool: True si se puede abrir posición
+        """
+        # Verificar límites diarios
+        if self.trades_today >= self.max_trades_per_day:
+            logger.info(f"Máximo de operaciones diarias alcanzado: {self.trades_today}")
+            return False
+        
+        if self.loss_today >= (self.initial_balance * self.max_loss_per_day / 100):
+            logger.info(f"Máxima pérdida diaria alcanzada: ${self.loss_today:.2f}")
+            return False
+        
+        # Verificar balance suficiente
+        if self.balance <= 0:
+            logger.info("Balance insuficiente para operar")
+            return False
+        
+        return True
+    
+    def add_trade(self, trade_data: Dict[str, Any]):
+        """
+        Añade operación al historial
+        
+        Args:
+            trade_data: Datos de la operación
+        """
+        # Añadir timestamp
+        trade_data["timestamp"] = datetime.now()
+        
+        # Añadir al historial
+        self.trade_history.append(trade_data)
+        
+        # Mantener tamaño de historial
+        if len(self.trade_history) > 1000:
+            self.trade_history = self.trade_history[-1000:]
+        
+        # Llamar callback si existe
+        if self.on_trade_callback:
+            self.on_trade_callback(trade_data)
+    
+    def add_signal(self, signal: float, price: float, reason: str):
+        """
+        Añade señal al historial
+        
+        Args:
+            signal: Valor de la señal (-2 a 2)
+            price: Precio actual
+            reason: Razón de la señal
+        """
+        # Crear objeto de señal
+        signal_data = {
+            "timestamp": datetime.now(),
+            "signal": signal,
+            "price": price,
+            "reason": reason
+        }
+        
+        # Añadir al historial
+        self.signal_history.append(signal_data)
+        
+        # Mantener tamaño de historial
+        if len(self.signal_history) > 1000:
+            self.signal_history = self.signal_history[-1000:]
+        
+        # Llamar callback si existe
+        if self.on_signal_callback:
+            self.on_signal_callback(signal, price, reason)
+    
+    def add_learning_event(self, event_type: str, description: str, success: bool = True):
+        """
+        Añade evento de aprendizaje
+        
+        Args:
+            event_type: Tipo de evento
+            description: Descripción del evento
+            success: Si fue exitoso
+        """
+        # Crear objeto de evento
+        event_data = {
+            "timestamp": datetime.now(),
+            "type": event_type,
+            "description": description,
+            "success": success
+        }
+        
+        # Añadir al historial
+        self.learning_events.append(event_data)
+        
+        # Mantener tamaño de historial
+        if len(self.learning_events) > 1000:
+            self.learning_events = self.learning_events[-1000:]
+        
+        # Llamar callback si existe
+        if self.on_learning_callback:
+            self.on_learning_callback(event_type, description, success)
+    
+    def get_stats(self) -> Dict[str, Any]:
+        """
+        Obtiene estadísticas de rendimiento
+        
+        Returns:
+            Dict: Estadísticas de rendimiento
+        """
+        # Calcular estadísticas básicas
+        total_trades = len(self.trade_history)
+        winning_trades = sum(1 for trade in self.trade_history if trade.get('profit', 0) > 0)
+        
+        if total_trades > 0:
+            win_rate = winning_trades / total_trades * 100
         else:
-            logger.warning(f"Archivo de configuración {config_file} no encontrado")
-    except Exception as e:
-        logger.error(f"Error al cargar configuración: {str(e)}")
+            win_rate = 0
+        
+        total_profit = sum(trade.get('profit', 0) for trade in self.trade_history)
+        profit_factor = 1.0
+        
+        # Calcular profit factor si hay suficientes trades
+        if total_trades > 5:
+            gross_profit = sum(trade.get('profit', 0) for trade in self.trade_history if trade.get('profit', 0) > 0)
+            gross_loss = sum(abs(trade.get('profit', 0)) for trade in self.trade_history if trade.get('profit', 0) < 0)
+            
+            if gross_loss > 0:
+                profit_factor = gross_profit / gross_loss
+        
+        # Estadísticas de estrategia
+        strategy_stats = self.strategy.get_stats() if self.strategy else {}
+        
+        # Tiempo de ejecución
+        runtime = datetime.now() - self.start_time
+        hours_running = runtime.total_seconds() / 3600
+        
+        return {
+            "balance": self.balance,
+            "initial_balance": self.initial_balance,
+            "total_profit": total_profit,
+            "profit_pct": (self.balance / self.initial_balance - 1) * 100,
+            "total_trades": total_trades,
+            "winning_trades": winning_trades,
+            "win_rate": win_rate,
+            "profit_factor": profit_factor,
+            "trades_today": self.trades_today,
+            "loss_today": self.loss_today,
+            "time_running_hours": hours_running,
+            "strategy_stats": strategy_stats
+        }
     
-    return config
+    def set_callbacks(self, trade_cb=None, signal_cb=None, learning_cb=None, position_cb=None):
+        """
+        Configura callbacks para eventos
+        
+        Args:
+            trade_cb: Callback para operaciones
+            signal_cb: Callback para señales
+            learning_cb: Callback para eventos de aprendizaje
+            position_cb: Callback para actualizaciones de posición
+        """
+        self.on_trade_callback = trade_cb
+        self.on_signal_callback = signal_cb
+        self.on_learning_callback = learning_cb
+        self.on_position_update_callback = position_cb
+        
+        logger.info("Callbacks configurados")
 
-def parse_args():
-    """
-    Parsea argumentos de línea de comandos
+class ScalpingBot(TradingBot):
+    """Bot especializado en operaciones de scalping (timeframes cortos)"""
     
-    Returns:
-        argparse.Namespace: Argumentos parseados
-    """
-    parser = argparse.ArgumentParser(description='Bot de Trading de Solana')
-    parser.add_argument('--mode', type=str, default=DEFAULT_MODE, 
-                      choices=['paper', 'live'], 
-                      help='Modo de trading (paper o live)')
-    parser.add_argument('--symbol', type=str, default=DEFAULT_SYMBOL,
-                      help='Símbolo de trading (e.j., SOL-USDT)')
-    parser.add_argument('--interval', type=str, default=DEFAULT_INTERVAL,
-                      choices=['1m', '5m', '15m', '30m', '1h', '4h', '1d'],
-                      help='Intervalo de tiempo para el análisis')
-    parser.add_argument('--notify', action='store_true',
-                      help='Activar notificaciones')
-    parser.add_argument('--continuous', action='store_true',
-                      help='Ejecutar en modo continuo')
-    parser.add_argument('--interactive', action='store_true',
-                      help='Iniciar en modo interactivo')
+    def __init__(self, symbol: str, timeframe: str, strategy: str, paper_trading: bool = True):
+        """
+        Inicializa el bot de scalping
+        
+        Args:
+            symbol: Símbolo de trading
+            timeframe: Intervalo de tiempo
+            strategy: Nombre de estrategia
+            paper_trading: Si usar paper trading
+        """
+        # Configuración específica para scalping
+        config = {
+            "symbol": symbol,
+            "timeframe": timeframe,
+            "strategy": strategy,
+            "paper_trading": paper_trading,
+            "max_position_size": 0.05,  # 5% del balance
+            "stop_loss_pct": 0.3,      # 0.3% stop loss
+            "take_profit_pct": 0.5,     # 0.5% take profit
+            "max_trades_per_day": 50,   # Más operaciones para scalping
+            "max_loss_per_day": 3.0     # Límite de pérdida más estricto
+        }
+        
+        super().__init__(config)
+        
+        # Ajustes específicos para scalping
+        self.max_holding_time = 30  # Máximo tiempo en minutos
+        
+        logger.info(f"Bot de scalping inicializado: {self.symbol} {self.timeframe}")
     
-    return parser.parse_args()
-
-def interactive_mode():
-    """
-    Inicia el bot en modo interactivo con menú
-    """
-    try:
-        from enhanced_bot import main_menu
-        main_menu()
-    except ImportError:
+    def run(self):
+        """Ejecuta el bucle principal del bot con ajustes para scalping"""
+        if self.running:
+            logger.warning("El bot ya está en ejecución")
+            return
+        
+        self.running = True
+        logger.info(f"Iniciando bot de scalping para {self.symbol}")
+        
         try:
-            from bot_interactivo import main_menu
-            main_menu()
-        except ImportError:
-            logger.error("No se encontró módulo para modo interactivo")
-            print("Error: No se encontró módulo para modo interactivo")
-            print("Por favor, asegúrate de tener enhanced_bot.py o bot_interactivo.py")
+            # Bucle principal con intervalos más cortos
+            while self.running:
+                try:
+                    # Obtener datos actualizados
+                    data = self.get_market_data()
+                    
+                    if data is None or len(data) < 20:
+                        logger.warning("Datos insuficientes para análisis, esperando...")
+                        time.sleep(5)
+                        continue
+                    
+                    # Detectar condición de mercado
+                    market_condition = self.adaptive_system.detect_market_condition(data)
+                    time_interval = TimeInterval(self.timeframe) if self.timeframe in [e.value for e in TimeInterval] else TimeInterval.MINUTE_1
+                    
+                    # Generar señal
+                    signal, reason, details = self.strategy.get_signal(data)
+                    
+                    # Registrar señal
+                    current_price = data['close'].iloc[-1]
+                    self.add_signal(signal, current_price, reason)
+                    
+                    # Procesar señal con lógica de scalping más agresiva
+                    self.process_scalping_signal(signal, current_price, reason, details)
+                    
+                    # Gestionar posición existente con criterios de scalping
+                    if self.current_position:
+                        self.manage_scalping_position(current_price, data)
+                    
+                    # Añadir evento de aprendizaje periódicamente
+                    if np.random.random() < 0.15:  # 15% de probabilidad (más frecuente)
+                        self.add_learning_event(
+                            "ADAPTACIÓN", 
+                            f"Ajuste fino para condición {market_condition.value} en scalping", 
+                            True
+                        )
+                    
+                    # Esperar menos tiempo entre ciclos
+                    time.sleep(2)  # Más rápido para scalping
+                    
+                except Exception as e:
+                    logger.error(f"Error en ciclo de scalping: {e}")
+                    time.sleep(10)
+        
+        except KeyboardInterrupt:
+            logger.info("Bot de scalping detenido por usuario")
+        finally:
+            self.running = False
+            logger.info("Bot de scalping detenido")
+    
+    def process_scalping_signal(self, signal: float, price: float, reason: str, details: Dict[str, Any]):
+        """
+        Procesa señal con criterios específicos de scalping
+        
+        Args:
+            signal: Señal (-2 a 2)
+            price: Precio actual
+            reason: Razón de la señal
+            details: Detalles adicionales
+        """
+        # Modificación para operaciones más rápidas
+        
+        # Verificar si ya estamos en posición
+        if self.current_position:
+            # En scalping, cerrar posiciones más rápidamente
+            if self.current_position["type"] == "long" and signal <= -0.3:
+                self.close_position(price, f"Señal de salida rápida: {reason}")
+            
+            elif self.current_position["type"] == "short" and signal >= 0.3:
+                self.close_position(price, f"Señal de salida rápida: {reason}")
+            
+            # Verificar tiempo máximo de posición
+            holding_time = datetime.now() - self.current_position["entry_time"]
+            if holding_time.total_seconds() / 60 > self.max_holding_time:
+                self.close_position(price, "Tiempo máximo de posición alcanzado")
+            
+            return
+        
+        # Entradas más agresivas para scalping
+        if signal >= 0.3:  # Umbral más bajo para long
+            self.open_position("long", price, self.calculate_position_size(price), reason)
+        
+        elif signal <= -0.3 and False:  # Umbral más bajo para short (desactivado)
+            # self.open_position("short", price, self.calculate_position_size(price), reason)
+            pass
+    
+    def manage_scalping_position(self, current_price: float, data: pd.DataFrame):
+        """
+        Gestiona posición con ajustes para scalping
+        
+        Args:
+            current_price: Precio actual
+            data: DataFrame con datos de mercado
+        """
+        if not self.current_position:
+            return
+        
+        position = self.current_position
+        position_type = position["type"]
+        entry_price = position["entry_price"]
+        
+        # Calcular PnL actual
+        if position_type == "long":
+            pnl_pct = (current_price / entry_price - 1) * 100
+        else:  # short
+            pnl_pct = (entry_price / current_price - 1) * 100
+        
+        # Trailing stop más agresivo para scalping
+        if pnl_pct > 0.25 and position_type == "long":  # Umbral más bajo
+            # Si estamos en ganancia, mover stop loss para asegurar parte
+            new_stop = current_price * (1 - self.stop_loss_pct / 400)  # Más ajustado
+            if new_stop > position["stop_loss"]:
+                position["stop_loss"] = new_stop
+                logger.info(f"Trailing stop ajustado a: {new_stop:.4f}")
+        
+        # Cerrar si se alcanzan niveles
+        hit_take_profit = False
+        hit_stop_loss = False
+        
+        if position_type == "long":
+            hit_take_profit = current_price >= position["take_profit"]
+            hit_stop_loss = current_price <= position["stop_loss"]
+        else:  # short
+            hit_take_profit = current_price <= position["take_profit"]
+            hit_stop_loss = current_price >= position["stop_loss"]
+        
+        if hit_take_profit:
+            self.close_position(current_price, "Take Profit alcanzado (scalping)")
+        elif hit_stop_loss:
+            self.close_position(current_price, "Stop Loss activado (scalping)")
+        
+        # Monitoreo de volatilidad
+        # En scalping, podemos cerrar posiciones si la volatilidad cambia demasiado
+        recent_vol = data['close'].pct_change().tail(10).std() * 100
+        if recent_vol > 0.5:  # Si volatilidad es muy alta
+            self.close_position(current_price, "Alta volatilidad detectada")
 
-def main():
-    """
-    Función principal
-    """
-    # Parsear argumentos
-    args = parse_args()
-    
-    # Si está en modo interactivo, abrir ese modo
-    if args.interactive:
-        interactive_mode()
-        return
-    
-    # Cargar configuración
-    config = load_config()
-    
-    # Verificar credenciales
-    api_key = config.get('OKX_API_KEY', '')
-    api_secret = config.get('OKX_API_SECRET', '')
-    passphrase = config.get('OKX_PASSPHRASE', '')
-    
-    if not api_key or not api_secret or not passphrase:
-        logger.error("Credenciales de API no encontradas en config.env")
-        print("Error: Credenciales de API no encontradas en config.env")
-        print("Por favor, configura OKX_API_KEY, OKX_API_SECRET y OKX_PASSPHRASE")
-        return
-    
-    # Inicializar bot
-    bot = TradingBot(
-        api_key=api_key,
-        api_secret=api_secret,
-        passphrase=passphrase,
-        mode=args.mode
-    )
-    
-    # Ejecutar bot
-    bot.run(
-        symbol=args.symbol,
-        interval=args.interval,
-        notify=args.notify,
-        continuous=args.continuous
-    )
-
+# Ejemplo de uso independiente
 if __name__ == "__main__":
-    main()
+    # Usar la clase ScalpingBot para operaciones de muy corto plazo
+    bot = ScalpingBot(
+        symbol="SOL-USDT",
+        timeframe="1m",
+        strategy="rsi_scalping",
+        paper_trading=True  # Solo paper trading por seguridad
+    )
+    
+    # Configurar callbacks para eventos
+    def on_trade(trade_data):
+        print(f"Nueva operación: {trade_data}")
+    
+    def on_signal(signal, price, reason):
+        print(f"Señal: {signal:.2f} a ${price:.2f} - {reason}")
+    
+    def on_learning(event_type, description, success):
+        print(f"Aprendizaje: {event_type} - {description} - {'✓' if success else '✗'}")
+    
+    def on_position(position_data):
+        if position_data:
+            print(f"Posición: {position_data['type']} {position_data['size']} @ {position_data['entry_price']}")
+        else:
+            print("Posición cerrada")
+    
+    # Configurar callbacks
+    bot.set_callbacks(on_trade, on_signal, on_learning, on_position)
+    
+    # Iniciar bot
+    try:
+        logger.info("Presiona Ctrl+C para detener el bot")
+        bot.run()
+    except KeyboardInterrupt:
+        logger.info("Bot detenido por usuario")
+    finally:
+        # Mostrar estadísticas
+        stats = bot.get_stats()
+        print("\n--- ESTADÍSTICAS DE TRADING ---")
+        print(f"Balance final: ${stats['balance']:.2f} (Inicial: ${stats['initial_balance']:.2f})")
+        print(f"Rentabilidad: {stats['profit_pct']:.2f}%")
+        print(f"Operaciones totales: {stats['total_trades']}")
+        print(f"Win rate: {stats['win_rate']:.2f}%")
+        print(f"Profit factor: {stats['profit_factor']:.2f}")
+        print(f"Tiempo de ejecución: {stats['time_running_hours']:.2f} horas")

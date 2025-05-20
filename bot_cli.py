@@ -132,6 +132,208 @@ def main_menu():
         print("Opción no válida. Inténtalo de nuevo.")
         time.sleep(1)
 
+def scalping_menu():
+    """Menú de scalping en tiempo real con visualización"""
+    clear_screen()
+    print_header("SCALPING EN TIEMPO REAL")
+    
+    # Obtener información necesaria
+    print("\nEste modo ejecuta operaciones de scalping en timeframes muy cortos (segundos/minutos)")
+    print("con visualización en tiempo real del rendimiento y aprendizaje del bot.\n")
+    
+    # Seleccionar par de trading
+    print("\n1. Selecciona el par de trading:")
+    try:
+        symbols = get_available_symbols()
+        for i, symbol in enumerate(symbols, 1):
+            print(f"  {i}. {symbol}")
+        
+        symbol_choice = get_user_choice(1, len(symbols))
+        selected_symbol = symbols[symbol_choice - 1] if symbol_choice else "SOL-USDT"
+    except Exception as e:
+        logger.error(f"Error obteniendo símbolos: {e}")
+        print("Error obteniendo símbolos, usando SOL-USDT")
+        selected_symbol = "SOL-USDT"
+    
+    # Seleccionar intervalo de tiempo
+    print("\n2. Selecciona el intervalo de tiempo para scalping:")
+    intervals = ["1m", "3m", "5m", "15m"]
+    for i, interval in enumerate(intervals, 1):
+        print(f"  {i}. {interval}")
+    
+    interval_choice = get_user_choice(1, len(intervals))
+    selected_interval = intervals[interval_choice - 1] if interval_choice else "1m"
+    
+    # Seleccionar estrategia de scalping
+    print("\n3. Selecciona la estrategia de scalping:")
+    try:
+        from strategies.scalping_strategies import get_available_scalping_strategies
+        scalping_strategies = get_available_scalping_strategies()
+        
+        strategies_list = []
+        for i, (key, strategy) in enumerate(scalping_strategies.items(), 1):
+            strategies_list.append((key, strategy.name, strategy.description))
+            print(f"  {i}. {strategy.name} - {strategy.description}")
+        
+        strategy_choice = get_user_choice(1, len(strategies_list))
+        if not strategy_choice:
+            return
+        
+        selected_strategy_key = strategies_list[strategy_choice - 1][0]
+    except Exception as e:
+        logger.error(f"Error obteniendo estrategias: {e}")
+        print("\nNo se pudieron cargar las estrategias de scalping. Usando RSI por defecto.")
+        time.sleep(2)
+        selected_strategy_key = "rsi_scalping"
+    
+    # Seleccionar modo de ejecución
+    print("\n4. Selecciona el modo de ejecución:")
+    print("  1. Modo Demo (simulación con datos sintéticos)")
+    print("  2. Modo Paper Trading (simulación con datos reales)")
+    print("  3. Modo Live Trading (trading real) [DESHABILITADO]")
+    
+    mode_choice = get_user_choice(1, 2)  # Limitado a 2 porque el modo 3 está deshabilitado
+    if not mode_choice:
+        return
+    
+    # Confirmar antes de iniciar
+    print("\n=== RESUMEN DE CONFIGURACIÓN ===")
+    print(f"Par de trading: {selected_symbol}")
+    print(f"Intervalo: {selected_interval}")
+    print(f"Estrategia: {selected_strategy_key}")
+    print(f"Modo: {'Demo' if mode_choice == 1 else 'Paper Trading'}")
+    
+    if not confirm_action("¿Iniciar bot de scalping con esta configuración?"):
+        return
+    
+    try:
+        # Inicializar bot para el monitor
+        if mode_choice == 1:  # Modo Demo
+            # Crear monitor para la simulación
+            print("\nIniciando monitor de trading en modo demo...")
+            print("Presiona 'q' para salir cuando el monitor esté activo.")
+            time.sleep(2)
+            
+            try:
+                # Importar módulos necesarios
+                from interface.live_trading_monitor import LiveTradingMonitor, simulate_trading_for_demo
+                
+                # Iniciar monitor demo
+                monitor = LiveTradingMonitor(None, selected_symbol, selected_interval)
+                
+                # Función que ejecuta el monitor y la simulación
+                def run_demo():
+                    try:
+                        # Iniciar monitor
+                        monitor_thread = threading.Thread(target=monitor.start)
+                        monitor_thread.daemon = True
+                        monitor_thread.start()
+                        
+                        # Ejecutar simulación en primer plano
+                        simulate_trading_for_demo(monitor, duration_seconds=600)  # 10 minutos de demo
+                    except KeyboardInterrupt:
+                        monitor.stop()
+                    except Exception as e:
+                        logger.error(f"Error en la simulación: {e}")
+                    finally:
+                        if hasattr(monitor, 'running') and monitor.running:
+                            monitor.stop()
+                
+                # Ejecutar en hilo separado
+                demo_thread = threading.Thread(target=run_demo)
+                demo_thread.daemon = True
+                demo_thread.start()
+                
+                # Esperar a que el usuario presione Enter para volver al menú
+                input("\nPresiona Enter para volver al menú principal (esto no detendrá el monitor)...")
+                
+            except ImportError as e:
+                logger.error(f"Error importando módulos necesarios: {e}")
+                print(f"\nNo se pudo iniciar el monitor: {e}")
+                print("Asegúrate de que todos los módulos estén instalados.")
+                input("\nPresiona Enter para continuar...")
+            
+        else:  # Paper Trading
+            try:
+                print("\nIniciando bot en modo paper trading...")
+                print("Configurando conexión con exchange...")
+                print("Presiona 'q' para salir cuando el monitor esté activo.")
+                
+                # Intentar importar módulos necesarios
+                from trading_bot import TradingBot, ScalpingBot
+                from interface.live_trading_monitor import LiveTradingMonitor, run_live_monitor
+                
+                try:
+                    # Intentar crear ScalpingBot especializado
+                    bot = ScalpingBot(
+                        symbol=selected_symbol,
+                        timeframe=selected_interval,
+                        strategy=selected_strategy_key,
+                        paper_trading=True
+                    )
+                    print("Bot de scalping inicializado correctamente.")
+                    
+                except Exception as e:
+                    logger.error(f"Error creando ScalpingBot, usando TradingBot básico: {e}")
+                    print("Usando bot genérico como alternativa.")
+                    
+                    # Crear bot genérico si falla
+                    bot_config = {
+                        "symbol": selected_symbol,
+                        "timeframe": selected_interval,
+                        "strategy": selected_strategy_key,
+                        "paper_trading": True,
+                        "max_position_size": 0.05,  # 5% del balance
+                        "stop_loss_pct": 0.3,      # 0.3% stop loss
+                        "take_profit_pct": 0.5     # 0.5% take profit
+                    }
+                    bot = TradingBot(bot_config)
+                
+                # Iniciar monitor con bot real
+                monitor = run_live_monitor(bot, selected_symbol, selected_interval)
+                
+                # Iniciar el bot
+                bot_thread = threading.Thread(target=bot.run)
+                bot_thread.daemon = True
+                bot_thread.start()
+                
+                # Esperar a que el usuario presione Enter para volver al menú
+                input("\nPresiona Enter para volver al menú principal (esto no detendrá el bot ni el monitor)...")
+                
+            except ImportError:
+                print("\nNo se pudo importar el módulo de trading.")
+                print("Ejecutando en modo demo como alternativa...")
+                time.sleep(2)
+                
+                # Ejecutar el modo demo como fallback
+                from interface.live_trading_monitor import LiveTradingMonitor, simulate_trading_for_demo
+                
+                monitor = LiveTradingMonitor(None, selected_symbol, selected_interval)
+                
+                # Iniciar monitor
+                monitor_thread = threading.Thread(target=monitor.start)
+                monitor_thread.daemon = True
+                monitor_thread.start()
+                
+                # Ejecutar simulación
+                demo_thread = threading.Thread(target=lambda: simulate_trading_for_demo(monitor, 600))
+                demo_thread.daemon = True
+                demo_thread.start()
+                
+                # Esperar a que el usuario presione Enter para volver al menú
+                input("\nPresiona Enter para volver al menú principal...")
+            
+            except Exception as e:
+                logger.error(f"Error al iniciar el bot de scalping: {e}")
+                print(f"\nError al iniciar el bot: {e}")
+                print("Verifique que todas las dependencias estén instaladas y la configuración sea correcta.")
+                input("\nPresiona Enter para continuar...")
+    
+    except Exception as e:
+        logger.error(f"Error en el menú de scalping: {e}")
+        print(f"\nError: {e}")
+        time.sleep(3)
+
 def bot_management_menu():
     """Menú de gestión de bots"""
     while True:
