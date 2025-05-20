@@ -125,8 +125,10 @@ def settings():
 
 @app.route('/battle-arena')
 def battle_arena():
-    """Battle Arena page route"""
-    return render_template('battle_arena.html')
+    """Battle Arena page route (Desactivada)"""
+    # La batalla de bots ha sido desactivada, redirigir al dashboard
+    from flask import redirect, url_for
+    return redirect(url_for('dashboard'))
 
 @app.route('/error-management')
 def error_management():
@@ -352,16 +354,24 @@ def get_positions():
 
 @app.route('/api/change_mode', methods=['POST'])
 def change_trading_mode():
-    """API endpoint para cambiar entre modo papel y real"""
+    """API endpoint para cambiar entre modo papel y real (restringido a paper)"""
     global trading_bot
     
     data = request.json
     new_mode = data.get('mode', 'paper')
     confirmed = data.get('confirm', False)
     
-    # Solo permitir 'paper' o 'live'
-    if new_mode not in ['paper', 'live']:
-        return jsonify({"success": False, "message": "Invalid mode. Use 'paper' or 'live'"})
+    # RESTRICCIÓN: Forzar siempre a paper trading
+    if new_mode == 'live':
+        logger.warning("⚠️ ADVERTENCIA: Se intentó activar el modo live pero está deshabilitado por seguridad.")
+        new_mode = 'paper'
+        
+    # Solo permitir 'paper' (live deshabilitado)
+    if new_mode != 'paper':
+        return jsonify({
+            "success": False, 
+            "message": "Solo se permite el modo 'paper'. El modo live está deshabilitado por seguridad."
+        })
     
     if not trading_bot:
         if not initialize_bot():
@@ -370,33 +380,18 @@ def change_trading_mode():
                 'message': 'Bot not initialized'
             })
     
-    # Si está intentando cambiar a modo real, verificar requisitos
-    if new_mode == 'live':
-        # Verificar credenciales API válidas
-        if not trading_bot.verify_api_credentials():
-            return jsonify({
-                "success": False, 
-                "message": "Credenciales API inválidas. Verifique sus claves API de OKX."
-            })
-        
-        # Verificar requisitos de rendimiento
-        if not confirmed:
-            # Verificar requisitos solo si no está confirmado
-            performance_ok, performance_message = trading_bot.verify_performance_requirements()
-            if not performance_ok:
-                return jsonify({
-                    "success": False,
-                    "needs_confirmation": True,
-                    "message": f"ADVERTENCIA: {performance_message}\n\nEl trading con fondos reales implica un riesgo significativo de pérdida financiera."
-                })
-    
-    # Cambiar modo
+    # Cambiar modo (siempre a paper)
     try:
-        trading_bot.set_trading_mode(new_mode)
-        mode_display = "Trading Real" if new_mode == "live" else "Paper Trading"
+        # Si existe el método set_trading_mode
+        if hasattr(trading_bot, 'set_trading_mode'):
+            trading_bot.set_trading_mode(new_mode)
+        else:
+            # Si no existe, simplemente asignar la propiedad
+            trading_bot.mode = new_mode
+            
         return jsonify({
             "success": True, 
-            "message": f"Modo cambiado a {mode_display}"
+            "message": "Modo establecido a Paper Trading (simulación)"
         })
     except Exception as e:
         logger.error(f"Error al cambiar modo de trading: {e}")

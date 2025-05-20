@@ -53,7 +53,7 @@ logger = logging.getLogger("SolanaTradingBot")
 # Constantes
 DEFAULT_SYMBOL = "SOL-USDT"
 DEFAULT_INTERVAL = "15m"
-DEFAULT_MODE = "paper"  # 'paper' para simulación, 'live' para trading real
+DEFAULT_MODE = "paper"  # IMPORTANTE: Siempre usamos 'paper' por seguridad
 DEFAULT_INITIAL_BALANCE = 1000.0  # Balance inicial para paper trading
 DEFAULT_LEVERAGE = 3.0  # Apalancamiento predeterminado
 
