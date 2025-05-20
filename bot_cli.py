@@ -1,6 +1,7 @@
 """
 Interfaz de línea de comandos para el Solana Trading Bot
 Este script proporciona un menú interactivo para gestionar el bot de trading
+con visualización en tiempo real de operaciones y aprendizaje
 """
 
 import os
@@ -9,6 +10,7 @@ import time
 import signal
 import logging
 import json
+import threading
 from datetime import datetime
 from typing import Dict, List, Any, Optional
 
@@ -33,9 +35,13 @@ try:
     # Módulos de interfaz
     from interface.cli_menu import clear_screen, print_header, print_menu, get_user_choice
     from interface.cli_utils import print_table, print_chart, confirm_action
+    from interface.live_trading_monitor import LiveTradingMonitor, run_live_monitor, simulate_trading_for_demo
     
     # Módulos de datos
     from data_management.market_data import get_available_symbols, get_market_data
+    
+    # Módulos de estrategia y escalping
+    from strategies.scalping_strategies import get_available_scalping_strategies, ScalpingStrategy
     
     # Módulos de backtesting
     from backtesting.engine import run_backtest
@@ -94,11 +100,12 @@ def main_menu():
     
     options = [
         "Gestionar Bots",
-        "Configuración",
+        "Scalping en Tiempo Real",
         "Ver Mercados",
         "Backtesting",
         "Panel de Control",
-        "Configuración de IA",
+        "Configuración de IA", 
+        "Configuración",
         "Salir"
     ]
     
@@ -107,7 +114,7 @@ def main_menu():
     if choice == 1:
         bot_management_menu()
     elif choice == 2:
-        configuration_menu()
+        scalping_menu()
     elif choice == 3:
         market_view_menu()
     elif choice == 4:
@@ -118,6 +125,8 @@ def main_menu():
         from interface.ai_menu import ai_configuration_menu
         ai_configuration_menu()
     elif choice == 7:
+        configuration_menu()
+    elif choice == 8:
         confirm_exit()
     else:
         print("Opción no válida. Inténtalo de nuevo.")
