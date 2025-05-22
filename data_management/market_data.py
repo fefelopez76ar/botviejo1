@@ -192,7 +192,7 @@ def get_current_price(symbol: str) -> float:
         float: Precio actual
     """
     try:
-        # Intentar obtener el precio directamente desde el exchange
+        # MÉTODO 1: Intentar obtener el precio directamente desde el exchange con API key
         try:
             exchange = initialize_exchange(test=False)
             if exchange is not None:
@@ -200,12 +200,25 @@ def get_current_price(symbol: str) -> float:
                 ticker = exchange.fetch_ticker(formatted_symbol)
                 if ticker and 'last' in ticker and ticker['last']:
                     price = ticker['last']
-                    logger.info(f"Precio real de {symbol}: ${price}")
+                    logger.info(f"Precio real de {symbol} (API con autenticación): ${price}")
                     return price
         except Exception as direct_error:
-            logger.error(f"Error obteniendo precio directamente de OKX: {direct_error}")
+            logger.error(f"Error obteniendo precio con API autenticada: {direct_error}")
+        
+        # MÉTODO 2: Intentar con la API pública de OKX (no requiere autenticación)
+        try:
+            import ccxt
+            public_exchange = ccxt.okx({'enableRateLimit': True})
+            formatted_symbol = symbol.replace("-", "/")
+            ticker = public_exchange.fetch_ticker(formatted_symbol)
+            if ticker and 'last' in ticker and ticker['last']:
+                price = ticker['last']
+                logger.info(f"Precio real de {symbol} (API pública): ${price}")
+                return price
+        except Exception as public_error:
+            logger.error(f"Error obteniendo precio con API pública: {public_error}")
             
-        # Intentar con datos recientes (respaldo)
+        # MÉTODO 3: Intentar con datos recientes (respaldo)
         df = get_market_data(symbol, "1m", 1)
         
         if df is not None and not df.empty:
@@ -213,7 +226,7 @@ def get_current_price(symbol: str) -> float:
             logger.info(f"Precio de {symbol} desde datos recientes: ${price}")
             return price
         
-        # Valores por defecto actualizados si no hay datos (última opción)
+        # MÉTODO 4: Valores por defecto actualizados si no hay datos (última opción)
         default_prices = {
             "SOL-USDT": 178.75,  # Actualizado
             "BTC-USDT": 68000.0,
