@@ -110,12 +110,12 @@ def initialize_exchange(exchange_id: str = "okx", test: bool = False) -> Optiona
         
         # Añadir configuración para modo de simulación en OKX
         if exchange_id == 'okx':
-            # Usar wspap.okx.com para modo demo/papel
+            # Configuración general
             config['options']['warnOnFetchOpenOrdersWithoutSymbol'] = False
             
             if test:
-                # Para OKX, necesitamos usar la URL específica de demo
-                config['hostname'] = 'wspap.okx.com'  # Hostname para simulación
+                # Para OKX, la documentación indica usar el parámetro 'test' en options
+                config['options']['test'] = True
                 logger.info("Configurado OKX para usar modo de simulación (Demo Trading)")
         
         exchange = exchange_class(config)

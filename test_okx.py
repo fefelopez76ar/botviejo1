@@ -41,10 +41,10 @@ try:
         'secret': api_secret,
         'password': passphrase,  # OKX usa 'password' en lugar de 'passphrase'
         'enableRateLimit': True,
-        'hostname': 'wspap.okx.com',  # Usar el hostname de la API de simulación
         'options': {
             'defaultType': 'spot',
-            'warnOnFetchOpenOrdersWithoutSymbol': False
+            'warnOnFetchOpenOrdersWithoutSymbol': False,
+            'test': True  # Este es el parámetro correcto para modo Demo según la documentación
         }
     })
     print("Modo de simulación activado - usando API Demo Trading de OKX")
