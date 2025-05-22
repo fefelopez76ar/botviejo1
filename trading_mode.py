@@ -146,25 +146,37 @@ class SecurityRequirements:
         Returns:
             Dict: Resultados de verificación
         """
-        # MODIFICADO: Siempre devuelve True para permitir modo real
+        # Verificar todos los requisitos
+        win_rate_check = SecurityRequirements.verify_win_rate(performance_data.get('trades', []))
+        consecutive_days_check = SecurityRequirements.verify_consecutive_positive_days(performance_data.get('daily_results', {}))
+        drawdown_check = SecurityRequirements.verify_max_drawdown(performance_data.get('equity_curve', []))
+        trades_check = SecurityRequirements.verify_min_trades(performance_data.get('trades', []))
+        
+        all_passed = all([
+            win_rate_check[0],
+            consecutive_days_check[0],
+            drawdown_check[0],
+            trades_check[0]
+        ])
+        
         return {
-            'all_requirements_met': True,
+            'all_requirements_met': all_passed,
             'requirements': {
                 'win_rate': {
-                    'passed': True,
-                    'message': "Requisito de win rate omitido (modo de desarrollo)"
+                    'passed': win_rate_check[0],
+                    'message': win_rate_check[1]
                 },
                 'consecutive_positive_days': {
-                    'passed': True,
-                    'message': "Requisito de días consecutivos omitido (modo de desarrollo)"
+                    'passed': consecutive_days_check[0],
+                    'message': consecutive_days_check[1]
                 },
                 'max_drawdown': {
-                    'passed': True,
-                    'message': "Requisito de drawdown omitido (modo de desarrollo)"
+                    'passed': drawdown_check[0],
+                    'message': drawdown_check[1]
                 },
                 'min_trades': {
-                    'passed': True,
-                    'message': "Requisito de operaciones mínimas omitido (modo de desarrollo)"
+                    'passed': trades_check[0],
+                    'message': trades_check[1]
                 }
             }
         }
