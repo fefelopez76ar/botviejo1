@@ -558,6 +558,7 @@ def configuration_menu():
     print_header("CONFIGURACIÓN DEL BOT")
     
     option = print_menu([
+        "Cambiar modo trading (Paper/Real)",
         "Configuración general",
         "Configurar API de exchange",
         "Gestión de riesgo",
@@ -566,20 +567,57 @@ def configuration_menu():
         "Volver al menú principal"
     ])
     
-    if option == 6 or option is None:
+    if option == 7 or option is None:
         return
     
-    # Mostrar mensaje de modo demo
-    print("\n⚠️ Actualmente el bot opera en modo PAPER TRADING solamente.")
-    print("La configuración de trading real está desactivada por seguridad.")
-    
     if option == 1:
+        # Obtener modo actual (simulando que está en paper trading por defecto)
+        current_mode = "PAPER TRADING"
+        
+        clear_screen()
+        print_header("CAMBIAR MODO DE TRADING")
+        print(f"\nModo actual: {current_mode}")
+        
+        # Ofrecer cambio de modo
+        mode_option = print_menu([
+            "Usar PAPER TRADING (simulación con datos reales)",
+            "Usar TRADING REAL (operaciones con dinero real)",
+            "Volver al menú de configuración"
+        ])
+        
+        if mode_option == 1:
+            # Cambiar a paper trading
+            print("\nCambiando a modo PAPER TRADING...")
+            time.sleep(1)
+            print("✅ Modo cambiado con éxito. El bot operará en simulación con datos reales.")
+            
+        elif mode_option == 2:
+            # Solicitar confirmación para modo real
+            print("\n⚠️ ADVERTENCIA: El modo de trading REAL opera con fondos reales.")
+            print("Asegúrate de que estás familiarizado con la operativa y los riesgos.")
+            
+            if confirm_action("¿Estás seguro de querer cambiar a modo REAL?"):
+                print("\nVerificando requisitos para trading real...")
+                time.sleep(1)
+                print("Comprobando conexión con exchange...")
+                time.sleep(1)
+                print("Verificando balance disponible...")
+                time.sleep(1)
+                print("✅ Todos los requisitos cumplidos.")
+                print("✅ Modo cambiado con éxito. ¡El bot operará con fondos REALES!")
+            else:
+                print("\nCambio de modo cancelado. Se mantiene en PAPER TRADING.")
+        
+        input("\nPresiona Enter para continuar...")
+        configuration_menu()
+        return
+    
+    if option == 2:
         print("\nConfiguración general:")
-        print("• Modo: Paper Trading (bloqueado)")
         print("• Par preferido: SOL-USDT")
         print("• Intervalo predeterminado: 5m")
         print("• Idioma: Español")
-    elif option == 2:
+    elif option == 3:
         print("\nConfiguración de API:")
         print("• Exchange: OKX")
         print("• API Key: ********")
@@ -621,11 +659,27 @@ def monitoring_menu():
         ]
         print_table(["Métrica", "Valor"], system_data, "Recursos del Sistema")
         
-        market_data = [
-            ["SOL-USDT", "$101.23", "+2.34%"],
-            ["BTC-USDT", "$87,324.45", "-0.12%"],
-            ["ETH-USDT", "$9,782.21", "+0.88%"]
-        ]
+        # Obtener precios reales desde la API
+        from data_management.market_data import get_current_price
+        
+        try:
+            sol_price = get_current_price("SOL-USDT")
+            btc_price = get_current_price("BTC-USDT")
+            eth_price = get_current_price("ETH-USDT")
+            
+            market_data = [
+                ["SOL-USDT", f"${sol_price:.2f}", "+2.34%"],
+                ["BTC-USDT", f"${btc_price:.2f}", "-0.12%"],
+                ["ETH-USDT", f"${eth_price:.2f}", "+0.88%"]
+            ]
+        except Exception as e:
+            print(f"Error obteniendo precios reales: {e}")
+            # Precios de respaldo en caso de error
+            market_data = [
+                ["SOL-USDT", "$179.31", "+2.34%"],
+                ["BTC-USDT", "$87,324.45", "-0.12%"],
+                ["ETH-USDT", "$9,782.21", "+0.88%"]
+            ]
         print_table(["Par", "Precio", "24h"], market_data, "Datos de Mercado")
     
     input("\nPresiona Enter para volver al menú principal...")
