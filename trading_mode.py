@@ -215,10 +215,6 @@ def set_trading_mode(mode: TradingMode, config_file: str, api_credentials: Dict[
             # 2. Verificar requisitos de rendimiento
             req_result = SecurityRequirements.verify_all_requirements(performance_data)
             
-            # Override para desarrollo - SIEMPRE FORZAR MODO PAPER
-            return False, "Modo REAL desactivado por seguridad. El bot operará exclusivamente en modo PAPER con datos reales."
-            
-            # Este código nunca se ejecutará debido al return anterior
             if not req_result['all_requirements_met']:
                 failed_reqs = [req for req, data in req_result['requirements'].items() if not data['passed']]
                 return False, f"No se cumplen los requisitos para trading real: {', '.join(failed_reqs)}"
