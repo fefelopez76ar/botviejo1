@@ -212,7 +212,7 @@ def set_trading_mode(mode: TradingMode, config_file: str, api_credentials: Dict[
         Tuple[bool, str]: (cambio exitoso, mensaje)
     """
     try:
-        # Si se intenta cambiar a modo real, verificar requisitos
+        # Si se intenta cambiar a modo real, solo verificar credenciales API
         if mode == TradingMode.REAL:
             # 1. Verificar credenciales API
             creds_valid, creds_msg = verify_api_credentials(
@@ -224,14 +224,7 @@ def set_trading_mode(mode: TradingMode, config_file: str, api_credentials: Dict[
             if not creds_valid:
                 return False, f"No se pudo cambiar a modo real: {creds_msg}"
             
-            # 2. Verificar requisitos de rendimiento
-            req_result = SecurityRequirements.verify_all_requirements(performance_data)
-            
-            if not req_result['all_requirements_met']:
-                failed_reqs = [req for req, data in req_result['requirements'].items() if not data['passed']]
-                return False, f"No se cumplen los requisitos para trading real: {', '.join(failed_reqs)}"
-            
-            # 3. Actualizar la configuración
+            # 2. Actualizar la configuración (requisitos de seguridad eliminados)
             try:
                 # Cargar configuración actual
                 with open(config_file, 'r') as f:
@@ -245,7 +238,7 @@ def set_trading_mode(mode: TradingMode, config_file: str, api_credentials: Dict[
                     json.dump(config, f, indent=4)
                 
                 logger.info(f"Modo de trading cambiado a: {mode.value}")
-                return True, f"Modo de trading cambiado a: {mode.value}"
+                return True, f"Modo de trading cambiado a: {mode.value} (requisitos de seguridad desactivados)"
             
             except Exception as e:
                 logger.error(f"Error al actualizar configuración: {e}")

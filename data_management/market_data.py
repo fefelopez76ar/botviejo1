@@ -96,7 +96,9 @@ def initialize_exchange(exchange_id: str = "okx", test: bool = False) -> Optiona
         
         # Configurar exchange
         exchange_class = getattr(ccxt, exchange_id)
-        exchange = exchange_class({
+        
+        # Configuración básica
+        config = {
             'apiKey': api_key,
             'secret': api_secret,
             'password': password,  # OKX usa 'password' en lugar de 'passphrase'
@@ -104,14 +106,26 @@ def initialize_exchange(exchange_id: str = "okx", test: bool = False) -> Optiona
             'options': {
                 'defaultType': 'spot'
             }
-        })
+        }
         
-        # Usar sandbox en modo test
+        # Añadir configuración para modo de simulación en OKX
+        if exchange_id == 'okx':
+            # Usar wspap.okx.com para modo demo/papel
+            config['options']['warnOnFetchOpenOrdersWithoutSymbol'] = False
+            
+            if test:
+                # Para OKX, necesitamos usar la URL específica de demo
+                config['hostname'] = 'wspap.okx.com'  # Hostname para simulación
+                logger.info("Configurado OKX para usar modo de simulación (Demo Trading)")
+        
+        exchange = exchange_class(config)
+        
+        # Usar sandbox en modo test para otros exchanges
         if test and hasattr(exchange, 'set_sandbox_mode'):
             exchange.set_sandbox_mode(True)
             logger.info(f"Exchange {exchange_id} inicializado en modo TEST")
         else:
-            logger.info(f"Exchange {exchange_id} inicializado en modo REAL")
+            logger.info(f"Exchange {exchange_id} inicializado en modo {'DEMO' if test else 'REAL'}")
         
         return exchange
     
@@ -142,15 +156,18 @@ def get_market_data(symbol: str, timeframe: str = "15m", limit: int = 100) -> Op
             logger.warning(f"Timeframe no válido: {timeframe}, cambiando a 15m")
             timeframe = "15m"
         
-        # Intentar obtener datos reales del exchange - USANDO MODO REAL
-        exchange = initialize_exchange(test=False)
+        # Verificar si debemos usar modo demo
+        use_demo = os.environ.get('USE_DEMO_MODE', 'false').lower() == 'true'
+        
+        # Intentar obtener datos reales del exchange - USANDO MODO DEMO SI ESTÁ CONFIGURADO
+        exchange = initialize_exchange(test=use_demo)
         
         if exchange is not None:
             try:
                 # Formato específico para el exchange
                 formatted_symbol = symbol.replace("-", "/")
                 
-                logger.info(f"Obteniendo datos reales de {formatted_symbol} con timeframe {timeframe}")
+                logger.info(f"Obteniendo datos reales de {formatted_symbol} con timeframe {timeframe} (Modo: {'DEMO' if use_demo else 'REAL'})")
                 
                 # Obtener datos
                 ohlcv = exchange.fetch_ohlcv(formatted_symbol, timeframe, limit=limit)
@@ -192,15 +209,18 @@ def get_current_price(symbol: str) -> float:
         float: Precio actual
     """
     try:
+        # Verificar si debemos usar modo demo
+        use_demo = os.environ.get('USE_DEMO_MODE', 'false').lower() == 'true'
+        
         # MÉTODO 1: Intentar obtener el precio directamente desde el exchange con API key
         try:
-            exchange = initialize_exchange(test=False)
+            exchange = initialize_exchange(test=use_demo)
             if exchange is not None:
                 formatted_symbol = symbol.replace("-", "/")
                 ticker = exchange.fetch_ticker(formatted_symbol)
                 if ticker and 'last' in ticker and ticker['last']:
-                    price = ticker['last']
-                    logger.info(f"Precio real de {symbol} (API con autenticación): ${price}")
+                    price = float(ticker['last'])
+                    logger.info(f"Precio real de {symbol} (Modo: {'DEMO' if use_demo else 'REAL'}): ${price}")
                     return price
         except Exception as direct_error:
             logger.error(f"Error obteniendo precio con API autenticada: {direct_error}")
@@ -212,7 +232,7 @@ def get_current_price(symbol: str) -> float:
             formatted_symbol = symbol.replace("-", "/")
             ticker = public_exchange.fetch_ticker(formatted_symbol)
             if ticker and 'last' in ticker and ticker['last']:
-                price = ticker['last']
+                price = float(ticker['last'])
                 logger.info(f"Precio real de {symbol} (API pública): ${price}")
                 return price
         except Exception as public_error:
