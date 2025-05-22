@@ -35,13 +35,19 @@ api_secret = "2D78D8359A4873449E832B37BABC33E6"
 passphrase = "Daeco1212@"
 
 try:
-    # Configurar cliente OKX
+    # Configurar cliente OKX en modo simulación
     exchange = ccxt.okx({
         'apiKey': api_key,
         'secret': api_secret,
         'password': passphrase,  # OKX usa 'password' en lugar de 'passphrase'
-        'enableRateLimit': True
+        'enableRateLimit': True,
+        'hostname': 'wspap.okx.com',  # Usar el hostname de la API de simulación
+        'options': {
+            'defaultType': 'spot',
+            'warnOnFetchOpenOrdersWithoutSymbol': False
+        }
     })
+    print("Modo de simulación activado - usando API Demo Trading de OKX")
     
     # Obtener precio de Solana
     ticker = exchange.fetch_ticker('SOL/USDT')
