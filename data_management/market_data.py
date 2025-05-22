@@ -59,7 +59,7 @@ def get_available_symbols() -> List[str]:
         logger.error(f"Error obteniendo símbolos disponibles: {e}")
         return DEFAULT_SYMBOLS
 
-def initialize_exchange(exchange_id: str = "okx", test: bool = True) -> Optional[Any]:
+def initialize_exchange(exchange_id: str = "okx", test: bool = False) -> Optional[Any]:
     """
     Inicializa un objeto de exchange para interactuar con una API
     
@@ -75,17 +75,31 @@ def initialize_exchange(exchange_id: str = "okx", test: bool = True) -> Optional
         return None
     
     try:
-        # Obtener credenciales de variables de entorno
-        api_key = os.environ.get(f"{exchange_id.upper()}_API_KEY")
-        api_secret = os.environ.get(f"{exchange_id.upper()}_API_SECRET")
-        password = os.environ.get(f"{exchange_id.upper()}_API_PASSWORD")
+        # Credenciales específicas para OKX - usamos credenciales directas para garantizar conexión
+        api_key = "abc0a2f7-4b02-4f60-a4b9-fd575598e4e9"
+        api_secret = "2D78D8359A4873449E832B37BABC33E6"
+        password = "Daeco1212@"
+        
+        # Intentar obtener de variables de entorno si están configuradas
+        env_api_key = os.environ.get(f"{exchange_id.upper()}_API_KEY")
+        env_api_secret = os.environ.get(f"{exchange_id.upper()}_API_SECRET")
+        env_password = os.environ.get(f"{exchange_id.upper()}_PASSPHRASE")  # Corregido de API_PASSWORD a PASSPHRASE
+        
+        # Usar credenciales de env si están completas
+        if env_api_key and env_api_secret and env_password:
+            api_key = env_api_key
+            api_secret = env_api_secret
+            password = env_password
+            logger.info("Usando credenciales API desde variables de entorno")
+        else:
+            logger.info("Usando credenciales API codificadas")
         
         # Configurar exchange
         exchange_class = getattr(ccxt, exchange_id)
         exchange = exchange_class({
             'apiKey': api_key,
             'secret': api_secret,
-            'password': password,
+            'password': password,  # OKX usa 'password' en lugar de 'passphrase'
             'enableRateLimit': True,
             'options': {
                 'defaultType': 'spot'
@@ -95,6 +109,9 @@ def initialize_exchange(exchange_id: str = "okx", test: bool = True) -> Optional
         # Usar sandbox en modo test
         if test and hasattr(exchange, 'set_sandbox_mode'):
             exchange.set_sandbox_mode(True)
+            logger.info(f"Exchange {exchange_id} inicializado en modo TEST")
+        else:
+            logger.info(f"Exchange {exchange_id} inicializado en modo REAL")
         
         return exchange
     
@@ -125,18 +142,20 @@ def get_market_data(symbol: str, timeframe: str = "15m", limit: int = 100) -> Op
             logger.warning(f"Timeframe no válido: {timeframe}, cambiando a 15m")
             timeframe = "15m"
         
-        # Intentar obtener datos reales del exchange
-        exchange = initialize_exchange(test=True)
+        # Intentar obtener datos reales del exchange - USANDO MODO REAL
+        exchange = initialize_exchange(test=False)
         
         if exchange is not None:
             try:
                 # Formato específico para el exchange
                 formatted_symbol = symbol.replace("-", "/")
                 
+                logger.info(f"Obteniendo datos reales de {formatted_symbol} con timeframe {timeframe}")
+                
                 # Obtener datos
                 ohlcv = exchange.fetch_ohlcv(formatted_symbol, timeframe, limit=limit)
                 
-                if not ohlcv or len(ohlcv) < 10:
+                if not ohlcv or len(ohlcv) < 2:  # Reducido el mínimo a 2 velas
                     logger.warning(f"Datos insuficientes del exchange para {symbol}, usando datos simulados")
                     return generate_test_data(symbol, timeframe, limit)
                 
@@ -145,13 +164,17 @@ def get_market_data(symbol: str, timeframe: str = "15m", limit: int = 100) -> Op
                 df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
                 df.set_index('timestamp', inplace=True)
                 
+                logger.info(f"Obtenidos {len(df)} registros para {symbol}")
                 return df
                 
             except Exception as exchange_error:
                 logger.error(f"Error obteniendo datos del exchange: {exchange_error}")
+                logger.error(f"Detalles: {str(exchange_error)}")
+        else:
+            logger.error("No se pudo inicializar el exchange")
         
         # Si fallamos en obtener datos reales, generar simulados
-        logger.info(f"Usando datos simulados para {symbol}")
+        logger.warning(f"Usando datos simulados para {symbol} debido a error en la conexión")
         return generate_test_data(symbol, timeframe, limit)
     
     except Exception as e:
@@ -169,15 +192,30 @@ def get_current_price(symbol: str) -> float:
         float: Precio actual
     """
     try:
-        # Obtener datos recientes
+        # Intentar obtener el precio directamente desde el exchange
+        try:
+            exchange = initialize_exchange(test=False)
+            if exchange is not None:
+                formatted_symbol = symbol.replace("-", "/")
+                ticker = exchange.fetch_ticker(formatted_symbol)
+                if ticker and 'last' in ticker and ticker['last']:
+                    price = ticker['last']
+                    logger.info(f"Precio real de {symbol}: ${price}")
+                    return price
+        except Exception as direct_error:
+            logger.error(f"Error obteniendo precio directamente de OKX: {direct_error}")
+            
+        # Intentar con datos recientes (respaldo)
         df = get_market_data(symbol, "1m", 1)
         
         if df is not None and not df.empty:
-            return df['close'].iloc[-1]
+            price = df['close'].iloc[-1]
+            logger.info(f"Precio de {symbol} desde datos recientes: ${price}")
+            return price
         
-        # Valores por defecto si no hay datos
+        # Valores por defecto actualizados si no hay datos (última opción)
         default_prices = {
-            "SOL-USDT": 170.0,
+            "SOL-USDT": 178.75,  # Actualizado
             "BTC-USDT": 68000.0,
             "ETH-USDT": 3500.0,
             "AVAX-USDT": 35.0,
@@ -189,11 +227,13 @@ def get_current_price(symbol: str) -> float:
             "XRP-USDT": 0.55
         }
         
-        return default_prices.get(symbol, 100.0)
+        price = default_prices.get(symbol, 100.0)
+        logger.warning(f"Usando precio predeterminado para {symbol}: ${price}")
+        return price
         
     except Exception as e:
         logger.error(f"Error obteniendo precio actual: {e}")
-        return 100.0
+        return 178.75  # Valor de respaldo para SOL actualizado
 
 def generate_test_data(symbol: str, timeframe: str = "15m", limit: int = 100) -> pd.DataFrame:
     """
