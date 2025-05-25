@@ -8,12 +8,54 @@ import sys
 import time
 import logging
 import json
+import subprocess
 from typing import List, Dict, Any, Optional, Union
 from enum import Enum, auto
 from datetime import datetime, timedelta
 
-from interface.cli_menu import clear_screen, print_header, display_logo, print_menu, get_user_choice, confirm_action
-from interface.cli_utils import print_table, print_chart, progress_bar, loading_animation
+# Verificar e instalar dependencias requeridas
+def check_and_install_dependencies():
+    required_packages = [
+        "ccxt", "pandas", "numpy", "matplotlib", 
+        "scikit-learn", "statsmodels", "tabulate", 
+        "websocket-client"
+    ]
+    
+    try:
+        # Verificar qué paquetes faltan
+        missing_packages = []
+        for package in required_packages:
+            try:
+                __import__(package)
+            except ImportError:
+                missing_packages.append(package)
+        
+        # Instalar paquetes faltantes
+        if missing_packages:
+            print("Instalando dependencias necesarias...")
+            subprocess.check_call([
+                sys.executable, "-m", "pip", "install", 
+                *missing_packages
+            ])
+            print("Dependencias instaladas correctamente.")
+        
+        return True
+    except Exception as e:
+        print(f"Error al instalar dependencias: {e}")
+        print("Por favor, instala manualmente: pip install ccxt pandas numpy matplotlib scikit-learn statsmodels tabulate websocket-client")
+        return False
+
+# Ejecutar verificación de dependencias
+check_and_install_dependencies()
+
+# Importar módulos de interfaz
+try:
+    from interface.cli_menu import clear_screen, print_header, display_logo, print_menu, get_user_choice, confirm_action
+    from interface.cli_utils import print_table, print_chart, progress_bar, loading_animation
+except ImportError as e:
+    print(f"Error al importar módulos de interfaz: {e}")
+    print("Asegúrate de tener la estructura de carpetas correcta.")
+    sys.exit(1)
 
 # Configuración de logging
 logging.basicConfig(
