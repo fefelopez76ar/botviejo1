@@ -61,7 +61,7 @@ def get_available_symbols() -> List[str]:
 
 def initialize_exchange(exchange_id: str = "okx", test: bool = False) -> Optional[Any]:
     """
-    Inicializa un objeto de exchange para interactuar con una API de forma optimizada
+    Inicializa un objeto de exchange optimizado para trading de alta velocidad
     
     Args:
         exchange_id: ID del exchange (okx, binance, etc.)
@@ -75,56 +75,62 @@ def initialize_exchange(exchange_id: str = "okx", test: bool = False) -> Optiona
         return None
     
     try:
-        # Intentar obtener credenciales de variables de entorno
+        # Obtener credenciales de variables de entorno (más seguro)
         api_key = os.environ.get(f"{exchange_id.upper()}_API_KEY")
         api_secret = os.environ.get(f"{exchange_id.upper()}_API_SECRET")
         password = os.environ.get(f"{exchange_id.upper()}_PASSPHRASE")
-        
-        # Verificar si se encontraron todas las credenciales necesarias
+
         if not all([api_key, api_secret, password]):
-            logger.error(f"Credenciales de API incompletas para {exchange_id}. Asegúrate de configurar todas las variables de entorno necesarias.")
+            logger.error("Credenciales incompletas en variables de entorno")
             return None
         
-        logger.info(f"Configurando conexión optimizada para {exchange_id}")
-        
-        # Configurar exchange con parámetros optimizados
+        # Configurar exchange
         exchange_class = getattr(ccxt, exchange_id)
         
-        # Configuración optimizada para baja latencia
+        # Configuración optimizada para trading de alta velocidad
         config = {
             'apiKey': api_key,
             'secret': api_secret,
-            'password': password,  # OKX usa 'password' en lugar de 'passphrase'
+            'password': password,
             'enableRateLimit': True,
-            'timeout': 10000,  # Timeout más corto (10 segundos)
+            'timeout': 10000,  # 10 segundos timeout
             'options': {
                 'defaultType': 'spot',
                 'adjustForTimeDifference': True,
-                'recvWindow': 5000,  # Ventana de recepción más corta
-                'warnOnFetchOpenOrdersWithoutSymbol': False
+                'recvWindow': 5000,
+                'createMarketBuyOrderRequiresPrice': False,
+                'warnOnFetchOpenOrdersWithoutSymbol': False,
+                'networkPriority': ['MAIN_NET'],
+                'defaultNetwork': 'MAIN_NET'
+            },
+            'headers': {
+                'User-Agent': 'sol-trading-bot/1.0'
             }
         }
         
-        # Configuración específica para OKX
         if exchange_id == 'okx':
-            if test:
-                # Configurar modo demo/simulación para OKX
-                config['options']['test'] = True
-                logger.info("Configurado OKX para usar modo de simulación (Demo Trading)")
+            config['options'].update({
+                'maxRetries': 3,
+                'test': test,
+                'http': {
+                    'timeout': 10000,
+                    'keepalive': True
+                }
+            })
         
-        # Crear instancia del exchange
         exchange = exchange_class(config)
         
-        # Configurar sandbox/test para otros exchanges
-        if test and exchange_id != 'okx' and hasattr(exchange, 'set_sandbox_mode'):
+        # Usar sandbox en modo test para otros exchanges
+        if test and hasattr(exchange, 'set_sandbox_mode'):
             exchange.set_sandbox_mode(True)
+            logger.info(f"Exchange {exchange_id} inicializado en modo TEST")
+        else:
+            logger.info(f"Exchange {exchange_id} inicializado en modo {'DEMO' if test else 'REAL'}")
         
-        logger.info(f"Exchange {exchange_id} inicializado en modo {'DEMO' if test else 'REAL'}")
         return exchange
     
     except Exception as e:
         logger.error(f"Error inicializando exchange {exchange_id}: {e}")
-        logger.error(f"Detalles: {str(e)}")
         return None
 
 def get_market_data(symbol: str, timeframe: str = "15m", limit: int = 100) -> Optional[pd.DataFrame]:
@@ -194,7 +200,7 @@ def get_market_data(symbol: str, timeframe: str = "15m", limit: int = 100) -> Op
 
 def get_current_price(symbol: str) -> float:
     """
-    Obtiene el precio actual de un símbolo
+    Obtiene el precio actual optimizado para trading de alta velocidad
     
     Args:
         symbol: Símbolo de trading (ej. SOL-USDT)
@@ -203,32 +209,26 @@ def get_current_price(symbol: str) -> float:
         float: Precio actual
     """
     try:
-        # Verificar si debemos usar modo demo
         use_demo = os.environ.get('USE_DEMO_MODE', 'false').lower() == 'true'
+        exchange = initialize_exchange(test=use_demo)
         
-        # MÉTODO 1: Intentar obtener el precio directamente desde el exchange con API key
-        try:
-            exchange = initialize_exchange(test=use_demo)
-            if exchange is not None:
-                formatted_symbol = symbol.replace("-", "/")
-                ticker = exchange.fetch_ticker(formatted_symbol)
-                if ticker and 'last' in ticker and ticker['last']:
-                    price = float(ticker['last'])
-                    logger.info(f"Precio real de {symbol} (Modo: {'DEMO' if use_demo else 'REAL'}): ${price}")
-                    return price
-        except Exception as direct_error:
-            logger.error(f"Error obteniendo precio con API autenticada: {direct_error}")
+        if exchange is None:
+            raise Exception("No se pudo inicializar el exchange")
+            
+        formatted_symbol = symbol.replace("-", "/")
         
-        # MÉTODO 2: Intentar con la API pública de OKX (no requiere autenticación)
-        try:
-            import ccxt
-            public_exchange = ccxt.okx({'enableRateLimit': True})
-            formatted_symbol = symbol.replace("-", "/")
-            ticker = public_exchange.fetch_ticker(formatted_symbol)
-            if ticker and 'last' in ticker and ticker['last']:
-                price = float(ticker['last'])
-                logger.info(f"Precio real de {symbol} (API pública): ${price}")
-                return price
+        # Usar fetch_ticker_quick si está disponible (más rápido)
+        if hasattr(exchange, 'fetch_ticker_quick'):
+            ticker = exchange.fetch_ticker_quick(formatted_symbol)
+        else:
+            ticker = exchange.fetch_ticker(formatted_symbol)
+            
+        if not ticker or 'last' not in ticker or not ticker['last']:
+            raise Exception("Datos de ticker inválidos")
+            
+        price = float(ticker['last'])
+        logger.debug(f"Precio {symbol}: ${price} (Modo: {'DEMO' if use_demo else 'REAL'})")
+        return price
         except Exception as public_error:
             logger.error(f"Error obteniendo precio con API pública: {public_error}")
             
