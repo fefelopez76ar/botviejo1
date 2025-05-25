@@ -61,7 +61,7 @@ def get_available_symbols() -> List[str]:
 
 def initialize_exchange(exchange_id: str = "okx", test: bool = False) -> Optional[Any]:
     """
-    Inicializa un objeto de exchange para interactuar con una API
+    Inicializa un objeto de exchange para interactuar con una API de forma optimizada
     
     Args:
         exchange_id: ID del exchange (okx, binance, etc.)
@@ -75,62 +75,56 @@ def initialize_exchange(exchange_id: str = "okx", test: bool = False) -> Optiona
         return None
     
     try:
-        # Credenciales específicas para OKX - usamos credenciales directas para garantizar conexión
-        api_key = "abc0a2f7-4b02-4f60-a4b9-fd575598e4e9"
-        api_secret = "2D78D8359A4873449E832B37BABC33E6"
-        password = "Daeco1212@"
+        # Intentar obtener credenciales de variables de entorno
+        api_key = os.environ.get(f"{exchange_id.upper()}_API_KEY")
+        api_secret = os.environ.get(f"{exchange_id.upper()}_API_SECRET")
+        password = os.environ.get(f"{exchange_id.upper()}_PASSPHRASE")
         
-        # Intentar obtener de variables de entorno si están configuradas
-        env_api_key = os.environ.get(f"{exchange_id.upper()}_API_KEY")
-        env_api_secret = os.environ.get(f"{exchange_id.upper()}_API_SECRET")
-        env_password = os.environ.get(f"{exchange_id.upper()}_PASSPHRASE")  # Corregido de API_PASSWORD a PASSPHRASE
+        # Verificar si se encontraron todas las credenciales necesarias
+        if not all([api_key, api_secret, password]):
+            logger.error(f"Credenciales de API incompletas para {exchange_id}. Asegúrate de configurar todas las variables de entorno necesarias.")
+            return None
         
-        # Usar credenciales de env si están completas
-        if env_api_key and env_api_secret and env_password:
-            api_key = env_api_key
-            api_secret = env_api_secret
-            password = env_password
-            logger.info("Usando credenciales API desde variables de entorno")
-        else:
-            logger.info("Usando credenciales API codificadas")
+        logger.info(f"Configurando conexión optimizada para {exchange_id}")
         
-        # Configurar exchange
+        # Configurar exchange con parámetros optimizados
         exchange_class = getattr(ccxt, exchange_id)
         
-        # Configuración básica
+        # Configuración optimizada para baja latencia
         config = {
             'apiKey': api_key,
             'secret': api_secret,
             'password': password,  # OKX usa 'password' en lugar de 'passphrase'
             'enableRateLimit': True,
+            'timeout': 10000,  # Timeout más corto (10 segundos)
             'options': {
-                'defaultType': 'spot'
+                'defaultType': 'spot',
+                'adjustForTimeDifference': True,
+                'recvWindow': 5000,  # Ventana de recepción más corta
+                'warnOnFetchOpenOrdersWithoutSymbol': False
             }
         }
         
-        # Añadir configuración para modo de simulación en OKX
+        # Configuración específica para OKX
         if exchange_id == 'okx':
-            # Configuración general
-            config['options']['warnOnFetchOpenOrdersWithoutSymbol'] = False
-            
             if test:
-                # Para OKX, la documentación indica usar el parámetro 'test' en options
+                # Configurar modo demo/simulación para OKX
                 config['options']['test'] = True
                 logger.info("Configurado OKX para usar modo de simulación (Demo Trading)")
         
+        # Crear instancia del exchange
         exchange = exchange_class(config)
         
-        # Usar sandbox en modo test para otros exchanges
-        if test and hasattr(exchange, 'set_sandbox_mode'):
+        # Configurar sandbox/test para otros exchanges
+        if test and exchange_id != 'okx' and hasattr(exchange, 'set_sandbox_mode'):
             exchange.set_sandbox_mode(True)
-            logger.info(f"Exchange {exchange_id} inicializado en modo TEST")
-        else:
-            logger.info(f"Exchange {exchange_id} inicializado en modo {'DEMO' if test else 'REAL'}")
         
+        logger.info(f"Exchange {exchange_id} inicializado en modo {'DEMO' if test else 'REAL'}")
         return exchange
     
     except Exception as e:
         logger.error(f"Error inicializando exchange {exchange_id}: {e}")
+        logger.error(f"Detalles: {str(e)}")
         return None
 
 def get_market_data(symbol: str, timeframe: str = "15m", limit: int = 100) -> Optional[pd.DataFrame]:
