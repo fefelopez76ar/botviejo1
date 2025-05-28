@@ -1,0 +1,33 @@
+### Mejoras del Bot - 27 de mayo de 2025
+
+#### Cambios y Mejoras Implementadas:
+1. **Corrección del manejo de colas:**
+   - Se corrigió el manejo de la cola `user_input_queue` en `main1.py` para evitar errores al llamar a `task_done()` innecesariamente.
+   - Se agregó un bloque `try-except` para manejar posibles excepciones y registrar advertencias en caso de errores.
+
+2. **Habilitación de registros detallados:**
+   - En `modulo2.py`, se activaron los registros para los datos procesados que se colocan en la cola `data_queue`.
+   - Esto permite rastrear el tipo de datos y el instrumento asociado, mejorando la capacidad de depuración.
+
+3. **Estructura de carpetas y archivos:**
+   - **Carpeta `info`:**
+     - Se utiliza para almacenar reportes, registros y documentación relevante del bot.
+     - Archivos creados:
+       - `execution_report_20250527.txt`: Detalla los cambios realizados y la ubicación de los registros.
+       - `bot_improvements_20250527.txt`: Lista las mejoras implementadas y su impacto.
+   - **Carpeta `data`:**
+     - Contiene datos procesados y otros archivos relacionados con la ejecución del bot.
+     - Archivo creado:
+       - `changelog_20250527.txt`: Registro de cambios realizados el 27 de mayo de 2025.
+
+#### Impacto de las Mejoras:
+- **Estabilidad:**
+  - El bot ahora maneja las colas de manera más robusta, evitando errores críticos durante la ejecución.
+- **Depuración:**
+  - Los registros detallados permiten identificar y solucionar problemas más rápidamente.
+- **Organización:**
+  - La estructura de carpetas facilita el acceso a la información y la documentación del bot.
+
+#### Próximos Pasos:
+- Continuar monitoreando el rendimiento del bot y realizar ajustes según sea necesario.
+- Documentar cualquier nueva funcionalidad o cambio en los archivos correspondientes.

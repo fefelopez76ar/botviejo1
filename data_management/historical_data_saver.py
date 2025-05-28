@@ -87,7 +87,17 @@ class HistoricalDataSaver:
         except Exception as e:
             logging.error(f"Error inesperado en save_data: {e} - Data: {data}")
 
+    def connect(self):
+        """Método público para conectar a la base de datos."""
+        self._connect()
+
     def close(self):
+        if self.conn:
+            self.conn.close()
+            logging.info("Conexión a la base de datos cerrada.")
+    
+    def disconnect(self):
+        """Método público para desconectar de la base de datos."""
         if self.conn:
             self.conn.close()
             logging.info("Conexión a la base de datos cerrada.")

@@ -26,7 +26,7 @@ from dotenv import load_dotenv
 from api_client.modulocola import data_queue
 from api_client.modulo2 import OKXWebSocketClient
 # ---------------------------------------------------
-
+from data_management.historical_data_saver import HistoricalDataSaver
 # Configurar logging
 logging.basicConfig(
     level=logging.INFO,
@@ -46,7 +46,7 @@ load_dotenv(dotenv_path=config_path)
 class ScalpingBot:
     """Bot de scalping para trading de Solana en OKX"""
 
-    def __init__(self):
+    def __init__(self, historical_data_saver: HistoricalDataSaver): # MODIFICADO: Ahora recibe el saver
         self.active = False
         self.exchange = None
         self.symbol = "SOL/USDT"
@@ -64,10 +64,14 @@ class ScalpingBot:
         self.trading_thread = None
         # --- NUEVO: Atributo para la cola de datos en el bot ---
         self.data_queue = data_queue # Referencia a la cola global de modulocola.py
+        # --- NUEVO: Atributo para HistoricalDataSaver ---
+        self.historical_data_saver = historical_data_saver
         # ------------------------------------------------------
 
     def initialize(self):
         logger.info(f"Inicializando bot en modo {self.mode.upper()}...")
+        # Llama al método de inicialización del HistoricalDataSaver
+        self.historical_data_saver.connect()
         logger.info("Bot inicializado.")
 
     def start(self):
@@ -91,13 +95,15 @@ class ScalpingBot:
     def shutdown(self):
         logger.info("Apagando el bot...")
         self.stop()
+        # Cierra la conexión de la base de datos al apagar
+        self.historical_data_saver.disconnect()
         logger.info("Bot apagado y recursos liberados.")
 
     async def run_data_consumer(self):
         logger.info("[ScalpingBot]: Iniciando consumidor de datos de la cola...")
         while not self.stop_event.is_set():
             try:
-                data = await self.data_queue.get()
+                data = await asyncio.wait_for(self.data_queue.get(), timeout=1.0)
                 # logger.debug(f"[ScalpingBot]: Datos recibidos de la cola: {data.get('type', 'N/A')}")
 
                 if data.get('type') == 'ticker':
@@ -106,17 +112,29 @@ class ScalpingBot:
                     if price_data:
                         last_price = price_data[0].get('last')
                         logger.info(f"[ScalpingBot - Ticker]: {inst_id} - Último precio: {last_price}")
+                        # NUEVO: Guardar datos de ticker
+                        self.historical_data_saver.save_ticker_data(data) # <--- ¡Aquí está la adición!
                 elif data.get('type') == 'books-l2-tbt':
                     logger.info(f"[ScalpingBot - OrderBook]: {data.get('instrument')} - Bid: {data.get('best_bid')}, Ask: {data.get('best_ask')}")
+                    # NUEVO: Guardar datos de order book
+                    self.historical_data_saver.save_order_book_data(data) # <--- ¡Aquí está la adición!
                 elif data.get('type') == 'trades':
                     logger.info(f"[ScalpingBot - Trade]: {data.get('instrument')} - Trades recibidos.")
 
+                # Asegurarse de que task_done() se llama para cada elemento 'get'
                 self.data_queue.task_done()
+            except asyncio.TimeoutError:
+                pass
             except asyncio.CancelledError:
                 logger.info("[ScalpingBot]: Consumidor de cola cancelado.")
                 break
             except Exception as e:
                 logger.error(f"[ScalpingBot ERROR]: Error al consumir de la cola: {e}")
+                if not self.data_queue.empty():
+                    try:
+                        self.data_queue.task_done()
+                    except ValueError:
+                        pass
                 await asyncio.sleep(1)
 
         logger.info("[ScalpingBot]: Consumidor de datos de la cola detenido.")
@@ -174,16 +192,21 @@ async def main_cli_interface_async():
             await okx_client.ws.close()
         return # Salir de la función principal
 
-    # SUSCRIPCIONES INICIALES (solo si la autenticación fue exitosa)
+    # SUSCRIPCIONES INICIALES
+    # MODIFICADO: ELIMINADA LA SUSCRIPCIÓN A "trades"
     await okx_client.subscribe([
         {"channel": "tickers", "instId": "SOL-USDT"},
-        {"channel": "books-l2-tbt", "instId": "SOL-USDT"},
-        {"channel": "trades", "instId": "SOL-USDT"}
+        {"channel": "books-l2-tbt", "instId": "SOL-USDT"}
     ])
-    logger.info("Suscripciones iniciales enviadas.")
+    logger.info("Suscripciones iniciales a tickers y order book enviadas.")
+
+    # --- NUEVO: Inicializar HistoricalDataSaver ---
+    historical_data_saver = HistoricalDataSaver()
+    # --------------------------------------------
 
     # --- 3. Inicializar tu ScalpingBot (síncrono) ---
-    bot = ScalpingBot()
+    # MODIFICADO: Pasar la instancia de historical_data_saver al ScalpingBot
+    bot = ScalpingBot(historical_data_saver)
     bot.initialize()
 
     # --- 4. Crear un hilo para manejar la entrada del usuario de forma síncrona ---
@@ -239,7 +262,11 @@ async def main_cli_interface_async():
             except Exception as e:
                 logger.error(f"Error en manejador de comandos CLI: {e}")
             finally:
-                user_input_queue.task_done()
+                try:
+                    if not user_input_queue.empty():
+                        user_input_queue.task_done()
+                except ValueError as ve:
+                    logger.warning(f"task_done() llamado innecesariamente: {ve}")
             await asyncio.sleep(0.1)
 
     tasks.append(cli_command_handler())

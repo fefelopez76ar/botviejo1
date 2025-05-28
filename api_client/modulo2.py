@@ -126,6 +126,9 @@ class OKXWebSocketClient:
             logging.error("No se puede suscribir: el WebSocket no está conectado.")
             return
 
+        # Filtrar el canal 'trades' de la lista de canales
+        channels = [channel for channel in channels if channel.get("channel") != "trades"]
+
         subscribe_message = {
             "op": "subscribe",
             "args": channels
@@ -225,18 +228,10 @@ class OKXWebSocketClient:
                         "data": payload_data # Opcional: mantener la data original completa
                     }
 
-                elif channel == "trades" and payload_data:
-                    # Para trades, podríamos enviar la lista completa de trades
-                    processed_item = {
-                        "type": "trades",
-                        "instrument": inst_id,
-                        "data": payload_data # Lista de trades
-                    }
-
                 # Si hemos procesado algo, lo ponemos en la cola
                 if processed_item:
                     await self.data_queue.put(processed_item)
-                    # logging.info(f"Datos '{processed_item['type']}' de '{processed_item['instrument']}' puestos en la cola.")
+                    logging.info(f"Datos '{processed_item['type']}' de '{processed_item['instrument']}' puestos en la cola.")
                 else:
                     logging.debug(f"Datos de canal '{channel}' no procesados o vacíos: {data}")
 
