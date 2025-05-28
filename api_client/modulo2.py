@@ -9,6 +9,7 @@ import hmac
 import hashlib
 import base64
 import time
+from datetime import datetime
 
 # Cargar las variables de entorno desde config.env con ruta completa
 # Nota: Este load_dotenv se hace aquí por si el módulo se ejecuta de forma independiente.
@@ -16,16 +17,40 @@ import time
 config_path = Path(__file__).parent.parent / "config.env"
 load_dotenv(dotenv_path=config_path)
 
-# Crear carpeta 'info' si no existe y configurar logging
+# Crear carpeta 'info' si no existe y configurar logging en un archivo txt llamado 'pendientes.txt'
 info_dir = Path(__file__).parent.parent / "info"
 info_dir.mkdir(exist_ok=True) # Asegura que la carpeta 'info' exista
 
-log_file_path = info_dir / "bot.log"
+# Ruta del archivo pendientes.txt
+log_txt_path = info_dir / "pendientes.txt"
+
+# Escribir contenido inicial en pendientes.txt
+contenido_inicial = """Pendientes del proyecto:
+
+1. **Final Testing:**
+   - Run the bot to confirm that it initializes correctly, processes data, and saves it to the database without errors.
+   - Verify that the database (`market_data.db`) contains the expected data using `verificar_db.py`.
+
+2. **Error Handling:**
+   - Ensure robust error handling for any remaining edge cases during bot execution.
+
+3. **Folder and File Verification:**
+   - Confirm that the `info/` folder exists and contains the necessary logs.
+   - Verify that the new `market_data.db` file is created with the correct schema.
+
+4. **Data Validation:**
+   - Compress and share the `info/` folder for further analysis of saved data.
+
+"""
+
+with open(log_txt_path, "w", encoding="utf-8") as f:
+    f.write(contenido_inicial)
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler(log_file_path, mode='a', encoding='utf-8'),
+        logging.FileHandler(log_txt_path, mode='a', encoding='utf-8'),
         logging.StreamHandler()
     ]
 )

@@ -26,7 +26,7 @@ from dotenv import load_dotenv
 from api_client.modulocola import data_queue
 from api_client.modulo2 import OKXWebSocketClient
 # ---------------------------------------------------
-from data_management.historical_data_saver import HistoricalDataSaver
+from data_management.historical_data_saver_async import HistoricalDataSaver
 # Configurar logging
 logging.basicConfig(
     level=logging.INFO,
@@ -68,10 +68,12 @@ class ScalpingBot:
         self.historical_data_saver = historical_data_saver
         # ------------------------------------------------------
 
-    def initialize(self):
+    async def initialize_historical_data_saver(self):
+        await self.historical_data_saver.connect()
+
+    async def initialize(self):
         logger.info(f"Inicializando bot en modo {self.mode.upper()}...")
-        # Llama al método de inicialización del HistoricalDataSaver
-        self.historical_data_saver.connect()
+        await self.historical_data_saver.connect()
         logger.info("Bot inicializado.")
 
     def start(self):
@@ -92,11 +94,11 @@ class ScalpingBot:
         else:
             logger.warning("El bot no está activo.")
 
-    def shutdown(self):
+    async def shutdown(self):
         logger.info("Apagando el bot...")
         self.stop()
         # Cierra la conexión de la base de datos al apagar
-        self.historical_data_saver.disconnect()
+        await self.historical_data_saver.disconnect()
         logger.info("Bot apagado y recursos liberados.")
 
     async def run_data_consumer(self):
@@ -113,7 +115,7 @@ class ScalpingBot:
                         last_price = price_data[0].get('last')
                         logger.info(f"[ScalpingBot - Ticker]: {inst_id} - Último precio: {last_price}")
                         # NUEVO: Guardar datos de ticker
-                        self.historical_data_saver.save_ticker_data(data) # <--- ¡Aquí está la adición!
+                        await self.historical_data_saver.save_ticker_data(data) # <--- ¡Aquí está la adición!
                 elif data.get('type') == 'books-l2-tbt':
                     logger.info(f"[ScalpingBot - OrderBook]: {data.get('instrument')} - Bid: {data.get('best_bid')}, Ask: {data.get('best_ask')}")
                     # NUEVO: Guardar datos de order book
@@ -207,7 +209,7 @@ async def main_cli_interface_async():
     # --- 3. Inicializar tu ScalpingBot (síncrono) ---
     # MODIFICADO: Pasar la instancia de historical_data_saver al ScalpingBot
     bot = ScalpingBot(historical_data_saver)
-    bot.initialize()
+    await bot.initialize()
 
     # --- 4. Crear un hilo para manejar la entrada del usuario de forma síncrona ---
     user_input_queue = asyncio.Queue()
@@ -215,15 +217,15 @@ async def main_cli_interface_async():
         while True:
             try:
                 user_input = input("> ").lower() # <--- ¡AQUÍ ESTÁ EL PROMPT!
-                asyncio.run_coroutine_threadsafe(user_input_queue.put(user_input), loop)
+                loop.call_soon_threadsafe(asyncio.create_task, user_input_queue.put(user_input))
                 if user_input == 'q':
                     break
             except EOFError:
-                asyncio.run_coroutine_threadsafe(user_input_queue.put('q'), loop)
+                loop.call_soon_threadsafe(asyncio.create_task, user_input_queue.put('q'))
                 break
             except Exception as e:
                 logger.error(f"Error en hilo de input: {e}")
-                asyncio.run_coroutine_threadsafe(user_input_queue.put('q'), loop)
+                loop.call_soon_threadsafe(asyncio.create_task, user_input_queue.put('q'))
                 break
 
     input_thread = threading.Thread(target=_get_user_input_thread, args=(asyncio.get_event_loop(),), daemon=True) # Pasar el loop
@@ -243,7 +245,7 @@ async def main_cli_interface_async():
                 cmd = await user_input_queue.get()
                 if cmd == 'q':
                     logger.info("Comando 'q' recibido: Iniciando cierre del bot.")
-                    bot.shutdown()
+                    await bot.shutdown()
                     if okx_client.ws and hasattr(okx_client.ws, 'closed') and not okx_client.ws.closed:
                         await okx_client.ws.close()
                     break
@@ -277,7 +279,7 @@ async def main_cli_interface_async():
         logger.info("Tareas principales canceladas.")
     finally:
         logger.info("Cerrando recursos del bot...")
-        bot.shutdown()
+        await bot.shutdown()
         # También aquí se verifica si ws existe y tiene el atributo .closed
         if okx_client.ws and hasattr(okx_client.ws, 'closed') and not okx_client.ws.closed:
             await okx_client.ws.close()
@@ -287,9 +289,4 @@ async def main_cli_interface_async():
 
 # --- Punto de entrada principal ---
 if __name__ == "__main__":
-    try:
-        asyncio.run(main_cli_interface_async())
-    except KeyboardInterrupt:
-        logger.info("Proceso principal interrumpido por el usuario (Ctrl+C).")
-    except Exception as e:
-        logger.critical(f"Un error inesperado detuvo el bot: {e}", exc_info=True)
+    asyncio.run(main_cli_interface_async())

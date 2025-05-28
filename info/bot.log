@@ -24718,3 +24718,1372 @@ Traceback (most recent call last):
     self.historical_data_saver.disconnect()
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AttributeError: 'HistoricalDataSaver' object has no attribute 'disconnect'
+2025-05-27 23:09:18,220 - INFO - ==================================================
+SolanaScalper - Bot de Trading v2.0 (MODO ASÍNCRONO)
+==================================================
+
+2025-05-27 23:09:18,228 - INFO - Iniciando componentes asíncronos y síncronos...
+2025-05-27 23:09:18,232 - INFO - Conectando y suscribiendo al WebSocket de OKX...
+2025-05-27 23:09:19,931 - INFO - Conexión establecida con la API de OKX WebSocket.
+2025-05-27 23:09:19,939 - INFO - Enviando solicitud de autenticación a OKX WebSocket...
+2025-05-27 23:09:20,371 - INFO - Respuesta de autenticación: {'event': 'login', 'msg': '', 'code': '0', 'connId': 'f79b695f'}
+2025-05-27 23:09:20,371 - INFO - Autenticación con OKX WebSocket exitosa.
+2025-05-27 23:09:20,379 - INFO - Enviando suscripción: {'op': 'subscribe', 'args': [{'channel': 'tickers', 'instId': 'SOL-USDT'}, {'channel': 'books-l2-tbt', 'instId': 'SOL-USDT'}]}
+2025-05-27 23:09:20,788 - INFO - Respuesta de suscripción: {'event': 'subscribe', 'arg': {'channel': 'tickers', 'instId': 'SOL-USDT'}, 'connId': 'f79b695f'}
+2025-05-27 23:09:20,788 - INFO - Suscripciones iniciales a tickers y order book enviadas.
+2025-05-27 23:09:20,788 - INFO - Inicializando bot en modo PAPER...
+2025-05-27 23:09:20,822 - INFO - Bot inicializado.
+2025-05-27 23:09:20,827 - INFO - Hilo de entrada de usuario iniciado. Presiona 'q' para salir.
+2025-05-27 23:09:20,829 - INFO - Iniciando recepción de mensajes del WebSocket.
+2025-05-27 23:09:20,834 - ERROR - Error del servidor OKX: Only users who are VIP5 and above in trading fee tier are allowed to subscribe to this channel (Código: 60029)
+2025-05-27 23:09:20,866 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:20,871 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:20,871 - INFO - [ScalpingBot]: Iniciando consumidor de datos de la cola...
+2025-05-27 23:09:20,871 - WARNING - Comando desconocido: python c:\proyectos\mibot2\cryptotradingbot\verificar_db.py
+2025-05-27 23:09:20,879 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.28
+2025-05-27 23:09:20,884 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.28
+2025-05-27 23:09:21,198 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:21,199 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.28
+2025-05-27 23:09:21,485 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:21,486 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.28
+2025-05-27 23:09:21,579 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:21,583 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.28
+2025-05-27 23:09:21,829 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:21,833 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.28
+2025-05-27 23:09:21,970 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:21,974 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.28
+2025-05-27 23:09:22,096 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:22,096 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.28
+2025-05-27 23:09:22,187 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:22,187 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.28
+2025-05-27 23:09:22,339 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:22,339 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:22,430 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:22,430 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:22,569 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:22,569 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:22,680 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:22,680 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:22,940 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:22,940 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:23,049 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:23,049 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:23,179 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:23,179 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:23,329 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:23,329 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:23,480 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:23,480 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:23,589 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:23,589 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:23,740 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:23,740 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:23,885 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:23,885 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:23,993 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:23,993 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:24,129 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:24,129 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:24,279 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:24,279 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:24,540 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:24,540 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:25,020 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:25,030 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:25,050 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:25,052 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:25,130 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:25,130 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:25,979 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:25,989 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:26,240 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:26,240 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:26,379 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:26,379 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:27,030 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:27,030 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:27,629 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:27,629 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:27,896 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:27,899 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:28,244 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:28,244 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:28,470 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:28,479 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:28,630 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:28,630 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:29,079 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:29,079 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.28
+2025-05-27 23:09:29,230 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:29,240 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.28
+2025-05-27 23:09:29,479 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:29,479 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.28
+2025-05-27 23:09:29,600 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:29,600 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.28
+2025-05-27 23:09:29,970 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:29,970 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.28
+2025-05-27 23:09:30,069 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:30,069 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.28
+2025-05-27 23:09:30,180 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:30,180 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.28
+2025-05-27 23:09:30,289 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:30,289 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.28
+2025-05-27 23:09:30,540 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:30,540 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.28
+2025-05-27 23:09:31,070 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:31,079 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:31,170 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:31,170 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:31,289 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:31,289 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:31,699 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:31,699 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:31,850 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:31,850 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:31,990 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:31,990 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:32,090 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:32,090 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:32,180 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:32,180 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:32,279 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:32,279 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:32,435 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:32,435 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:32,929 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:32,929 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:33,539 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:33,549 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:33,679 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:33,679 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:33,830 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:33,830 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:33,935 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:33,935 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:34,069 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:34,069 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:34,169 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:34,169 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:34,329 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:34,329 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:34,580 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:34,580 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:34,735 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:34,735 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:34,939 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:34,939 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:35,090 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:35,090 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:35,370 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:35,370 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:35,469 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:35,469 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:35,570 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:35,570 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.27
+2025-05-27 23:09:35,950 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:35,950 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.28
+2025-05-27 23:09:36,070 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:36,070 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.28
+2025-05-27 23:09:36,189 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:36,194 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.28
+2025-05-27 23:09:36,294 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:36,315 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.28
+2025-05-27 23:09:36,435 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:36,457 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.28
+2025-05-27 23:09:36,543 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:36,574 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.28
+2025-05-27 23:09:36,690 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:36,690 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.28
+2025-05-27 23:09:36,780 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:36,780 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.28
+2025-05-27 23:09:36,880 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:36,880 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.28
+2025-05-27 23:09:37,029 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:37,029 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.28
+2025-05-27 23:09:37,140 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:37,140 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.28
+2025-05-27 23:09:37,635 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:37,635 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.28
+2025-05-27 23:09:37,960 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:37,965 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.26
+2025-05-27 23:09:38,080 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:38,080 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.24
+2025-05-27 23:09:38,190 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:38,190 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.24
+2025-05-27 23:09:38,289 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:38,289 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.24
+2025-05-27 23:09:38,400 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:38,400 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.24
+2025-05-27 23:09:38,563 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:38,564 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.24
+2025-05-27 23:09:38,667 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:38,682 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.24
+2025-05-27 23:09:38,793 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:38,838 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.24
+2025-05-27 23:09:38,885 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:38,915 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.24
+2025-05-27 23:09:39,034 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:39,036 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.24
+2025-05-27 23:09:39,140 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:39,145 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.24
+2025-05-27 23:09:39,296 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:39,300 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.22
+2025-05-27 23:09:39,377 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:39,380 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.22
+2025-05-27 23:09:39,500 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:39,500 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.22
+2025-05-27 23:09:39,580 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:39,585 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.22
+2025-05-27 23:09:39,709 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:39,714 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.22
+2025-05-27 23:09:39,865 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:39,869 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.22
+2025-05-27 23:09:39,940 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:39,942 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.22
+2025-05-27 23:09:40,055 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:40,055 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.23
+2025-05-27 23:09:40,185 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:40,185 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.23
+2025-05-27 23:09:40,390 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:40,390 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.23
+2025-05-27 23:09:40,694 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:40,694 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.23
+2025-05-27 23:09:40,869 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:40,869 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.23
+2025-05-27 23:09:40,950 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:40,950 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.23
+2025-05-27 23:09:41,050 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:41,050 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.22
+2025-05-27 23:09:41,190 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:41,195 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.22
+2025-05-27 23:09:41,279 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:41,279 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.22
+2025-05-27 23:09:41,399 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:41,399 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.22
+2025-05-27 23:09:41,530 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:41,530 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.22
+2025-05-27 23:09:41,690 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:41,690 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.22
+2025-05-27 23:09:42,019 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:42,030 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.22
+2025-05-27 23:09:42,030 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:42,030 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.22
+2025-05-27 23:09:42,140 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:42,140 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.22
+2025-05-27 23:09:42,290 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:42,290 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.22
+2025-05-27 23:09:43,050 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:43,050 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:43,050 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.22
+2025-05-27 23:09:43,050 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.21
+2025-05-27 23:09:43,280 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:43,280 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.21
+2025-05-27 23:09:43,435 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:43,435 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.21
+2025-05-27 23:09:43,690 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:43,690 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.21
+2025-05-27 23:09:43,834 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:43,834 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.21
+2025-05-27 23:09:43,979 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:43,979 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.21
+2025-05-27 23:09:44,180 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:44,180 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.21
+2025-05-27 23:09:44,280 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:44,280 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.21
+2025-05-27 23:09:44,510 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:44,510 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.2
+2025-05-27 23:09:44,629 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:44,629 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.2
+2025-05-27 23:09:44,779 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:44,779 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.2
+2025-05-27 23:09:44,890 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:44,890 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.2
+2025-05-27 23:09:45,340 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:45,350 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.2
+2025-05-27 23:09:45,514 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:45,514 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.19
+2025-05-27 23:09:45,570 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:45,570 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.19
+2025-05-27 23:09:45,670 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:45,679 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.19
+2025-05-27 23:09:45,770 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:45,780 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.19
+2025-05-27 23:09:45,870 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:45,870 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.19
+2025-05-27 23:09:46,079 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:46,079 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.19
+2025-05-27 23:09:46,350 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:46,350 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.19
+2025-05-27 23:09:46,580 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:46,580 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.19
+2025-05-27 23:09:46,740 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:46,740 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.19
+2025-05-27 23:09:46,840 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:46,840 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.19
+2025-05-27 23:09:47,200 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:47,200 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.19
+2025-05-27 23:09:47,331 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:47,331 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.19
+2025-05-27 23:09:47,679 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:47,679 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.17
+2025-05-27 23:09:47,780 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:47,780 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.17
+2025-05-27 23:09:47,929 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:47,932 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.17
+2025-05-27 23:09:48,080 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:48,080 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.17
+2025-05-27 23:09:48,350 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:48,350 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.17
+2025-05-27 23:09:48,480 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:48,480 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.17
+2025-05-27 23:09:48,580 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:48,580 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.17
+2025-05-27 23:09:48,674 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:48,680 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.17
+2025-05-27 23:09:48,833 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:48,833 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.17
+2025-05-27 23:09:49,279 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:49,279 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.17
+2025-05-27 23:09:49,439 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:49,439 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.17
+2025-05-27 23:09:49,679 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:49,679 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.17
+2025-05-27 23:09:49,933 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:49,933 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.17
+2025-05-27 23:09:50,090 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:50,090 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.17
+2025-05-27 23:09:50,199 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:50,199 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.17
+2025-05-27 23:09:50,540 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:50,540 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.17
+2025-05-27 23:09:50,789 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:50,789 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.17
+2025-05-27 23:09:51,864 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:51,864 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.13
+2025-05-27 23:09:51,965 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:51,970 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.1
+2025-05-27 23:09:52,069 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:52,069 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.1
+2025-05-27 23:09:52,180 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:52,180 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.11
+2025-05-27 23:09:52,300 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:52,300 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.11
+2025-05-27 23:09:52,386 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:52,388 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.11
+2025-05-27 23:09:52,486 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:52,488 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.11
+2025-05-27 23:09:52,629 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:52,655 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.11
+2025-05-27 23:09:52,740 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:52,750 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.11
+2025-05-27 23:09:52,980 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:52,980 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.11
+2025-05-27 23:09:53,105 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:53,162 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.11
+2025-05-27 23:09:53,184 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:53,219 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.11
+2025-05-27 23:09:53,435 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:53,435 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.11
+2025-05-27 23:09:53,550 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:53,550 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.11
+2025-05-27 23:09:53,660 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:53,660 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.1
+2025-05-27 23:09:53,790 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:53,800 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.1
+2025-05-27 23:09:53,883 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:53,890 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.1
+2025-05-27 23:09:54,045 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:54,055 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.1
+2025-05-27 23:09:54,170 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:54,170 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.1
+2025-05-27 23:09:54,289 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:54,295 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.1
+2025-05-27 23:09:54,440 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:54,440 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.1
+2025-05-27 23:09:54,580 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:54,580 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.1
+2025-05-27 23:09:54,920 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:54,925 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.08
+2025-05-27 23:09:55,036 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:55,040 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.08
+2025-05-27 23:09:55,347 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:55,350 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.08
+2025-05-27 23:09:55,446 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:55,452 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.08
+2025-05-27 23:09:55,564 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:55,564 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.08
+2025-05-27 23:09:55,670 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:55,680 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.08
+2025-05-27 23:09:55,900 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:55,900 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.08
+2025-05-27 23:09:56,031 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:56,033 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.08
+2025-05-27 23:09:56,170 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:56,175 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.08
+2025-05-27 23:09:56,284 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:56,300 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.08
+2025-05-27 23:09:56,545 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:56,570 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.08
+2025-05-27 23:09:56,644 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:56,650 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.08
+2025-05-27 23:09:56,770 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:56,770 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.08
+2025-05-27 23:09:56,880 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:56,880 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.08
+2025-05-27 23:09:56,979 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:56,979 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.08
+2025-05-27 23:09:57,129 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:57,129 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.08
+2025-05-27 23:09:57,340 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:57,340 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.08
+2025-05-27 23:09:57,479 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:57,481 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.08
+2025-05-27 23:09:57,580 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:57,580 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.08
+2025-05-27 23:09:57,681 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:57,681 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.08
+2025-05-27 23:09:57,832 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:57,834 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.08
+2025-05-27 23:09:57,940 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:57,940 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.08
+2025-05-27 23:09:58,064 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:58,065 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.08
+2025-05-27 23:09:58,280 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:58,280 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.08
+2025-05-27 23:09:58,534 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:58,540 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.09
+2025-05-27 23:09:58,650 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:58,650 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.09
+2025-05-27 23:09:58,980 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:58,980 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.09
+2025-05-27 23:09:59,940 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:09:59,940 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.1
+2025-05-27 23:10:00,098 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:10:00,100 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.1
+2025-05-27 23:10:00,230 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:10:00,235 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.1
+2025-05-27 23:10:00,360 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:10:00,360 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.1
+2025-05-27 23:10:00,440 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:10:00,450 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.12
+2025-05-27 23:10:00,540 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:10:00,540 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.13
+2025-05-27 23:10:00,680 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:10:00,680 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.13
+2025-05-27 23:10:00,849 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:10:00,849 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.13
+2025-05-27 23:10:00,905 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:10:00,905 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.15
+2025-05-27 23:10:01,010 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:10:01,010 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.16
+2025-05-27 23:10:01,147 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:10:01,148 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.16
+2025-05-27 23:10:01,701 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:10:01,709 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 175.16
+2025-05-27 23:10:02,087 - INFO - Manejador de comandos CLI cancelado.
+2025-05-27 23:10:02,118 - INFO - [ScalpingBot]: Consumidor de cola cancelado.
+2025-05-27 23:10:02,199 - INFO - [ScalpingBot]: Consumidor de datos de la cola detenido.
+2025-05-27 23:10:02,481 - INFO - Receptor de mensajes del WebSocket detenido.
+2025-05-27 23:10:02,485 - INFO - Tareas principales canceladas.
+2025-05-27 23:10:02,486 - INFO - Cerrando recursos del bot...
+2025-05-27 23:10:02,488 - INFO - Apagando el bot...
+2025-05-27 23:10:02,495 - WARNING - El bot no está activo.
+2025-05-27 23:10:02,500 - INFO - Bot apagado y recursos liberados.
+2025-05-27 23:10:02,500 - INFO - Bot apagado completamente.
+2025-05-27 23:12:15,260 - INFO - ==================================================
+SolanaScalper - Bot de Trading v2.0 (MODO ASÍNCRONO)
+==================================================
+
+2025-05-27 23:12:15,260 - INFO - Iniciando componentes asíncronos y síncronos...
+2025-05-27 23:12:15,260 - INFO - Conectando y suscribiendo al WebSocket de OKX...
+2025-05-27 23:12:16,941 - INFO - Conexión establecida con la API de OKX WebSocket.
+2025-05-27 23:12:16,941 - INFO - Enviando solicitud de autenticación a OKX WebSocket...
+2025-05-27 23:12:17,327 - INFO - Respuesta de autenticación: {'event': 'login', 'msg': '', 'code': '0', 'connId': '6c002a16'}
+2025-05-27 23:12:17,361 - INFO - Autenticación con OKX WebSocket exitosa.
+2025-05-27 23:12:17,371 - INFO - Enviando suscripción: {'op': 'subscribe', 'args': [{'channel': 'tickers', 'instId': 'SOL-USDT'}, {'channel': 'books-l2-tbt', 'instId': 'SOL-USDT'}]}
+2025-05-27 23:12:17,781 - INFO - Respuesta de suscripción: {'event': 'subscribe', 'arg': {'channel': 'tickers', 'instId': 'SOL-USDT'}, 'connId': '6c002a16'}
+2025-05-27 23:12:17,781 - INFO - Suscripciones iniciales a tickers y order book enviadas.
+2025-05-27 23:12:17,791 - INFO - Inicializando bot en modo PAPER...
+2025-05-27 23:12:17,791 - CRITICAL - Un error inesperado detuvo el bot: asyncio.run() cannot be called from a running event loop
+Traceback (most recent call last):
+  File "c:\proyectos\mibot2\CryptoTradingBot\main1.py", line 293, in <module>
+    asyncio.run(main_cli_interface_async())
+  File "C:\Users\fede\AppData\Local\Programs\Python\Python311\Lib\asyncio\runners.py", line 190, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Users\fede\AppData\Local\Programs\Python\Python311\Lib\asyncio\runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\fede\AppData\Local\Programs\Python\Python311\Lib\asyncio\base_events.py", line 653, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "c:\proyectos\mibot2\CryptoTradingBot\main1.py", line 212, in main_cli_interface_async
+    bot.initialize()
+  File "c:\proyectos\mibot2\CryptoTradingBot\main1.py", line 76, in initialize
+    asyncio.run(self.initialize_historical_data_saver())
+  File "C:\Users\fede\AppData\Local\Programs\Python\Python311\Lib\asyncio\runners.py", line 186, in run
+    raise RuntimeError(
+RuntimeError: asyncio.run() cannot be called from a running event loop
+2025-05-27 23:15:24,172 - INFO - ==================================================
+SolanaScalper - Bot de Trading v2.0 (MODO ASÍNCRONO)
+==================================================
+
+2025-05-27 23:15:24,241 - INFO - Iniciando componentes asíncronos y síncronos...
+2025-05-27 23:15:24,282 - INFO - Conectando y suscribiendo al WebSocket de OKX...
+2025-05-27 23:15:27,157 - INFO - Conexión establecida con la API de OKX WebSocket.
+2025-05-27 23:15:27,162 - INFO - Enviando solicitud de autenticación a OKX WebSocket...
+2025-05-27 23:15:27,542 - INFO - Respuesta de autenticación: {'event': 'login', 'msg': '', 'code': '0', 'connId': '9ffb92be'}
+2025-05-27 23:15:27,542 - INFO - Autenticación con OKX WebSocket exitosa.
+2025-05-27 23:15:27,542 - INFO - Enviando suscripción: {'op': 'subscribe', 'args': [{'channel': 'tickers', 'instId': 'SOL-USDT'}, {'channel': 'books-l2-tbt', 'instId': 'SOL-USDT'}]}
+2025-05-27 23:15:27,922 - INFO - Respuesta de suscripción: {'event': 'subscribe', 'arg': {'channel': 'tickers', 'instId': 'SOL-USDT'}, 'connId': '9ffb92be'}
+2025-05-27 23:15:27,922 - INFO - Suscripciones iniciales a tickers y order book enviadas.
+2025-05-27 23:15:27,932 - INFO - Inicializando bot en modo PAPER...
+2025-05-27 23:15:27,987 - INFO - [HistoricalDataSaver]: Conectado a DB async 'market_data.db' y tablas verificadas.
+2025-05-27 23:15:27,987 - INFO - Bot inicializado.
+2025-05-27 23:15:27,992 - INFO - Hilo de entrada de usuario iniciado. Presiona 'q' para salir.
+2025-05-27 23:15:27,992 - INFO - Iniciando recepción de mensajes del WebSocket.
+2025-05-27 23:15:27,992 - ERROR - Error del servidor OKX: Only users who are VIP5 and above in trading fee tier are allowed to subscribe to this channel (Código: 60029)
+2025-05-27 23:15:27,992 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:27,992 - INFO - [ScalpingBot]: Iniciando consumidor de datos de la cola...
+2025-05-27 23:15:28,003 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.9
+2025-05-27 23:15:28,008 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:28,137 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:28,142 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.9
+2025-05-27 23:15:28,142 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:29,152 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:29,152 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.9
+2025-05-27 23:15:29,172 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:29,233 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:29,272 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.9
+2025-05-27 23:15:29,272 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:29,332 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:29,332 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.9
+2025-05-27 23:15:29,342 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:29,470 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:29,473 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.9
+2025-05-27 23:15:29,474 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:29,581 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:29,582 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.89
+2025-05-27 23:15:29,583 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:29,692 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:29,702 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.89
+2025-05-27 23:15:29,707 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:29,833 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:29,837 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.89
+2025-05-27 23:15:29,837 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:29,932 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:29,932 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.89
+2025-05-27 23:15:29,937 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:30,047 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:30,087 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.89
+2025-05-27 23:15:30,096 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:30,181 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:30,192 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.89
+2025-05-27 23:15:30,196 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:30,298 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:30,303 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.89
+2025-05-27 23:15:30,306 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:30,430 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:30,443 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.89
+2025-05-27 23:15:30,467 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:30,554 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:30,589 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.89
+2025-05-27 23:15:30,592 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:30,682 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:30,682 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.89
+2025-05-27 23:15:30,682 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:30,772 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:30,772 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.89
+2025-05-27 23:15:30,772 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:30,882 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:30,882 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.89
+2025-05-27 23:15:30,887 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:31,009 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:31,012 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.89
+2025-05-27 23:15:31,017 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:31,132 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:31,132 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.89
+2025-05-27 23:15:31,132 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:31,232 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:31,232 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.89
+2025-05-27 23:15:31,232 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:31,472 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:31,472 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.89
+2025-05-27 23:15:31,472 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:31,572 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:31,572 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.89
+2025-05-27 23:15:31,572 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:31,747 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:31,752 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.89
+2025-05-27 23:15:31,752 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:32,072 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:32,072 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.89
+2025-05-27 23:15:32,072 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:32,232 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:32,232 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.89
+2025-05-27 23:15:32,232 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:32,332 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:32,332 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.89
+2025-05-27 23:15:32,342 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:32,452 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:32,452 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.89
+2025-05-27 23:15:32,452 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:32,672 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:32,672 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.89
+2025-05-27 23:15:32,672 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:32,832 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:32,832 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.89
+2025-05-27 23:15:32,832 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:33,272 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:33,282 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.89
+2025-05-27 23:15:33,282 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:33,372 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:33,382 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.89
+2025-05-27 23:15:33,382 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:33,782 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:33,782 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.89
+2025-05-27 23:15:33,782 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:33,882 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:33,882 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.89
+2025-05-27 23:15:33,887 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:34,292 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:34,297 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.89
+2025-05-27 23:15:34,297 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:34,398 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:34,403 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.89
+2025-05-27 23:15:34,406 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:34,502 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:34,502 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.89
+2025-05-27 23:15:34,506 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:34,656 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:34,666 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.89
+2025-05-27 23:15:34,668 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:34,770 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:34,773 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.89
+2025-05-27 23:15:34,775 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:34,982 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:34,986 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.89
+2025-05-27 23:15:34,989 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:35,092 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:35,108 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.89
+2025-05-27 23:15:35,111 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:35,332 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:35,332 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.89
+2025-05-27 23:15:35,332 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:35,482 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:35,487 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.89
+2025-05-27 23:15:35,487 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:35,632 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:35,632 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.89
+2025-05-27 23:15:35,632 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:36,772 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:36,772 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.89
+2025-05-27 23:15:36,781 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:36,912 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:36,917 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.89
+2025-05-27 23:15:36,917 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:37,162 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:37,162 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.89
+2025-05-27 23:15:37,162 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:37,282 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:37,282 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.89
+2025-05-27 23:15:37,282 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:37,382 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:37,382 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.89
+2025-05-27 23:15:37,387 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:37,498 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:37,500 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.89
+2025-05-27 23:15:37,503 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:37,650 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:37,654 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.9
+2025-05-27 23:15:37,658 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:38,132 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:38,132 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.9
+2025-05-27 23:15:38,132 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:38,232 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:38,232 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.9
+2025-05-27 23:15:38,232 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:38,325 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:38,332 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.9
+2025-05-27 23:15:38,332 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:38,712 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:38,712 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:38,712 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:38,832 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:38,832 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:38,832 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:39,397 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:39,402 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:39,402 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:39,877 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:39,907 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:39,917 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:39,980 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:40,068 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:40,307 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:40,323 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:40,337 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:40,339 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:40,417 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:40,469 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:40,488 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:40,502 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:40,504 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:40,506 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:40,509 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:40,522 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:40,522 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:40,672 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:40,672 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:40,672 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:40,775 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:40,775 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:40,785 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:40,878 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:40,882 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:40,885 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:41,151 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:41,154 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:41,167 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:41,277 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:41,288 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:41,297 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:41,397 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:41,400 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:41,402 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:41,533 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:41,536 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.92
+2025-05-27 23:15:41,539 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:41,662 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:41,662 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.92
+2025-05-27 23:15:41,662 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:42,583 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:42,585 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:42,588 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:42,722 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:42,722 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:42,732 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:42,842 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:42,842 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:42,848 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:43,230 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:43,232 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:43,232 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:43,330 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:43,332 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:43,335 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:44,092 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:44,092 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:44,092 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:44,236 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:44,236 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:44,236 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:44,374 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:44,382 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:44,382 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:44,475 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:44,475 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:44,482 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:44,582 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:44,582 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:44,582 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:44,685 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:44,686 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:44,688 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:44,833 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:44,837 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:44,837 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:44,936 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:44,936 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.88
+2025-05-27 23:15:44,942 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:45,082 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:45,082 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.88
+2025-05-27 23:15:45,082 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:45,699 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:45,701 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:45,701 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:45,702 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.88
+2025-05-27 23:15:45,703 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:45,704 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.88
+2025-05-27 23:15:45,706 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:45,706 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.88
+2025-05-27 23:15:45,708 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:45,880 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:45,886 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.88
+2025-05-27 23:15:45,889 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:45,985 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:45,988 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.88
+2025-05-27 23:15:45,990 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:46,082 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:46,082 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.88
+2025-05-27 23:15:46,087 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:46,222 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:46,222 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.88
+2025-05-27 23:15:46,232 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:46,342 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:46,342 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.88
+2025-05-27 23:15:46,352 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:46,662 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:46,665 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:46,666 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.88
+2025-05-27 23:15:46,668 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:46,672 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.88
+2025-05-27 23:15:46,684 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:46,972 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:46,982 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.88
+2025-05-27 23:15:46,982 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:47,122 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:47,122 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.88
+2025-05-27 23:15:47,122 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:47,272 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:47,272 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.88
+2025-05-27 23:15:47,272 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:47,382 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:47,387 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.88
+2025-05-27 23:15:47,387 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:47,485 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:47,486 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.88
+2025-05-27 23:15:47,490 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:47,666 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:47,670 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.9
+2025-05-27 23:15:47,684 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:47,762 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:47,762 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.9
+2025-05-27 23:15:47,762 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:47,870 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:47,874 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.9
+2025-05-27 23:15:47,875 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:47,974 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:47,982 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:47,982 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:48,087 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:48,087 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:48,092 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:48,482 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:48,483 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:48,485 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:48,612 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:48,620 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:48,623 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:49,338 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:49,338 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:49,338 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:49,443 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:49,443 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:49,452 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:49,682 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:49,682 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:49,682 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:49,782 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:49,782 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:49,782 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:49,940 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:49,942 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:49,942 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:50,068 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:50,072 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:50,077 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:50,607 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:50,608 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:50,609 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:50,610 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:50,616 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:50,618 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:50,620 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:50,621 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:50,623 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:50,678 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:50,688 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:50,693 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:52,133 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:52,136 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.93
+2025-05-27 23:15:52,139 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:52,235 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:52,242 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.92
+2025-05-27 23:15:52,255 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:52,365 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:52,370 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.92
+2025-05-27 23:15:52,372 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:52,469 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:52,470 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.92
+2025-05-27 23:15:52,472 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:52,597 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:52,603 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.92
+2025-05-27 23:15:52,607 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:52,741 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:52,756 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.93
+2025-05-27 23:15:52,759 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:52,877 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:52,886 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.93
+2025-05-27 23:15:52,889 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:53,034 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:53,037 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.93
+2025-05-27 23:15:53,039 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:53,190 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:53,193 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.93
+2025-05-27 23:15:53,207 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:53,393 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:53,404 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.93
+2025-05-27 23:15:53,409 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:53,505 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:53,549 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.93
+2025-05-27 23:15:53,564 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:54,005 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:54,023 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.93
+2025-05-27 23:15:54,033 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:54,143 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:54,151 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.93
+2025-05-27 23:15:54,154 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:54,234 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:54,240 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:54,247 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:54,482 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:54,490 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:54,495 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:55,289 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:55,292 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:55,294 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:55,719 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:55,721 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:55,723 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:55,724 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:55,726 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:55,731 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:55,734 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:55,737 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:55,741 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:55,826 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:55,827 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:55,836 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:55,950 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:55,971 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:55,974 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:56,054 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:56,066 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:56,072 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:56,171 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:56,187 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:56,198 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:56,296 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:56,316 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.92
+2025-05-27 23:15:56,318 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:56,427 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:56,442 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.92
+2025-05-27 23:15:56,451 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:56,592 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:56,593 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.92
+2025-05-27 23:15:56,601 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:56,853 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:56,855 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.92
+2025-05-27 23:15:56,858 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:56,985 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:56,986 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.92
+2025-05-27 23:15:56,988 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:57,325 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:57,326 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.92
+2025-05-27 23:15:57,327 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:57,785 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:57,785 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.92
+2025-05-27 23:15:57,787 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:58,323 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:58,407 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:58,424 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:58,454 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:58,457 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:58,505 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:58,536 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:15:58,540 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.91
+2025-05-27 23:15:58,542 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:15:58,770 - INFO - Manejador de comandos CLI cancelado.
+2025-05-27 23:15:58,774 - INFO - [ScalpingBot]: Consumidor de cola cancelado.
+2025-05-27 23:15:58,775 - INFO - [ScalpingBot]: Consumidor de datos de la cola detenido.
+2025-05-27 23:15:59,156 - INFO - Receptor de mensajes del WebSocket detenido.
+2025-05-27 23:15:59,158 - INFO - Tareas principales canceladas.
+2025-05-27 23:15:59,159 - INFO - Cerrando recursos del bot...
+2025-05-27 23:15:59,169 - INFO - Apagando el bot...
+2025-05-27 23:15:59,190 - WARNING - El bot no está activo.
+2025-05-27 23:15:59,198 - INFO - [HistoricalDataSaver]: Desconectado de la base de datos 'market_data.db'.
+2025-05-27 23:15:59,227 - INFO - Bot apagado y recursos liberados.
+2025-05-27 23:15:59,234 - INFO - Bot apagado completamente.
+2025-05-27 23:17:46,363 - INFO - ==================================================
+SolanaScalper - Bot de Trading v2.0 (MODO ASÍNCRONO)
+==================================================
+
+2025-05-27 23:17:46,363 - INFO - Iniciando componentes asíncronos y síncronos...
+2025-05-27 23:17:46,363 - INFO - Conectando y suscribiendo al WebSocket de OKX...
+2025-05-27 23:17:48,012 - INFO - Conexión establecida con la API de OKX WebSocket.
+2025-05-27 23:17:48,014 - INFO - Enviando solicitud de autenticación a OKX WebSocket...
+2025-05-27 23:17:48,383 - INFO - Respuesta de autenticación: {'event': 'login', 'msg': '', 'code': '0', 'connId': 'd30fb4aa'}
+2025-05-27 23:17:48,384 - INFO - Autenticación con OKX WebSocket exitosa.
+2025-05-27 23:17:48,384 - INFO - Enviando suscripción: {'op': 'subscribe', 'args': [{'channel': 'tickers', 'instId': 'SOL-USDT'}, {'channel': 'books-l2-tbt', 'instId': 'SOL-USDT'}]}
+2025-05-27 23:17:48,796 - INFO - Respuesta de suscripción: {'event': 'subscribe', 'arg': {'channel': 'tickers', 'instId': 'SOL-USDT'}, 'connId': 'd30fb4aa'}
+2025-05-27 23:17:48,799 - INFO - Suscripciones iniciales a tickers y order book enviadas.
+2025-05-27 23:17:48,799 - INFO - Inicializando bot en modo PAPER...
+2025-05-27 23:17:48,816 - INFO - [HistoricalDataSaver]: Conectado a DB async 'market_data.db' y tablas verificadas.
+2025-05-27 23:17:48,816 - INFO - Bot inicializado.
+2025-05-27 23:17:48,824 - INFO - Hilo de entrada de usuario iniciado. Presiona 'q' para salir.
+2025-05-27 23:17:48,825 - INFO - Iniciando recepción de mensajes del WebSocket.
+2025-05-27 23:17:48,826 - ERROR - Error del servidor OKX: Only users who are VIP5 and above in trading fee tier are allowed to subscribe to this channel (Código: 60029)
+2025-05-27 23:17:48,826 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:17:48,826 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:17:48,827 - INFO - [ScalpingBot]: Iniciando consumidor de datos de la cola...
+2025-05-27 23:17:48,829 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.94
+2025-05-27 23:17:48,833 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:17:48,836 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.94
+2025-05-27 23:17:48,837 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:17:48,873 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:17:48,881 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.94
+2025-05-27 23:17:48,883 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:17:48,983 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:17:48,983 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.94
+2025-05-27 23:17:48,993 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:17:49,126 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:17:49,126 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.94
+2025-05-27 23:17:49,126 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:17:49,265 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:17:49,265 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.94
+2025-05-27 23:17:49,267 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:17:50,993 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:17:50,993 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.94
+2025-05-27 23:17:50,993 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:17:51,133 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:17:51,133 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.94
+2025-05-27 23:17:51,143 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:17:51,333 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:17:51,343 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.94
+2025-05-27 23:17:51,343 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:17:51,843 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:17:51,848 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.94
+2025-05-27 23:17:51,848 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:17:51,931 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:17:51,933 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.94
+2025-05-27 23:17:51,935 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:17:52,328 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:17:52,328 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.94
+2025-05-27 23:17:52,328 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:17:54,123 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:17:54,123 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.94
+2025-05-27 23:17:54,123 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:17:54,238 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:17:54,240 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.94
+2025-05-27 23:17:54,241 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:17:54,373 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:17:54,373 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.94
+2025-05-27 23:17:54,373 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:17:54,473 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:17:54,474 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.94
+2025-05-27 23:17:54,475 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:17:54,567 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:17:54,568 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.94
+2025-05-27 23:17:54,569 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:17:54,823 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:17:54,823 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.94
+2025-05-27 23:17:54,823 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:17:55,756 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:17:55,757 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:17:55,757 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.94
+2025-05-27 23:17:55,759 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:17:55,761 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.94
+2025-05-27 23:17:55,766 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:17:56,563 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:17:56,563 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.94
+2025-05-27 23:17:56,563 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named timestamp
+2025-05-27 23:17:56,586 - INFO - Manejador de comandos CLI cancelado.
+2025-05-27 23:17:56,603 - INFO - [ScalpingBot]: Consumidor de cola cancelado.
+2025-05-27 23:17:56,617 - INFO - [ScalpingBot]: Consumidor de datos de la cola detenido.
+2025-05-27 23:17:57,353 - INFO - Receptor de mensajes del WebSocket detenido.
+2025-05-27 23:17:57,363 - INFO - Tareas principales canceladas.
+2025-05-27 23:17:57,363 - INFO - Cerrando recursos del bot...
+2025-05-27 23:17:57,363 - INFO - Apagando el bot...
+2025-05-27 23:17:57,363 - WARNING - El bot no está activo.
+2025-05-27 23:17:57,363 - INFO - [HistoricalDataSaver]: Desconectado de la base de datos 'market_data.db'.
+2025-05-27 23:17:57,369 - INFO - Bot apagado y recursos liberados.
+2025-05-27 23:17:57,370 - INFO - Bot apagado completamente.
+2025-05-27 23:22:41,456 - INFO - ==================================================
+SolanaScalper - Bot de Trading v2.0 (MODO ASÍNCRONO)
+==================================================
+
+2025-05-27 23:22:41,458 - INFO - Iniciando componentes asíncronos y síncronos...
+2025-05-27 23:22:41,458 - INFO - Conectando y suscribiendo al WebSocket de OKX...
+2025-05-27 23:22:43,960 - INFO - Conexión establecida con la API de OKX WebSocket.
+2025-05-27 23:22:43,961 - INFO - Enviando solicitud de autenticación a OKX WebSocket...
+2025-05-27 23:22:44,572 - INFO - Respuesta de autenticación: {'event': 'login', 'msg': '', 'code': '0', 'connId': '8031307e'}
+2025-05-27 23:22:44,572 - INFO - Autenticación con OKX WebSocket exitosa.
+2025-05-27 23:22:44,573 - INFO - Enviando suscripción: {'op': 'subscribe', 'args': [{'channel': 'tickers', 'instId': 'SOL-USDT'}, {'channel': 'books-l2-tbt', 'instId': 'SOL-USDT'}]}
+2025-05-27 23:22:45,003 - INFO - Respuesta de suscripción: {'event': 'subscribe', 'arg': {'channel': 'tickers', 'instId': 'SOL-USDT'}, 'connId': '8031307e'}
+2025-05-27 23:22:45,003 - INFO - Suscripciones iniciales a tickers y order book enviadas.
+2025-05-27 23:22:45,004 - INFO - Inicializando bot en modo PAPER...
+2025-05-27 23:22:45,012 - INFO - [HistoricalDataSaver]: Conectado a DB async 'market_data.db' y tablas verificadas.
+2025-05-27 23:22:45,013 - INFO - Bot inicializado.
+2025-05-27 23:22:45,016 - INFO - Hilo de entrada de usuario iniciado. Presiona 'q' para salir.
+2025-05-27 23:22:45,017 - INFO - Iniciando recepción de mensajes del WebSocket.
+2025-05-27 23:22:45,018 - ERROR - Error del servidor OKX: Only users who are VIP5 and above in trading fee tier are allowed to subscribe to this channel (Código: 60029)
+2025-05-27 23:22:45,020 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:45,021 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:45,022 - INFO - [ScalpingBot]: Iniciando consumidor de datos de la cola...
+2025-05-27 23:22:45,023 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.65
+2025-05-27 23:22:45,026 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:45,027 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.65
+2025-05-27 23:22:45,032 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:45,074 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:45,075 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.65
+2025-05-27 23:22:45,076 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:45,185 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:45,186 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.65
+2025-05-27 23:22:45,187 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:45,335 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:45,336 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.65
+2025-05-27 23:22:45,337 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:45,837 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:45,838 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.65
+2025-05-27 23:22:45,839 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:46,343 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:46,344 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.65
+2025-05-27 23:22:46,345 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:46,475 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:46,475 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.66
+2025-05-27 23:22:46,476 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:46,574 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:46,574 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.66
+2025-05-27 23:22:46,577 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:46,930 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:46,931 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.66
+2025-05-27 23:22:46,932 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:47,176 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:47,177 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.66
+2025-05-27 23:22:47,178 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:47,658 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:47,659 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.67
+2025-05-27 23:22:47,660 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:48,230 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:48,231 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:48,232 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.67
+2025-05-27 23:22:48,233 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:48,234 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.67
+2025-05-27 23:22:48,236 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:48,256 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:48,257 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.67
+2025-05-27 23:22:48,258 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:48,461 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:48,462 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.67
+2025-05-27 23:22:48,463 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:48,580 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:48,581 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.67
+2025-05-27 23:22:48,582 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:48,777 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:48,778 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.67
+2025-05-27 23:22:48,779 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:48,989 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:48,990 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.69
+2025-05-27 23:22:48,991 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:49,137 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:49,138 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.69
+2025-05-27 23:22:49,139 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:49,282 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:49,283 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.69
+2025-05-27 23:22:49,284 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:49,436 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:49,437 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.69
+2025-05-27 23:22:49,438 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:49,977 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:49,978 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.69
+2025-05-27 23:22:49,979 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:50,136 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:50,137 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.69
+2025-05-27 23:22:50,138 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:50,243 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:50,244 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.69
+2025-05-27 23:22:50,245 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:51,475 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:51,475 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.69
+2025-05-27 23:22:51,477 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:51,677 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:51,678 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.69
+2025-05-27 23:22:51,679 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:51,827 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:51,828 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.69
+2025-05-27 23:22:51,829 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:53,097 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:53,098 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.74
+2025-05-27 23:22:53,099 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:53,186 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:53,187 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.74
+2025-05-27 23:22:53,188 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:53,478 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:53,479 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:53,479 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.74
+2025-05-27 23:22:53,480 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:53,481 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.73
+2025-05-27 23:22:53,483 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:53,573 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:53,574 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.73
+2025-05-27 23:22:53,578 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:53,674 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:53,675 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.73
+2025-05-27 23:22:53,676 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:53,945 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:53,946 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.74
+2025-05-27 23:22:53,947 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:54,185 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:54,186 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:54,186 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.76
+2025-05-27 23:22:54,187 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:54,188 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.76
+2025-05-27 23:22:54,189 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:54,267 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:54,267 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.77
+2025-05-27 23:22:54,269 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:54,373 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:54,374 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.77
+2025-05-27 23:22:54,375 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:54,473 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:54,474 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.78
+2025-05-27 23:22:54,475 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:54,626 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:54,627 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.78
+2025-05-27 23:22:54,628 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:54,765 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:54,765 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.78
+2025-05-27 23:22:54,767 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:54,883 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:54,884 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.78
+2025-05-27 23:22:54,885 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:55,026 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:55,027 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.78
+2025-05-27 23:22:55,028 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:55,755 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:55,756 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:55,756 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.78
+2025-05-27 23:22:55,757 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:55,758 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.8
+2025-05-27 23:22:55,759 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:55,861 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:55,862 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.81
+2025-05-27 23:22:55,863 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:56,108 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:56,108 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:56,109 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.81
+2025-05-27 23:22:56,111 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:56,112 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.81
+2025-05-27 23:22:56,112 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:56,183 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:22:56,184 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.81
+2025-05-27 23:22:56,185 - ERROR - [HistoricalDataSaver ERROR]: Error al guardar ticker: table tickers has no column named instrument_id
+2025-05-27 23:22:56,268 - INFO - Manejador de comandos CLI cancelado.
+2025-05-27 23:22:56,269 - INFO - [ScalpingBot]: Consumidor de cola cancelado.
+2025-05-27 23:22:56,269 - INFO - [ScalpingBot]: Consumidor de datos de la cola detenido.
+2025-05-27 23:22:56,642 - INFO - Receptor de mensajes del WebSocket detenido.
+2025-05-27 23:22:56,643 - INFO - Tareas principales canceladas.
+2025-05-27 23:22:56,643 - INFO - Cerrando recursos del bot...
+2025-05-27 23:22:56,644 - INFO - Apagando el bot...
+2025-05-27 23:22:56,644 - WARNING - El bot no está activo.
+2025-05-27 23:22:56,645 - INFO - [HistoricalDataSaver]: Desconectado de la base de datos 'market_data.db'.
+2025-05-27 23:22:56,646 - INFO - Bot apagado y recursos liberados.
+2025-05-27 23:22:56,646 - INFO - Bot apagado completamente.
+2025-05-27 23:28:11,432 - INFO - ==================================================
+SolanaScalper - Bot de Trading v2.0 (MODO ASÍNCRONO)
+==================================================
+
+2025-05-27 23:28:11,437 - INFO - Iniciando componentes asíncronos y síncronos...
+2025-05-27 23:28:11,438 - INFO - Conectando y suscribiendo al WebSocket de OKX...
+2025-05-27 23:28:13,117 - INFO - Conexión establecida con la API de OKX WebSocket.
+2025-05-27 23:28:13,117 - INFO - Enviando solicitud de autenticación a OKX WebSocket...
+2025-05-27 23:28:13,651 - INFO - Respuesta de autenticación: {'event': 'login', 'msg': '', 'code': '0', 'connId': 'd7718ea0'}
+2025-05-27 23:28:13,651 - INFO - Autenticación con OKX WebSocket exitosa.
+2025-05-27 23:28:13,651 - INFO - Enviando suscripción: {'op': 'subscribe', 'args': [{'channel': 'tickers', 'instId': 'SOL-USDT'}, {'channel': 'books-l2-tbt', 'instId': 'SOL-USDT'}]}
+2025-05-27 23:28:14,032 - INFO - Respuesta de suscripción: {'event': 'subscribe', 'arg': {'channel': 'tickers', 'instId': 'SOL-USDT'}, 'connId': 'd7718ea0'}
+2025-05-27 23:28:14,032 - INFO - Suscripciones iniciales a tickers y order book enviadas.
+2025-05-27 23:28:14,032 - INFO - Inicializando bot en modo PAPER...
+2025-05-27 23:28:14,089 - INFO - [HistoricalDataSaver]: Conectado a DB async 'market_data.db' y tablas verificadas.
+2025-05-27 23:28:14,089 - INFO - Bot inicializado.
+2025-05-27 23:28:14,089 - INFO - Hilo de entrada de usuario iniciado. Presiona 'q' para salir.
+2025-05-27 23:28:14,089 - INFO - Iniciando recepción de mensajes del WebSocket.
+2025-05-27 23:28:14,089 - ERROR - Error del servidor OKX: Only users who are VIP5 and above in trading fee tier are allowed to subscribe to this channel (Código: 60029)
+2025-05-27 23:28:14,097 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:28:14,100 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:28:14,102 - INFO - [ScalpingBot]: Iniciando consumidor de datos de la cola...
+2025-05-27 23:28:14,103 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.71
+2025-05-27 23:28:14,120 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.71
+2025-05-27 23:28:14,384 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:28:14,385 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.71
+2025-05-27 23:28:14,487 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:28:14,487 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.71
+2025-05-27 23:28:14,617 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:28:14,618 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.71
+2025-05-27 23:28:14,862 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:28:14,862 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.72
+2025-05-27 23:28:15,117 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:28:15,117 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:28:15,122 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.72
+2025-05-27 23:28:15,157 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.72
+2025-05-27 23:28:15,179 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:28:15,180 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.72
+2025-05-27 23:28:15,307 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:28:15,307 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.72
+2025-05-27 23:28:15,397 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:28:15,397 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.73
+2025-05-27 23:28:15,497 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:28:15,501 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.67
+2025-05-27 23:28:15,637 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:28:15,637 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.67
+2025-05-27 23:28:15,757 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:28:15,757 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.67
+2025-05-27 23:28:15,883 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:28:15,887 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.67
+2025-05-27 23:28:15,981 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:28:15,982 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.67
+2025-05-27 23:28:16,095 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:28:16,097 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.67
+2025-05-27 23:28:16,250 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:28:16,251 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.67
+2025-05-27 23:28:16,368 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:28:16,395 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.67
+2025-05-27 23:28:16,477 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:28:16,477 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.67
+2025-05-27 23:28:16,586 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:28:16,587 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.66
+2025-05-27 23:28:16,681 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:28:16,683 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.66
+2025-05-27 23:28:16,796 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:28:16,799 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.66
+2025-05-27 23:28:16,947 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:28:16,948 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.66
+2025-05-27 23:28:17,184 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:28:17,185 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.66
+2025-05-27 23:28:17,436 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:28:17,437 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.64
+2025-05-27 23:28:17,544 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:28:17,545 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.62
+2025-05-27 23:28:17,677 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:28:17,677 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.62
+2025-05-27 23:28:17,771 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:28:17,772 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.62
+2025-05-27 23:28:17,881 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:28:17,882 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.62
+2025-05-27 23:28:17,983 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:28:17,984 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.62
+2025-05-27 23:28:18,152 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:28:18,162 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.62
+2025-05-27 23:28:18,297 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:28:18,297 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.6
+2025-05-27 23:28:18,497 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:28:18,499 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.6
+2025-05-27 23:28:18,602 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:28:18,619 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.6
+2025-05-27 23:28:18,750 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:28:18,767 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.6
+2025-05-27 23:28:18,882 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:28:18,897 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.6
+2025-05-27 23:28:18,986 - INFO - Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+2025-05-27 23:28:18,989 - INFO - [ScalpingBot - Ticker]: SOL-USDT - Último precio: 174.6
+2025-05-27 23:28:19,027 - INFO - [ScalpingBot]: Consumidor de cola cancelado.
+2025-05-27 23:28:19,027 - INFO - [ScalpingBot]: Consumidor de datos de la cola detenido.
+2025-05-27 23:28:19,036 - INFO - Manejador de comandos CLI cancelado.
+2025-05-27 23:28:19,407 - INFO - Receptor de mensajes del WebSocket detenido.
+2025-05-27 23:28:19,407 - INFO - Tareas principales canceladas.
+2025-05-27 23:28:19,407 - INFO - Cerrando recursos del bot...
+2025-05-27 23:28:19,407 - INFO - Apagando el bot...
+2025-05-27 23:28:19,417 - WARNING - El bot no está activo.
+2025-05-27 23:28:19,417 - INFO - [HistoricalDataSaver]: Desconectado de la base de datos 'market_data.db'.
+2025-05-27 23:28:19,417 - INFO - Bot apagado y recursos liberados.
+2025-05-27 23:28:19,417 - INFO - Bot apagado completamente.
