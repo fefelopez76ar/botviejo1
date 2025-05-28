@@ -183,3 +183,86 @@ El "cerebro" del bot se puede exportar/importar entre instancias, preservando:
 5. **Optimización de parámetros vía aprendizaje por refuerzo**:
    - Ajuste automático basado en recompensas/castigos
    - Exploración/explotación de estrategias
+
+   📋 Archivos Principales de Ejecución
+1.
+- Script Principal CLI
+
+    Función: Punto de entrada principal del bot con interfaz de línea de comandos
+    Características:
+        Interfaz de usuario amigable con menús
+        Manejo de credenciales de API (OKX)
+        Scalping en tiempo real para SOL-USDT
+        Análisis técnico con RSI, MACD y Bandas de Bollinger
+        Modo paper trading por defecto (simulación)
+        Gestión de riesgo integrada
+    Uso: python main.py
+
+2.
+- Interfaz CLI Avanzada
+
+    Función: Sistema de menús interactivo más completo
+    Características:
+        Menú principal con múltiples opciones
+        Scalping en tiempo real con selección de estrategias
+        Backtesting y optimización
+        Configuración del bot
+        Diagnóstico y monitoreo
+        Simulación de trading en vivo
+    Uso: Se ejecuta desde otros scripts o directamente
+
+3.
+- Motor Principal del Bot
+
+    Función: Clase principal TradingBot y ScalpingBot
+    Características:
+        Sistema de ponderación adaptativa
+        Múltiples estrategias de trading
+        Gestión de posiciones y riesgo
+        Aprendizaje automático integrado
+        Callbacks para eventos
+        Historial de operaciones y señales
+    Uso: Se importa y usa en otros scripts
+
+4.
+- Interfaz Web Flask
+
+    Función: Dashboard web para control del bot
+    Características:
+        Interfaz web moderna en puerto 5000
+        Control remoto del bot (start/stop)
+        Monitoreo en tiempo real
+        Configuración de parámetros
+        API REST para integración
+        Gestión de errores automatizada
+    Uso: python app.py o mediante workflows
+
+5.
+- Launcher Simplificado
+
+    Función: Script de inicio rápido
+    Características:
+        Inicialización automática
+        Arte ASCII de bienvenida
+        Manejo de errores básico
+        Redirección al menú principal
+    Uso: python start_bot.py
+
+🚀 Workflows Configurados
+
+Según la configuración actual, tienes estos workflows disponibles:
+
+    Run Bot Paper ⭐ (Botón Run): python main.py --mode paper
+    Run Bot: python main.py
+    Run Trading Bot: python main.py
+    Run Production Bot: python main.py --mode live --validate-all
+
+💡 Recomendación de Uso
+
+Para empezar rápido: Usa el botón Run que ejecutará Run Bot Paper en modo simulación seguro.
+
+Para interfaz web: Ejecuta python app.py para acceder al dashboard en el puerto 5000.
+
+Para máximo control: Usa python bot_cli.py para acceso completo a todas las funciones.
+
+El sistema está configurado de manera segura para operar en modo paper trading por defecto, protegiendo tus fondos mientras pruebas las estrategias.
