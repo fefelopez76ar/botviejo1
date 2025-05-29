@@ -21,6 +21,7 @@ FUNCIONALIDADES ADICIONALES:
 - Análisis multi-timeframe ✓
 - Gestión de riesgo dinámica ✓
 - Monitoreo en tiempo real ✓
+- Verificación de base de datos (`verificar_db.py`) ✓
 
 1. MEJORAS DE FILTROS Y SEGURIDAD:
 ---------------------------------------------

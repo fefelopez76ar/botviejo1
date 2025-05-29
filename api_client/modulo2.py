@@ -10,6 +10,8 @@ import hashlib
 import base64
 import time
 from datetime import datetime
+# Implementación de filtros de sesión y cooldowns
+import datetime
 
 # Cargar las variables de entorno desde config.env con ruta completa
 # Nota: Este load_dotenv se hace aquí por si el módulo se ejecuta de forma independiente.
@@ -264,3 +266,29 @@ class OKXWebSocketClient:
             logging.warning(f"No se pudo decodificar el mensaje JSON recibido: {message[:100]}...")
         except Exception as e:
             logging.error(f"Error al procesar mensaje WebSocket: {e} - Mensaje: {message[:200]}...")
+
+# Filtro de sesión para evitar operar en momentos de baja liquidez
+def is_valid_session():
+    now = datetime.datetime.utcnow()
+    weekday = now.weekday()  # lunes = 0, domingo = 6
+    hour = now.hour
+    if weekday in [5, 6]:  # sábado o domingo
+        return False
+    if hour < 13 or hour > 21:  # fuera del horario US (13-21 UTC)
+        return False
+    return True
+
+# Cooldown temporal para circuit breakers
+last_break_time = None
+COOLDOWN_PERIOD_HOURS = 6
+
+def is_in_cooldown():
+    global last_break_time
+    if last_break_time is None:
+        return False
+    elapsed_time = (datetime.datetime.utcnow() - last_break_time).total_seconds() / 3600
+    return elapsed_time < COOLDOWN_PERIOD_HOURS
+
+def trigger_cooldown():
+    global last_break_time
+    last_break_time = datetime.datetime.utcnow()

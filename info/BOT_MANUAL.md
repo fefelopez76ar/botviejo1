@@ -1,4 +1,3 @@
-
 # MANUAL DEL BOT DE TRADING SOLANA
 
 ## 1. MODOS DE OPERACIÓN
@@ -98,3 +97,22 @@ python bot_cli.py                  # Interfaz línea comandos
 - Logs detallados
 - Reporte errores
 - Actualizaciones auto
+
+## Forma de Trabajo
+
+### Documentación de Cambios
+En cada cambio realizado en el proyecto, se debe:
+
+1. **Registrar el Cambio:**
+   - Anotar qué se hizo, cómo se implementó, y el estado actual del proyecto.
+   - Detallar los próximos pasos necesarios para avanzar.
+
+2. **Actualizar Archivos de Documentación:**
+   - Modificar los archivos en la carpeta `info/` para reflejar los cambios realizados.
+   - Crear un registro en el archivo de trabajo diario correspondiente (`work_log_YYYYMMDD.txt`).
+
+3. **Estructura del Registro:**
+   - **Qué se hizo:** Breve descripción del cambio.
+   - **Cómo se implementó:** Archivos modificados, scripts creados, y ubicación en la estructura del proyecto.
+   - **Estado actual:** Validación del cambio y su impacto en el proyecto.
+   - **Próximos pasos:** Tareas pendientes relacionadas con el cambio.
