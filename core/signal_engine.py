@@ -2,6 +2,7 @@ import logging
 from collections import deque
 import pandas as pd
 from typing import Dict, Any, Deque, Optional, Callable
+import random # Importar random para la estrategia dummy
 
 # Configurar logging para este módulo
 logger = logging.getLogger("SignalEngine")
@@ -24,13 +25,17 @@ class DummyMachineLearningStrategy:
         Simula la predicción de una señal de trading (BUY/SELL/HOLD).
         En una implementación real, 'features' serían los indicadores/datos de entrada para el modelo ML.
         """
-        if features.empty:
+        if features.empty or len(features) < 2: # Asegurarse de tener al menos 2 puntos para comparar
             return "HOLD"
         
         # Lógica de predicción dummy: compra si el último precio subió, vende si bajó.
         # Esto es solo para tener algo que genere señales para la prueba de flujo.
-        last_price = features['close'].iloc[-1]
-        prev_price = features['close'].iloc[-2] if len(features) > 1 else last_price
+        try:
+            last_price = float(features['close'].iloc[-1])
+            prev_price = float(features['close'].iloc[-2])
+        except (KeyError, IndexError, ValueError):
+            logger.warning("No se pudo obtener el precio 'close' de las features para la predicción dummy.")
+            return "HOLD"
 
         if last_price > prev_price:
             return "BUY"
@@ -39,81 +44,86 @@ class DummyMachineLearningStrategy:
         else:
             return "HOLD"
 
-# --- Clase Principal: SignalEngine ---
 class SignalEngine:
-    def __init__(self, instrument_id: str, data_buffer_size: int = 100,
-                 on_signal_generated: Optional[Callable[[str, str, float, Any], None]] = None):
+    def __init__(self, instrument_id: str, data_buffer_size: int = 50,
+                 ml_strategy: Optional[Any] = None,
+                 on_signal_generated: Optional[Callable[[str, str, float, pd.DataFrame], Any]] = None):
         self.instrument_id = instrument_id
-        # --- Concepto Técnico: deque (cola de doble extremo) ---
-        # data_buffer es una "memoria" que guarda los últimos 'data_buffer_size' ticks.
-        # 'deque' es eficiente para añadir y quitar elementos de los extremos.
         self.data_buffer: Deque[Dict[str, Any]] = deque(maxlen=data_buffer_size)
-        self.ml_strategy: Optional[DummyMachineLearningStrategy] = None
-        self._load_ml_strategy()
-        # --- Concepto Técnico: Callback (on_signal_generated) ---
-        # on_signal_generated es una función que se llamará cuando el SignalEngine genere una señal.
-        # Esto permite que el TradeExecutor "escuche" las señales del SignalEngine sin que este sepa
-        # directamente del TradeExecutor, manteniendo los módulos separados y limpios.
-        self.on_signal_generated = on_signal_generated 
-
+        self.ml_strategy = ml_strategy if ml_strategy else DummyMachineLearningStrategy()
+        self.on_signal_generated = on_signal_generated
         logger.info(f"SignalEngine inicializado para {instrument_id} con buffer de tamaño {data_buffer_size}.")
 
-    def _load_ml_strategy(self):
-        """
-        Intenta cargar la estrategia de Machine Learning.
-        Si el modelo no se encuentra, el motor continuará sin ML activo.
-        """
-        try:
-            self.ml_strategy = DummyMachineLearningStrategy()
-            logger.info("Estrategia de Machine Learning cargada exitosamente (dummy).")
-        except FileNotFoundError:
-            logger.warning("Modelo ML 'model_rf.pkl' no encontrado. SignalEngine operará sin estrategia ML.")
-            self.ml_strategy = None
-        except Exception as e:
-            logger.error(f"Error al cargar la estrategia ML: {e}")
-            self.ml_strategy = None
-
-    def process_data(self, data: Dict[str, Any]):
-        """
-        Procesa nuevos datos de mercado, los añade al buffer y genera señales si es necesario.
-        """
-        self.data_buffer.append(data)
-        logger.debug(f"Datos de {self.instrument_id} añadidos al buffer. Tamaño: {len(self.data_buffer)}")
-
-        # Generar señal cada vez que el buffer está lleno o cada 10 ticks (para probar)
-        if len(self.data_buffer) == self.data_buffer.maxlen or len(self.data_buffer) % 10 == 0:
-            self._generate_signal()
-
-    def _generate_signal(self):
-        """
-        Genera una señal de trading basándose en los datos del buffer y la estrategia ML.
-        """
-        if not self.data_buffer:
-            return
-
-        df = pd.DataFrame(list(self.data_buffer))
-
-        # Asegurarse de que el DataFrame tenga la columna 'close' para la estrategia dummy
-        if 'last_price' in df.columns:
-            df['close'] = df['last_price']
-        elif 'price' in df.columns:
-            df['close'] = df['price']
-        else:
-            logger.warning("Columna 'close' o 'last_price' no encontrada en los datos para SignalEngine. No se generará señal ML.")
-            return
-
-        signal = "HOLD" # Por defecto, la señal es HOLD
-        # Si hay una estrategia ML y suficientes datos, intentar predecir
-        if self.ml_strategy and len(df) >= 2: # Necesitamos al menos 2 ticks para la lógica dummy
-            signal = self.ml_strategy.predict(df)
-        else:
-            logger.debug("No hay estrategia ML cargada o datos insuficientes para generar señal.")
+    async def process_data(self, data: Dict[str, Any]):
+        # Solo procesar si son datos de ticker y para el instrumento correcto
+        if data.get('arg', {}).get('channel') == 'tickers' and \
+           data.get('arg', {}).get('instId') == self.instrument_id:
             
-        # Si la señal no es HOLD y hay un callback, notificar
-        if signal != "HOLD" and self.on_signal_generated:
-            current_price = df['close'].iloc[-1]
-            logger.info(f"[Signal Notifier] Nueva señal: {signal} para {self.instrument_id} a precio: {current_price:.2f}")
-            # Llama a la función de callback, que será execute_order del TradeExecutor
-            self.on_signal_generated(signal, self.instrument_id, current_price, df)
-        elif signal == "HOLD":
-            logger.debug(f"SignalEngine: No se generó señal activa (HOLD) para {self.instrument_id}.")
+            ticker_data = data.get('data')
+            if not ticker_data or not isinstance(ticker_data, list) or not ticker_data[0]:
+                logger.warning("Datos de ticker no válidos o vacíos.")
+                return
+
+            # Tomar el primer elemento de la lista 'data'
+            data_point = ticker_data[0]
+
+            # Convertir todos los valores numéricos importantes a float si no lo están ya
+            # Y asegurar que 'ts' (timestamp) se añada al buffer
+            processed_data_point = {
+                'instId': data_point.get('instId'),
+                'ts': int(data_point.get('ts')), # Asegurar que es int
+                'open': float(data_point.get('open', 0)) if data_point.get('open') else None,
+                'high': float(data_point.get('high24h', 0)) if data_point.get('high24h') else None, # Usar high24h para simulación
+                'low': float(data_point.get('low24h', 0)) if data_point.get('low24h') else None, # Usar low24h para simulación
+                'volCcy24h': float(data_point.get('volCcy24h', 0)) if data_point.get('volCcy24h') else None, # Volumen de moneda
+                'vol24h': float(data_point.get('vol24h', 0)) if data_point.get('vol24h') else None, # Volumen base
+                'askPx': float(data_point.get('askPx', 0)) if data_point.get('askPx') else None,
+                'bidPx': float(data_point.get('bidPx', 0)) if data_point.get('bidPx') else None,
+                # La clave 'last' es la que usamos para el precio de cierre en la simulación
+                'last': float(data_point.get('last')) if data_point.get('last') else None 
+            }
+            # Filtrar None values si no se esperan (depende de cómo uses los datos después)
+            processed_data_point = {k: v for k, v in processed_data_point.items() if v is not None}
+
+            self.data_buffer.append(processed_data_point)
+
+            # Convertir buffer a DataFrame para procesamiento
+            df = pd.DataFrame(list(self.data_buffer))
+            df['ts'] = pd.to_datetime(df['ts'], unit='ms') # Convertir timestamp a datetime
+
+            # Asegurarse de que el DataFrame tenga la columna 'close' para la estrategia dummy
+            # Preferimos 'last' (de OKX tickers), luego 'last_price', luego 'price'
+            if 'last' in df.columns:
+                df['close'] = df['last']
+            elif 'last_price' in df.columns:
+                df['close'] = df['last_price']
+            elif 'price' in df.columns:
+                df['close'] = df['price']
+            else:
+                logger.warning("Columna 'close', 'last_price' o 'last' no encontrada en los datos para SignalEngine. No se generará señal ML.")
+                return
+
+            signal = "HOLD" # Por defecto, la señal es HOLD
+            # Si hay una estrategia ML y suficientes datos, intentar predecir
+            if self.ml_strategy and len(df) >= 2: # Necesitamos al menos 2 ticks para la lógica dummy
+                try:
+                    signal = self.ml_strategy.predict(df)
+                except Exception as e:
+                    logger.error(f"Error al predecir señal con estrategia ML: {e}")
+                    signal = "HOLD" # Fallback a HOLD en caso de error
+
+            # Si la señal no es HOLD y hay un callback, notificar
+            if signal != "HOLD" and self.on_signal_generated:
+                try:
+                    # Asegurarse de que 'close' exista y sea numérica antes de acceder
+                    if 'close' in df.columns and pd.api.types.is_numeric_dtype(df['close']):
+                        current_price = df['close'].iloc[-1]
+                        logger.info(f"[Signal Notifier] Nueva señal: {signal} para {self.instrument_id} a precio: {current_price:.2f}")
+                        # Llama a la función de callback, que será execute_order del TradeExecutor
+                        await self.on_signal_generated(signal, self.instrument_id, current_price, df)
+                    else:
+                        logger.warning("Columna 'close' no numérica o no encontrada para notificar señal.")
+                except Exception as e:
+                    logger.error(f"Error al notificar señal generada: {e}")
+        # else:
+        #     logger.debug(f"Datos recibidos no son de ticker o no son para {self.instrument_id}. Ignorando.")

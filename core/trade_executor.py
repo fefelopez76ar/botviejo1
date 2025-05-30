@@ -33,7 +33,7 @@ class TradeExecutor:
         logger.debug(f"Calculando tamaño de posición: Capital a arriesgar={capital_at_risk:.2f}, Precio={current_price:.2f}, Tamaño={position_size:.4f}")
         return position_size
 
-    def execute_order(self, signal: str, instrument_id: str, current_price: float, data_context: Any):
+    async def execute_order(self, signal: str, instrument_id: str, current_price: float, data_context: Any):
         """
         Ejecuta una orden de compra o venta en modo simulado.
         Esta función es el "callback" que se le pasa al SignalEngine.

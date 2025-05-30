@@ -1,0 +1,28 @@
+Pendientes del proyecto:
+
+1. **Final Testing:**
+   - Run the bot to confirm that it initializes correctly, processes data, and saves it to the database without errors.
+   - Verify that the database (`market_data.db`) contains the expected data using `verificar_db.py`.
+
+2. **Error Handling:**
+   - Ensure robust error handling for any remaining edge cases during bot execution.
+
+3. **Folder and File Verification:**
+   - Confirm that the `info/` folder exists and contains the necessary logs.
+   - Verify that the new `market_data.db` file is created with the correct schema.
+
+4. **Data Validation:**
+   - Compress and share the `info/` folder for further analysis of saved data.
+
+2025-05-29 19:36:28,771 - INFO - ==================================================
+SolanaScalper - Bot de Trading v2.0 (MODO ASÍNCRONO)
+==================================================
+
+2025-05-29 19:36:28,771 - INFO - Iniciando componentes asíncronos y síncronos...
+2025-05-29 19:36:28,771 - INFO - Conectando y suscribiendo al WebSocket de OKX...
+2025-05-29 19:36:30,976 - INFO - Conexión establecida con la API de OKX WebSocket.
+2025-05-29 19:36:30,976 - INFO - Enviando solicitud de autenticación a OKX WebSocket...
+2025-05-29 19:36:31,855 - INFO - Respuesta de autenticación: {'event': 'error', 'msg': 'Your IP 2803:9800:9405:bc43:682f:e467:2d36:236e is not in linking trusted IP addresses.', 'code': '50110', 'connId': 'e8856693'}
+2025-05-29 19:36:31,855 - ERROR - Respuesta de autenticación con error: Your IP 2803:9800:9405:bc43:682f:e467:2d36:236e is not in linking trusted IP addresses. (Código: 50110)
+2025-05-29 19:36:31,855 - ERROR - La autenticación con OKX falló. Por favor, revisa tus credenciales.
+2025-05-29 19:36:31,855 - ERROR - No se pueden iniciar las suscripciones sin autenticación exitosa.

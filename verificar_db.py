@@ -35,5 +35,8 @@ def verificar_order_book():
     conn.close()
 
 if __name__ == "__main__":
-    verificar_tickers()
-    verificar_order_book()
+    try:
+        verificar_tickers()
+        verificar_order_book()
+    except KeyboardInterrupt:
+        print("\nEjecución interrumpida por el usuario.")
