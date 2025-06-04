@@ -191,11 +191,11 @@ async def main_cli_interface_async():
 
     # Instanciar el cliente WebSocket para CANALES PÚBLICOS (tickers)
     public_ws_client = PublicOKXWebSocketClient(api_key, secret_key, passphrase, data_queue)
-    public_ws_client.ws_url = "wss://ws.okx.com:8443/ws/v5/public" # Asegurar la URL pública
+    public_ws_client.ws_url = "wss://wspap.okx.com:8443/ws/v5/public" # Asegurar la URL pública
 
     # Instanciar el cliente WebSocket para CANALES DE NEGOCIO (candles)
     business_ws_client = BusinessOKXWebSocketClient(api_key, secret_key, passphrase, data_queue)
-    business_ws_client.ws_url = "wss://ws.okx.com:8443/ws/v5/business" # Asegurar la URL de negocio
+    business_ws_client.ws_url = "wss://wspap.okx.com:8443/ws/v5/business" # Asegurar la URL de negocio
 
     logger.info("Conectando y suscribiendo a los WebSockets de OKX (Público y Negocio)...")
 

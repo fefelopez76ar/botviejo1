@@ -1,0 +1,36 @@
+# Informe de Trabajo - 3 de Junio de 2025
+
+## Resumen del Día
+Hoy se realizaron los siguientes cambios y avances en el bot de trading:
+
+1. **Refactorización de WebSocket:**
+   - Se implementaron dos conexiones WebSocket separadas para manejar canales públicos y de negocios.
+   - URLs actualizadas a `wss://wspap.okx.com:8443/ws/v5/public` y `wss://wspap.okx.com:8443/ws/v5/business`.
+   - Archivos modificados: `modulo2.py` y `main1.py`.
+
+2. **Corrección de Errores:**
+   - Se resolvió el error `60018` asegurando que las URLs y parámetros de suscripción fueran correctos.
+   - Se verificó que las suscripciones a los canales `tickers` y `candles` funcionen correctamente.
+
+3. **Pruebas y Verificación:**
+   - El bot fue ejecutado y los logs confirmaron que las suscripciones y el flujo de datos están funcionando como se esperaba.
+
+## Próximos Pasos
+
+1. **Optimización de Guardado de Datos:**
+   - Revisar y optimizar el módulo `historical_data_saver.py` para manejar grandes volúmenes de datos.
+
+2. **Documentación:**
+   - Consolidar la documentación en la carpeta `info/` para reflejar los cambios recientes.
+
+3. **Pruebas Adicionales:**
+   - Realizar pruebas de estrés para garantizar la estabilidad del bot bajo carga.
+
+---
+
+## Estado Actual del Proyecto
+
+El bot está completamente funcional con las siguientes características:
+- Conexión estable a la API de OKX.
+- Recepción y guardado de datos de mercado (`tickers` y `candles`) en `market_data.db`.
+- Manejo de errores mejorado para suscripciones WebSocket.
