@@ -191,27 +191,27 @@ async def main_cli_interface_async():
 
     # Instanciar el cliente WebSocket para CANALES PÚBLICOS (tickers)
     public_ws_client = PublicOKXWebSocketClient(api_key, secret_key, passphrase, data_queue)
-    public_ws_client.ws_url = "wss://wspap.okx.com:8443/ws/v5/public" # Asegurar la URL pública
+    public_ws_client.ws_url = "wss://ws.okx.com:8443/ws/v5/public" # URL pública correcta
 
     # Instanciar el cliente WebSocket para CANALES DE NEGOCIO (candles)
     business_ws_client = BusinessOKXWebSocketClient(api_key, secret_key, passphrase, data_queue)
-    business_ws_client.ws_url = "wss://wspap.okx.com:8443/ws/v5/business" # Asegurar la URL de negocio
+    business_ws_client.ws_url = "wss://ws.okx.com:8443/ws/v5/business" # URL de negocio correcta
 
     logger.info("Conectando y suscribiendo a los WebSockets de OKX (Público y Negocio)...")
 
     # Conectar y suscribir cliente público (para tickers)
     await public_ws_client.connect()
-    logger.info("Enviando suscripción a Tickers (Público): {'op': 'subscribe', 'args': [{'channel': 'tickers', 'instId': 'SOL-USDT', 'instType': 'SPOT'}]}")
+    logger.info("Enviando suscripción a Tickers (Público): {'op': 'subscribe', 'args': [{'channel': 'tickers', 'instId': 'SOL-USDT'}]}")
     await public_ws_client.subscribe([
-        {"channel": "tickers", "instId": "SOL-USDT", "instType": "SPOT"}
+        {"channel": "tickers", "instId": "SOL-USDT"}
     ])
     logger.info("Suscripción a Tickers SOL-USDT enviada.")
 
     # Conectar y suscribir cliente de negocio (para candles)
     await business_ws_client.connect()
-    logger.info("Enviando suscripción a Candles (Negocio): {'op': 'subscribe', 'args': [{'channel': 'candle', 'instId': 'SOL-USDT'}]}")
+    logger.info("Enviando suscripción a Candles (Negocio): {'op': 'subscribe', 'args': [{'channel': 'candle1m', 'instId': 'SOL-USDT'}]}")
     await business_ws_client.subscribe([
-        {"channel": "candle", "instId": "SOL-USDT"}
+        {"channel": "candle1m", "instId": "SOL-USDT"}
     ])
     logger.info("Suscripción a Candles SOL-USDT (1m) enviada.")
 
