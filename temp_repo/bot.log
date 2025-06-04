@@ -1,0 +1,48 @@
+2025-05-20 16:19:31,545 - __main__ - ERROR - Error inesperado: EOF when reading a line
+Traceback (most recent call last):
+  File "/home/runner/workspace/bot_cli.py", line 50, in main
+    option = print_menu([
+             ^^^^^^^^^^^^
+  File "/home/runner/workspace/interface/cli_menu.py", line 70, in print_menu
+    return get_user_choice(1, len(options))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/interface/cli_menu.py", line 85, in get_user_choice
+    choice = input(f"\n> ")
+             ^^^^^^^^^^^^^^
+EOFError: EOF when reading a line
+2025-05-22 17:39:23,203 - __main__ - ERROR - Error inesperado: EOF when reading a line
+Traceback (most recent call last):
+  File "/home/runner/workspace/bot_cli.py", line 50, in main
+    option = print_menu([
+             ^^^^^^^^^^^^
+  File "/home/runner/workspace/interface/cli_menu.py", line 70, in print_menu
+    return get_user_choice(1, len(options))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/interface/cli_menu.py", line 85, in get_user_choice
+    choice = input(f"\n> ")
+             ^^^^^^^^^^^^^^
+EOFError: EOF when reading a line
+2025-05-22 19:47:28,378 - __main__ - ERROR - Error inesperado: EOF when reading a line
+Traceback (most recent call last):
+  File "/home/runner/workspace/bot_cli.py", line 50, in main
+    option = print_menu([
+             ^^^^^^^^^^^^
+  File "/home/runner/workspace/interface/cli_menu.py", line 70, in print_menu
+    return get_user_choice(1, len(options))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/interface/cli_menu.py", line 85, in get_user_choice
+    choice = input(f"\n> ")
+             ^^^^^^^^^^^^^^
+EOFError: EOF when reading a line
+2025-05-25 02:17:07,752 - __main__ - ERROR - Error inesperado: EOF when reading a line
+Traceback (most recent call last):
+  File "/home/runner/workspace/bot_cli.py", line 50, in main
+    option = print_menu([
+             ^^^^^^^^^^^^
+  File "/home/runner/workspace/interface/cli_menu.py", line 70, in print_menu
+    return get_user_choice(1, len(options))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/interface/cli_menu.py", line 85, in get_user_choice
+    choice = input(f"\n> ")
+             ^^^^^^^^^^^^^^
+EOFError: EOF when reading a line

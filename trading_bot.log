@@ -1,0 +1,24 @@
+2025-06-04 03:46:06,181 - INFO - Iniciando SolanaScalper Bot...
+2025-06-04 03:46:06,182 - INFO - Configuraci贸n: Cuenta b谩sica OKX - Solo datos de velas
+2025-06-04 03:46:06,894 - INFO - Conexi贸n establecida con la API de OKX WebSocket.
+2025-06-04 03:46:06,895 - INFO - Conexi贸n establecida con OKX
+2025-06-04 03:46:06,897 - INFO - Enviando suscripci贸n: {'op': 'subscribe', 'args': [{'channel': 'candle1m', 'instId': 'SOL-USDT'}]}
+2025-06-04 03:46:07,087 - INFO - Respuesta de suscripci贸n: {'event': 'subscribe', 'arg': {'channel': 'candle1m', 'instId': 'SOL-USDT'}, 'connId': 'c80d756e'}
+2025-06-04 03:46:07,088 - INFO - Suscripci贸n a candles SOL/USDT activa
+2025-06-04 03:46:07,088 - INFO - Bot iniciado - presiona Ctrl+C para detener
+2025-06-04 03:48:09,691 - INFO - 馃 Iniciando modo de aprendizaje autom谩tico
+2025-06-04 03:48:09,691 - INFO - 馃挵 Paper Trading activado - Sin riesgo real
+2025-06-04 03:48:10,431 - INFO - Conexi贸n establecida con la API de OKX WebSocket.
+2025-06-04 03:48:10,441 - INFO - Enviando suscripci贸n: {'op': 'subscribe', 'args': [{'channel': 'candle1m', 'instId': 'SOL-USDT'}]}
+2025-06-04 03:48:10,629 - INFO - Respuesta de suscripci贸n: {'event': 'subscribe', 'arg': {'channel': 'candle1m', 'instId': 'SOL-USDT'}, 'connId': 'aa461e44'}
+2025-06-04 03:48:10,629 - INFO - Conectado a datos de mercado en tiempo real
+2025-06-04 02:28:39,488 - INFO - Iniciando SolanaScalper Bot...
+2025-06-04 02:28:39,489 - INFO - Configuraci髇: Cuenta b醩ica OKX - Solo datos de velas
+2025-06-04 02:28:42,597 - INFO - Conexi髇 establecida con la API de OKX WebSocket.
+2025-06-04 02:28:42,598 - INFO - Conexi髇 establecida con OKX
+2025-06-04 02:28:42,598 - INFO - Enviando suscripci髇: {'op': 'subscribe', 'args': [{'channel': 'candle1m', 'instId': 'SOL-USDT'}]}
+2025-06-04 02:28:42,991 - INFO - Respuesta de suscripci髇: {'event': 'subscribe', 'arg': {'channel': 'candle1m', 'instId': 'SOL-USDT'}, 'connId': 'bafb7a0b'}
+2025-06-04 02:28:42,991 - INFO - Suscripci髇 a candles SOL/USDT activa
+2025-06-04 02:28:42,991 - INFO - Bot iniciado - presiona Ctrl+C para detener
+2025-06-04 02:38:06,928 - INFO - Bot detenido
+2025-06-04 02:38:07,183 - INFO - Bot detenido por el usuario
