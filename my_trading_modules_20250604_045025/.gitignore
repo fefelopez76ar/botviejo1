@@ -1,0 +1,17 @@
+# Credenciales
+config.env
+*.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+
+# Base de datos
+*.db
+*.sqlite
+
+# IDE
+.vscode/
+.idea/

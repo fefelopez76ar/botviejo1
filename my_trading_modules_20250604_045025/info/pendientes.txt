@@ -1,0 +1,16 @@
+Pendientes del proyecto:
+
+1. **Final Testing:**
+   - Run the bot to confirm that it initializes correctly, processes data, and saves it to the database without errors.
+   - Verify that the database (`market_data.db`) contains the expected data using `verificar_db.py`.
+
+2. **Error Handling:**
+   - Ensure robust error handling for any remaining edge cases during bot execution.
+
+3. **Folder and File Verification:**
+   - Confirm that the `info/` folder exists and contains the necessary logs.
+   - Verify that the new `market_data.db` file is created with the correct schema.
+
+4. **Data Validation:**
+   - Compress and share the `info/` folder for further analysis of saved data.
+

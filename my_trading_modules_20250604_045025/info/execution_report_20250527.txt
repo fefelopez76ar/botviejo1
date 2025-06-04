@@ -1,0 +1,58 @@
+### Reporte de Ejecución - 27 de mayo de 2025
+
+#### Cambios Realizados:
+1. **Corrección del manejo de la cola `user_input_queue` en `main1.py`:**
+   - Se agregó un bloque `try-except` para manejar posibles errores al llamar a `task_done()`.
+   - Esto asegura que no se llame innecesariamente y evita el error `ValueError: task_done() called too many times`.
+
+2. **Habilitación de registros en `modulo2.py`:**
+   - Se activaron los registros para los datos procesados que se colocan en la cola `data_queue`.
+   - Ahora se registra información como el tipo de datos y el instrumento asociado.
+
+3. **Funcionalidad de Guardado en Base de Datos:**
+   - Se implementó la funcionalidad para guardar los datos de mercado en una base de datos SQLite local llamada `market_data.db`.
+   - **Archivo creado:** `data_management/historical_data_saver.py`
+     - Contiene la clase `HistoricalDataSaver` que maneja la conexión y el guardado de datos.
+   - **Modificaciones en `main1.py`:**
+     - Se importó e inicializó `HistoricalDataSaver`.
+     - Los mensajes de los canales `tickers` y `books-l2-tbt` se pasan a `HistoricalDataSaver` para ser guardados.
+
+#### Verificación:
+- El bot se ejecutó correctamente después de los cambios.
+- Los datos procesados se registran en el archivo de log `bot.log` ubicado en la carpeta `info`.
+- Ejemplo de registro:
+  ```
+  Datos 'ticker' de 'SOL-USDT' puestos en la cola.
+  ```
+
+#### Estado Actual del Bot:
+- **Conexión:**
+  - Se conecta exitosamente a OKX WebSocket.
+  - Autentica correctamente con las credenciales API.
+- **Suscripciones:**
+  - Se suscribe sin errores a los canales públicos `tickers` y `books` para `SOL-USDT`.
+- **Procesamiento de Datos:**
+  - Recibe y procesa datos en tiempo real de los canales suscritos.
+  - Guarda los datos en la base de datos local `market_data.db`.
+- **Apagado:**
+  - Se apaga de forma limpia mediante el comando `q` sin errores.
+
+#### Ubicación de la Información:
+- **Logs:**
+  - Archivo: `info/bot.log`
+  - Contiene registros detallados de la ejecución del bot, incluyendo datos procesados y eventos importantes.
+
+- **Datos Procesados:**
+  - Los datos procesados se colocan en la cola `data_queue` y se consumen en tiempo real por el bot.
+
+- **Base de Datos:**
+  - Archivo: `market_data.db`
+  - Contiene los datos de mercado guardados para su posterior análisis y desarrollo de estrategias de trading.
+
+#### Próximos Pasos:
+1. Utilizar los datos guardados en `market_data.db` para desarrollar la lógica de trading y backtesting.
+2. Optimizar el rendimiento del bot para manejar mayores volúmenes de datos.
+3. Implementar estrategias de trading basadas en los datos históricos y en tiempo real.
+
+#### Conclusión:
+Los cambios realizados mejoran la estabilidad del bot, aseguran un registro adecuado de los datos procesados y añaden la funcionalidad de guardado en base de datos. El sistema está funcionando correctamente y listo para operaciones continuas.

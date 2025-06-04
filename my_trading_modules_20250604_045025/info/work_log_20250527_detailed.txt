@@ -1,0 +1,62 @@
+# Resumen de Trabajo del Día - 27 de Mayo de 2025
+
+## Objetivo Principal del Día
+Conectar el bot a OKX vía WebSocket, lograr la autenticación exitosa, recibir datos en tiempo real y tener una interfaz de comandos funcional.
+
+## Archivos Utilizados y su Propósito
+
+### main.py
+- **Propósito Original:** Era el punto de entrada principal del bot, pero en una versión anterior (síncrona o menos avanzada).
+- **Uso hoy:** Se utilizó como la base para crear `main1.py`. No se modificó directamente hoy para preservar la versión original.
+
+### main1.py (Archivo NUEVO / MODIFICADO)
+- **Propósito:** La nueva versión del punto de entrada principal del bot. Es la versión asíncrona y la que integra el cliente WebSocket (`modulo2.py`) y la cola de datos (`modulocola.py`).
+- **Acciones Realizadas:**
+  - **Creación:** Se creó una copia de `main.py` y se renombró a `main1.py`.
+  - **Modificación Mayor:** Se reescribió (o reemplazó) con un código completamente nuevo que incluye:
+    - Manejo de operaciones asíncronas (`asyncio`).
+    - Integración de `OKXWebSocketClient` para la conexión y autenticación.
+    - Integración de `data_queue` para pasar datos entre el cliente WebSocket y el bot.
+    - Implementación de una interfaz de comandos CLI (>, status, q, m) usando hilos (`threading`) para no bloquear el bucle asíncrono.
+    - Manejo de errores al cerrar el WebSocket después de fallos de autenticación.
+
+### modulo2.py (MODIFICADO)
+- **Uso:** Es el módulo que encapsula la lógica para conectarse al WebSocket de OKX, autenticarse y suscribirse a canales de datos. Es el cliente de la API WebSocket de OKX.
+- **Acciones Realizadas:**
+  - **Reescritura/Actualización:** Se actualizó a una versión más robusta y completa.
+  - **Autenticación Mejorada:** El método `authenticate()` ahora retorna `True` o `False` para indicar el éxito de la autenticación, lo que permite a `main1.py` decidir si continuar o salir.
+  - **Ajuste CLAVE del timestamp:**
+    - Originalmente se intentó -1000 ms (o -3000 ms).
+    - La solución final (proporcionada por ChatGPT y validada) fue cambiar la generación del timestamp de milisegundos a segundos: `timestamp = str(int(time.time()))`. Esta fue la clave para resolver el error 60006 (Timestamp request expired).
+  - **Procesamiento de Mensajes:** Incluye el método `process_message` para parsear los datos recibidos del WebSocket (tickers, order book, trades) y colocarlos en `data_queue`.
+
+### modulocola.py (Utilizado)
+- **Propósito:** Este archivo define una cola global (`data_queue`) que actúa como un bus de comunicación entre el cliente WebSocket (`modulo2.py`) y el núcleo del bot (`ScalpingBot` en `main1.py`).
+- **Acciones Realizadas:** No se modificó, pero su existencia es fundamental para el flujo de datos en la nueva arquitectura asíncrona.
+
+### config.env (Revisado / Verificado)
+- **Propósito:** Almacena tus credenciales sensibles de la API de OKX (API Key, Secret Key, Passphrase).
+- **Acciones Realizadas:** Se revisó varias veces para asegurar que las credenciales fueran correctas y que el archivo se cargara adecuadamente.
+
+## Conceptos Técnicos Clave Abordados
+
+1. **Programación Asíncrona (`asyncio`)**
+   - Es la base de la nueva arquitectura, permitiendo que el bot maneje múltiples tareas (conexión WebSocket, recepción de datos, interfaz de usuario) de forma concurrente sin bloquearse.
+
+2. **WebSockets**
+   - Protocolo de comunicación que permite una conexión persistente y bidireccional con el exchange para recibir datos en tiempo real.
+
+3. **Autenticación HMAC**
+   - Método de seguridad usado por OKX para verificar la identidad del cliente mediante una firma criptográfica que incluye un timestamp y tus credenciales.
+
+4. **Error 60006 (Timestamp request expired)**
+   - Un error común de API que indica una desincronización entre el reloj del cliente y el servidor. Se resolvió al comprender que OKX esperaba el timestamp en segundos para la firma, no en milisegundos.
+
+5. **Colas de Datos (`asyncio.Queue`)**
+   - Un mecanismo para pasar datos de forma segura entre diferentes partes asíncronas del programa (el cliente WebSocket que recibe los datos y el bot que los consume).
+
+6. **Hilos (`threading`)**
+   - Se usó un hilo para manejar la entrada síncrona del usuario (`input()`) sin bloquear el bucle principal asíncrono del bot.
+
+7. **Manejo de Errores y `logging`**
+   - Implementación de `try-except` y mensajes de `logging` detallados para diagnosticar problemas.
