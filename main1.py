@@ -201,9 +201,9 @@ async def main_cli_interface_async():
 
     # Conectar y suscribir cliente público (para tickers)
     await public_ws_client.connect()
-    logger.info("Enviando suscripción a Tickers (Público): {'op': 'subscribe', 'args': [{'channel': 'tickers', 'instId': 'SOL-USDT'}]}")
+    logger.info("Enviando suscripción a Ticker (Público): {'op': 'subscribe', 'args': [{'channel': 'ticker', 'instId': 'SOL-USDT'}]}")
     await public_ws_client.subscribe([
-        {"channel": "tickers", "instId": "SOL-USDT"}
+        {"channel": "ticker", "instId": "SOL-USDT"}
     ])
     logger.info("Suscripción a Tickers SOL-USDT enviada.")
 
