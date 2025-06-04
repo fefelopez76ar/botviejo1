@@ -24,7 +24,6 @@ import asyncio
 from pathlib import Path
 from dotenv import load_dotenv
 from api_client.modulocola import data_queue
-from api_client.modulo2 import OKXWebSocketClient as PublicOKXWebSocketClient
 from api_client.modulo2 import OKXWebSocketClient as BusinessOKXWebSocketClient
 # ---------------------------------------------------
 from data_management.historical_data_saver_async import HistoricalDataSaver
@@ -189,33 +188,22 @@ async def main_cli_interface_async():
     secret_key = os.getenv("OKX_API_SECRET")
     passphrase = os.getenv("OKX_PASSPHRASE")
 
-    # Instanciar el cliente WebSocket para CANALES PÚBLICOS (tickers)
-    public_ws_client = PublicOKXWebSocketClient(api_key, secret_key, passphrase, data_queue)
-    public_ws_client.ws_url = "wss://ws.okx.com:8443/ws/v5/public" # URL pública correcta
-
-    # Instanciar el cliente WebSocket para CANALES DE NEGOCIO (candles)
+    # Instanciar solo el cliente WebSocket para CANALES DE NEGOCIO (candles)
+    # Los canales públicos requieren nivel VIP en OKX, usamos solo business endpoint
     business_ws_client = BusinessOKXWebSocketClient(api_key, secret_key, passphrase, data_queue)
     business_ws_client.ws_url = "wss://ws.okx.com:8443/ws/v5/business" # URL de negocio correcta
 
-    logger.info("Conectando y suscribiendo a los WebSockets de OKX (Público y Negocio)...")
-
-    # Conectar y suscribir cliente público (para tickers)
-    await public_ws_client.connect()
-    logger.info("Enviando suscripción a Ticker (Público): {'op': 'subscribe', 'args': [{'channel': 'ticker', 'instId': 'SOL-USDT'}]}")
-    await public_ws_client.subscribe([
-        {"channel": "ticker", "instId": "SOL-USDT"}
-    ])
-    logger.info("Suscripción a Tickers SOL-USDT enviada.")
+    logger.info("Conectando a WebSocket de OKX (Solo candles - cuenta básica)...")
 
     # Conectar y suscribir cliente de negocio (para candles)
     await business_ws_client.connect()
-    logger.info("Enviando suscripción a Candles (Negocio): {'op': 'subscribe', 'args': [{'channel': 'candle1m', 'instId': 'SOL-USDT'}]}")
+    logger.info("Enviando suscripción a Candles: {'op': 'subscribe', 'args': [{'channel': 'candle1m', 'instId': 'SOL-USDT'}]}")
     await business_ws_client.subscribe([
         {"channel": "candle1m", "instId": "SOL-USDT"}
     ])
-    logger.info("Suscripción a Candles SOL-USDT (1m) enviada.")
+    logger.info("✓ Suscripción a Candles SOL-USDT (1m) enviada exitosamente.")
 
-    logger.info("Suscripciones iniciales enviadas. Suscripción a Order Book Nivel 2 TBT deshabilitada por restricción VIP.")
+    logger.info("Bot configurado para cuenta básica OKX - usando solo datos de velas para análisis técnico.")
 
     # --- NUEVO: Inicializar HistoricalDataSaver ---
     historical_data_saver = HistoricalDataSaver()
@@ -250,7 +238,6 @@ async def main_cli_interface_async():
 
     # --- 5. Ejecutar todas las tareas en paralelo con asyncio.gather ---
     tasks = [
-        public_ws_client.receive_messages(public_ws_client.process_message),
         business_ws_client.receive_messages(business_ws_client.process_message),
         bot.run_data_consumer()
     ]
@@ -262,8 +249,6 @@ async def main_cli_interface_async():
                 if cmd == 'q':
                     logger.info("Comando 'q' recibido: Iniciando cierre del bot.")
                     await bot.shutdown()
-                    if public_ws_client.ws and hasattr(public_ws_client.ws, 'closed') and not public_ws_client.ws.closed:
-                        await public_ws_client.ws.close()
                     if business_ws_client.ws and hasattr(business_ws_client.ws, 'closed') and not business_ws_client.ws.closed:
                         await business_ws_client.ws.close()
                     break
@@ -298,9 +283,7 @@ async def main_cli_interface_async():
     finally:
         logger.info("Cerrando recursos del bot...")
         await bot.shutdown()
-        # También aquí se verifica si ws existe y tiene el atributo .closed
-        if public_ws_client.ws and hasattr(public_ws_client.ws, 'closed') and not public_ws_client.ws.closed:
-            await public_ws_client.ws.close()
+        # Cerrar conexión WebSocket si está activa
         if business_ws_client.ws and hasattr(business_ws_client.ws, 'closed') and not business_ws_client.ws.closed:
             await business_ws_client.ws.close()
 

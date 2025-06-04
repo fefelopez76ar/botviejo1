@@ -1,40 +1,98 @@
-import ccxt
+#!/usr/bin/env python3
+"""
+Prueba los canales correctos para cuentas básicas de OKX
+Basado en documentación oficial de OKX API WebSocket
+"""
 import os
+import sys
+import asyncio
+import logging
+from pathlib import Path
+from dotenv import load_dotenv
 
-print("Verificando conexión con OKX...")
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
+logger = logging.getLogger()
 
-try:
-    # Usar las credenciales de config.env
-    api_key = "abc0a2f7-4b02-4f60-a4b9-fd575598e4e9"
-    api_secret = "2D78D8359A4873449E832B37BABC33E6"
-    password = "Daeco1212@"
+sys.path.insert(0, '/home/runner/workspace')
+config_path = Path("/home/runner/workspace/config.env")
+load_dotenv(dotenv_path=config_path)
+
+from api_client.modulocola import data_queue
+from api_client.modulo2 import OKXWebSocketClient
+
+async def test_correct_channels():
+    """Prueba los canales correctos según documentación OKX"""
     
-    # Configurar conexión
-    exchange = ccxt.okx({
-        'apiKey': api_key,
-        'secret': api_secret,
-        'password': password,
-        'enableRateLimit': True,
-        'options': {
-            'defaultType': 'spot',
-            'test': True  # Modo DEMO
+    logger.info("=== PRUEBA CANALES CORRECTOS OKX BÁSICO ===")
+    
+    api_key = os.getenv("OKX_API_KEY")
+    secret_key = os.getenv("OKX_API_SECRET")
+    passphrase = os.getenv("OKX_PASSPHRASE")
+    
+    # Configuraciones correctas según documentación OKX
+    test_configs = [
+        {
+            "name": "Public - books",
+            "url": "wss://ws.okx.com:8443/ws/v5/public",
+            "channel": "books",
+            "params": {"instId": "SOL-USDT"}
+        },
+        {
+            "name": "Public - trades", 
+            "url": "wss://ws.okx.com:8443/ws/v5/public",
+            "channel": "trades",
+            "params": {"instId": "SOL-USDT"}
+        },
+        {
+            "name": "Business - tickers (en business)",
+            "url": "wss://ws.okx.com:8443/ws/v5/business",
+            "channel": "tickers",
+            "params": {"instId": "SOL-USDT"}
+        },
+        {
+            "name": "Business - candle1m (confirmado)",
+            "url": "wss://ws.okx.com:8443/ws/v5/business",
+            "channel": "candle1m", 
+            "params": {"instId": "SOL-USDT"}
+        },
+        {
+            "name": "Business - index-tickers",
+            "url": "wss://ws.okx.com:8443/ws/v5/business",
+            "channel": "index-tickers",
+            "params": {"instId": "SOL-USDT"}
         }
-    })
+    ]
     
-    print("Conexión establecida con OKX")
+    for config in test_configs:
+        logger.info(f"\n--- Probando: {config['name']} ---")
+        
+        try:
+            client = OKXWebSocketClient(api_key, secret_key, passphrase, data_queue)
+            client.ws_url = config['url']
+            
+            await client.connect()
+            logger.info(f"✓ Conectado a {config['url'].split('/')[-1]}")
+            
+            subscription = {
+                "channel": config['channel'],
+                **config['params']
+            }
+            
+            await client.subscribe([subscription])
+            logger.info(f"→ Enviado: {subscription}")
+            
+            # Esperar respuesta
+            await asyncio.sleep(3)
+            
+            if client.ws:
+                await client.ws.close()
+                
+        except Exception as e:
+            logger.error(f"✗ Error: {e}")
+            
+        await asyncio.sleep(1)
     
-    # Verificar precio de Solana
-    ticker = exchange.fetch_ticker('SOL/USDT')
-    price = ticker['last']
-    print(f"Precio actual de Solana (SOL/USDT): ${price}")
-    
-    # Verificar balance
-    balance = exchange.fetch_balance()
-    usdt_balance = balance.get('total', {}).get('USDT', 0)
-    print(f"Balance de USDT: ${usdt_balance}")
-    
-    print("✅ Conexión con OKX funcionando correctamente")
-    
-except Exception as e:
-    print(f"❌ Error conectando con OKX: {e}")
-    print("Por favor verifica tus credenciales API y conexión a internet")
+    logger.info("\n=== PRUEBA COMPLETADA ===")
+
+if __name__ == "__main__":
+    asyncio.run(test_correct_channels())

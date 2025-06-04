@@ -1,91 +1,88 @@
 #!/usr/bin/env python3
 """
-Script de inicio para el bot de trading de Solana
-
-Este script permite iniciar el bot de trading desde la línea de comandos de
-manera sencilla, sin necesidad de conocer los detalles internos del sistema.
+Script principal para ejecutar el bot de trading Solana
+Configurado para cuentas básicas de OKX (solo candles)
 """
-
 import os
 import sys
-import time
+import asyncio
 import logging
-from datetime import datetime
+from pathlib import Path
+from dotenv import load_dotenv
 
 # Configurar logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.StreamHandler(sys.stdout),
-        logging.FileHandler(f"bot_{datetime.now().strftime('%Y%m%d')}.log")
+        logging.FileHandler('trading_bot.log'),
+        logging.StreamHandler(sys.stdout)
     ]
 )
-logger = logging.getLogger("SolanaTraderBotStarter")
+logger = logging.getLogger("SolanaScalper")
 
-def main():
-    """Función principal para iniciar el bot"""
+# Cargar configuración
+config_path = Path("config.env")
+load_dotenv(dotenv_path=config_path)
+
+# Importar módulos del bot
+from api_client.modulocola import data_queue
+from api_client.modulo2 import OKXWebSocketClient
+
+async def start_trading_bot():
+    """Inicia el bot de trading con configuración simplificada"""
     
-    # Mostrar arte ASCII
-    print("""
-  _____       _                     _____             _            ____        _   
- / ____|     | |                   |_   _|           | |          |  _ \      | |  
-| (___   ___ | | __ _ _ __   __ _    | |  _ __   __ _| |__   ___  | |_) | ___ | |_ 
- \___ \ / _ \| |/ _` | '_ \ / _` |   | | | '_ \ / _` | '_ \ / _ \ |  _ < / _ \| __|
- ____) | (_) | | (_| | | | | (_| |  _| |_| | | | (_| | | | |  __/ | |_) | (_) | |_ 
-|_____/ \___/|_|\__,_|_| |_|\__,_| |_____|_| |_|\__,_|_| |_|\___| |____/ \___/ \__|
-                                                                                   
-    """)
+    logger.info("Iniciando SolanaScalper Bot...")
+    logger.info("Configuración: Cuenta básica OKX - Solo datos de velas")
     
-    print("Iniciando bot de trading para Solana...")
-    print("Versión: 1.0.0")
-    print("Fecha: 20 de Mayo del 2025")
-    print("\nConfigurado para operar principalmente en:")
-    print("  - SOL-USDT en timeframes de 1m, 3m, 5m (scalping)")
-    print("  - Modo paper trading habilitado por defecto para seguridad")
-    print("  - Adaptación de estrategias según condiciones de mercado")
+    # Verificar credenciales
+    api_key = os.getenv("OKX_API_KEY")
+    secret_key = os.getenv("OKX_API_SECRET")
+    passphrase = os.getenv("OKX_PASSPHRASE")
+    
+    if not all([api_key, secret_key, passphrase]):
+        logger.error("Credenciales OKX no encontradas en config.env")
+        return
+    
+    # Crear cliente WebSocket
+    ws_client = OKXWebSocketClient(api_key, secret_key, passphrase, data_queue)
+    ws_client.ws_url = "wss://ws.okx.com:8443/ws/v5/business"
     
     try:
-        # Intentar importar el módulo del menú CLI
-        from bot_cli import main_menu, running
+        # Conectar y suscribir
+        await ws_client.connect()
+        logger.info("Conexión establecida con OKX")
         
-        print("\nIniciando interfaz de línea de comandos...")
-        time.sleep(1)
+        await ws_client.subscribe([
+            {"channel": "candle1m", "instId": "SOL-USDT"}
+        ])
+        logger.info("Suscripción a candles SOL/USDT activa")
         
-        # Iniciar el bucle principal
-        while running:
+        # Procesar datos en bucle
+        logger.info("Bot iniciado - presiona Ctrl+C para detener")
+        
+        while True:
             try:
-                main_menu()
+                if not data_queue.empty():
+                    data = data_queue.get_nowait()
+                    logger.info(f"Datos recibidos: {str(data)[:100]}...")
+                    
+                await asyncio.sleep(1)
+                
             except KeyboardInterrupt:
-                print("\n\nBot detenido por el usuario. ¡Hasta pronto!")
+                logger.info("Deteniendo bot...")
                 break
-            except Exception as e:
-                logger.error(f"Error en bucle principal: {e}")
-                print(f"\nError: {e}")
-                print("Reiniciando menú en 3 segundos...")
-                time.sleep(3)
-        
-    except ImportError as e:
-        logger.error(f"Error importando módulos necesarios: {e}")
-        print(f"\n❌ Error importando módulos necesarios: {e}")
-        print("\nVerifique que todos los módulos estén instalados correctamente.")
-        print("Ejecute el siguiente comando para instalar dependencias:")
-        print("\npip install -r requirements.txt")
-        
+                
     except Exception as e:
-        logger.error(f"Error crítico: {e}")
-        print(f"\n❌ Error crítico: {e}")
-        print("El bot no pudo iniciarse.")
+        logger.error(f"Error en el bot: {e}")
         
-    print("\n¡Gracias por usar Solana Trading Bot!")
+    finally:
+        if ws_client.ws:
+            await ws_client.ws.close()
+        logger.info("Bot detenido")
 
 if __name__ == "__main__":
     try:
-        # Iniciar el bot
-        main()
+        asyncio.run(start_trading_bot())
     except KeyboardInterrupt:
-        print("\n\nBot detenido por el usuario. ¡Hasta pronto!")
-    except Exception as e:
-        logger.error(f"Error inesperado: {e}")
-        print(f"\nError inesperado: {e}")
-        print("El bot ha finalizado con errores.")
+        logger.info("Bot detenido por el usuario")
