@@ -14,34 +14,34 @@ Pendientes del proyecto:
 4. **Data Validation:**
    - Compress and share the `info/` folder for further analysis of saved data.
 
-2025-06-04 03:22:43,538 - INFO - ==================================================
+2025-06-04 03:26:51,987 - INFO - ==================================================
 SolanaScalper - Bot de Trading v2.0 (MODO ASÍNCRONO)
 ==================================================
 
-2025-06-04 03:22:43,540 - INFO - Iniciando componentes asíncronos y síncronos...
-2025-06-04 03:22:43,543 - INFO - Conectando y suscribiendo a los WebSockets de OKX (Público y Negocio)...
-2025-06-04 03:22:44,364 - INFO - Conexión establecida con la API de OKX WebSocket.
-2025-06-04 03:22:44,365 - INFO - Enviando suscripción a Tickers (Público): {'op': 'subscribe', 'args': [{'channel': 'tickers', 'instId': 'SOL-USDT'}]}
-2025-06-04 03:22:44,366 - INFO - Enviando suscripción: {'op': 'subscribe', 'args': [{'channel': 'tickers', 'instId': 'SOL-USDT'}]}
-2025-06-04 03:22:44,563 - INFO - Respuesta de suscripción: {'event': 'error', 'msg': "Wrong URL or channel:tickers,instId:SOL-USDT doesn't exist. Please use the correct URL, channel and parameters referring to API document.", 'code': '60018', 'connId': 'e255bfe6'}
-2025-06-04 03:22:44,563 - ERROR - Error al suscribirse: Wrong URL or channel:tickers,instId:SOL-USDT doesn't exist. Please use the correct URL, channel and parameters referring to API document.
-2025-06-04 03:22:44,563 - INFO - Suscripción a Tickers SOL-USDT enviada.
-2025-06-04 03:22:45,171 - INFO - Conexión establecida con la API de OKX WebSocket.
-2025-06-04 03:22:45,171 - INFO - Enviando suscripción a Candles (Negocio): {'op': 'subscribe', 'args': [{'channel': 'candles', 'instId': 'SOL-USDT', 'bar': '1m'}]}
-2025-06-04 03:22:45,171 - INFO - Enviando suscripción: {'op': 'subscribe', 'args': [{'channel': 'candles', 'instId': 'SOL-USDT', 'bar': '1m'}]}
-2025-06-04 03:22:45,353 - INFO - Respuesta de suscripción: {'event': 'error', 'msg': "Wrong URL or channel:candles,instId:SOL-USDT doesn't exist. Please use the correct URL, channel and parameters referring to API document.", 'code': '60018', 'connId': '82746a2b'}
-2025-06-04 03:22:45,354 - ERROR - Error al suscribirse: Wrong URL or channel:candles,instId:SOL-USDT doesn't exist. Please use the correct URL, channel and parameters referring to API document.
-2025-06-04 03:22:45,354 - INFO - Suscripción a Candles SOL-USDT (1m) enviada.
-2025-06-04 03:22:45,354 - INFO - Suscripciones iniciales enviadas. Suscripción a Order Book Nivel 2 TBT deshabilitada por restricción VIP.
-2025-06-04 03:22:45,355 - INFO - Inicializando bot en modo PAPER...
-2025-06-04 03:22:45,362 - INFO - [HistoricalDataSaver]: Conectado a DB async '/home/runner/workspace/data_management/../data/market_data.db' y tablas verificadas.
-2025-06-04 03:22:45,362 - INFO - Bot inicializado.
-2025-06-04 03:22:45,364 - INFO - Hilo de entrada de usuario iniciado. Presiona 'q' para salir.
-2025-06-04 03:22:45,365 - INFO - Iniciando recepción de mensajes del WebSocket.
-2025-06-04 03:22:45,366 - INFO - Iniciando recepción de mensajes del WebSocket.
-2025-06-04 03:22:45,366 - INFO - [ScalpingBot]: Iniciando consumidor de datos de la cola...
-2025-06-04 03:22:45,367 - INFO - Comando 'q' recibido: Iniciando cierre del bot.
-2025-06-04 03:22:45,367 - INFO - Apagando el bot...
-2025-06-04 03:22:45,367 - WARNING - El bot no está activo.
-2025-06-04 03:22:45,371 - INFO - [HistoricalDataSaver]: Desconectado de la base de datos '/home/runner/workspace/data_management/../data/market_data.db'.
-2025-06-04 03:22:45,371 - INFO - Bot apagado y recursos liberados.
+2025-06-04 03:26:51,988 - INFO - Iniciando componentes asíncronos y síncronos...
+2025-06-04 03:26:51,989 - INFO - Conectando y suscribiendo a los WebSockets de OKX (Público y Negocio)...
+2025-06-04 03:26:52,789 - INFO - Conexión establecida con la API de OKX WebSocket.
+2025-06-04 03:26:52,789 - INFO - Enviando suscripción a Tickers (Público): {'op': 'subscribe', 'args': [{'channel': 'tickers', 'instId': 'SOL-USDT', 'instType': 'SPOT'}]}
+2025-06-04 03:26:52,790 - INFO - Enviando suscripción: {'op': 'subscribe', 'args': [{'channel': 'tickers', 'instId': 'SOL-USDT'}]}
+2025-06-04 03:26:52,985 - INFO - Respuesta de suscripción: {'event': 'error', 'msg': "Wrong URL or channel:tickers,instId:SOL-USDT doesn't exist. Please use the correct URL, channel and parameters referring to API document.", 'code': '60018', 'connId': 'a856b408'}
+2025-06-04 03:26:52,987 - ERROR - Error al suscribirse: Wrong URL or channel:tickers,instId:SOL-USDT doesn't exist. Please use the correct URL, channel and parameters referring to API document.
+2025-06-04 03:26:52,988 - INFO - Suscripción a Tickers SOL-USDT enviada.
+2025-06-04 03:26:53,826 - INFO - Conexión establecida con la API de OKX WebSocket.
+2025-06-04 03:26:53,826 - INFO - Enviando suscripción a Candles (Negocio): {'op': 'subscribe', 'args': [{'channel': 'candle', 'instId': 'SOL-USDT'}]}
+2025-06-04 03:26:53,826 - INFO - Enviando suscripción: {'op': 'subscribe', 'args': [{'channel': 'candles', 'instId': 'SOL-USDT', 'bar': '1m'}]}
+2025-06-04 03:26:54,015 - INFO - Respuesta de suscripción: {'event': 'error', 'msg': "Wrong URL or channel:candles,instId:SOL-USDT doesn't exist. Please use the correct URL, channel and parameters referring to API document.", 'code': '60018', 'connId': 'b66e9b7d'}
+2025-06-04 03:26:54,016 - ERROR - Error al suscribirse: Wrong URL or channel:candles,instId:SOL-USDT doesn't exist. Please use the correct URL, channel and parameters referring to API document.
+2025-06-04 03:26:54,017 - INFO - Suscripción a Candles SOL-USDT (1m) enviada.
+2025-06-04 03:26:54,017 - INFO - Suscripciones iniciales enviadas. Suscripción a Order Book Nivel 2 TBT deshabilitada por restricción VIP.
+2025-06-04 03:26:54,018 - INFO - Inicializando bot en modo PAPER...
+2025-06-04 03:26:54,025 - INFO - [HistoricalDataSaver]: Conectado a DB async '/home/runner/workspace/data_management/../data/market_data.db' y tablas verificadas.
+2025-06-04 03:26:54,026 - INFO - Bot inicializado.
+2025-06-04 03:26:54,028 - INFO - Hilo de entrada de usuario iniciado. Presiona 'q' para salir.
+2025-06-04 03:26:54,029 - INFO - Iniciando recepción de mensajes del WebSocket.
+2025-06-04 03:26:54,030 - INFO - Iniciando recepción de mensajes del WebSocket.
+2025-06-04 03:26:54,030 - INFO - [ScalpingBot]: Iniciando consumidor de datos de la cola...
+2025-06-04 03:26:54,031 - INFO - Comando 'q' recibido: Iniciando cierre del bot.
+2025-06-04 03:26:54,032 - INFO - Apagando el bot...
+2025-06-04 03:26:54,032 - WARNING - El bot no está activo.
+2025-06-04 03:26:54,034 - INFO - [HistoricalDataSaver]: Desconectado de la base de datos '/home/runner/workspace/data_management/../data/market_data.db'.
+2025-06-04 03:26:54,035 - INFO - Bot apagado y recursos liberados.
