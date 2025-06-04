@@ -25,7 +25,6 @@ from pathlib import Path
 from dotenv import load_dotenv
 from api_client.modulocola import data_queue
 from api_client.modulo2 import OKXWebSocketClient as PublicOKXWebSocketClient
-from api_client.modulo2 import OKXWebSocketClient as BusinessOKXWebSocketClient as PublicOKXWebSocketClient
 from api_client.modulo2 import OKXWebSocketClient as BusinessOKXWebSocketClient
 # ---------------------------------------------------
 from data_management.historical_data_saver_async import HistoricalDataSaver
