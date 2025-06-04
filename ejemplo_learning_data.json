@@ -1,0 +1,32 @@
+[
+  {
+    "timestamp": "2025-06-04T03:55:32.123456",
+    "success": true,
+    "profit": 12.45,
+    "indicators": {
+      "sma_5": 245.67,
+      "sma_20": 243.21,
+      "rsi": 65.8
+    }
+  },
+  {
+    "timestamp": "2025-06-04T03:57:15.654321",
+    "success": false,
+    "profit": -8.32,
+    "indicators": {
+      "sma_5": 244.12,
+      "sma_20": 245.89,
+      "rsi": 72.3
+    }
+  },
+  {
+    "timestamp": "2025-06-04T04:01:08.987654",
+    "success": true,
+    "profit": 15.67,
+    "indicators": {
+      "sma_5": 247.34,
+      "sma_20": 245.12,
+      "rsi": 58.4
+    }
+  }
+]

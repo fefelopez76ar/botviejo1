@@ -45,7 +45,7 @@ class PaperTradingEngine:
         self.status = "Iniciando..."
         
     def analyze_market(self, candle_data):
-        if len(self.market_data) < 20:
+        if len(self.market_data) < 5:  # Reducido de 20 a 5 para acelerar el aprendizaje
             return None
             
         df = pd.DataFrame(self.market_data)
