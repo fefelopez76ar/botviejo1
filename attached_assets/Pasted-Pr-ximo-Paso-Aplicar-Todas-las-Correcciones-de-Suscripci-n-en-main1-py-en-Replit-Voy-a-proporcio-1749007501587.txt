@@ -1,0 +1,21 @@
+Próximo Paso: Aplicar Todas las Correcciones de Suscripción en main1.py (en Replit)
+
+Voy a proporcionarte un comando de Python que leerá main1.py, realizará los dos reemplazos de texto necesarios (para candles y tickers), y luego volverá a escribir el archivo. Esto debería ser más fiable para asegurar que los cambios se queden.
+
+Las correcciones que este comando realizará son:
+
+    Para candles: Cambiará {'channel': 'candles', 'instId': 'SOL-USDT', 'bar': '1m'} a {'channel': 'candle', 'instId': 'SOL-USDT'}. (Es decir, candles a candle Y eliminará el parámetro bar).
+    Para tickers: Cambiará {'channel': 'tickers', 'instId': 'SOL-USDT'} a {'channel': 'tickers', 'instId': 'SOL-USDT', 'instType': 'SPOT'}.
+
+Instrucciones para Replit:
+
+    Asegúrate de que tu bot esté detenido en Replit.
+
+    En la terminal de Replit, asegúrate de estar en la raíz de tu proyecto.
+
+    Copia y pega el siguiente comando COMPLETO en la terminal de Replit y presiona Enter:
+    Bash
+
+    python -c "import os; import re; file_path_m1 = 'main1.py'; with open(file_path_m1, 'r', encoding='utf-8') as f: content_m1 = f.read(); old_candles_sub = \"[{'channel': 'candles', 'instId': 'SOL-USDT', 'bar': '1m'}]\"; new_candles_sub = \"[{'channel': 'candle', 'instId': 'SOL-USDT'}]\"; escaped_old_candles_sub = re.escape(old_candles_sub); new_content_m1 = re.sub(escaped_old_candles_sub, new_candles_sub, content_m1, count=1); old_tickers_sub = \"[{'channel': 'tickers', 'instId': 'SOL-USDT'}]\"; new_tickers_sub = \"[{'channel': 'tickers', 'instId': 'SOL-USDT', 'instType': 'SPOT'}]\"; escaped_old_tickers_sub = re.escape(old_tickers_sub); final_content = re.sub(escaped_old_tickers_sub, new_tickers_sub, new_content_m1, count=1); with open(file_path_m1, 'w', encoding='utf-8') as f: f.write(final_content); print('--> main1.py: Suscripción a Candles corregida a \"candle\" y sin \"bar\".'); print('--> main1.py: Suscripción a Tickers actualizada con \"instType\": \"SPOT\".')"
+
+Cuando este comando termine y veas ambos mensajes de confirmación sin errores en la terminal de Replit, por favor, avísame. Luego, ejecutaremos el bot para la prueba definitiva.

@@ -201,7 +201,7 @@ async def main_cli_interface_async():
 
     # Conectar y suscribir cliente público (para tickers)
     await public_ws_client.connect()
-    logger.info("Enviando suscripción a Tickers (Público): {'op': 'subscribe', 'args': [{'channel': 'tickers', 'instId': 'SOL-USDT'}]}")
+    logger.info("Enviando suscripción a Tickers (Público): {'op': 'subscribe', 'args': [{'channel': 'tickers', 'instId': 'SOL-USDT', 'instType': 'SPOT'}]}")
     await public_ws_client.subscribe([
         {"channel": "tickers", "instId": "SOL-USDT"}
     ])
@@ -209,7 +209,7 @@ async def main_cli_interface_async():
 
     # Conectar y suscribir cliente de negocio (para candles)
     await business_ws_client.connect()
-    logger.info("Enviando suscripción a Candles (Negocio): {'op': 'subscribe', 'args': [{'channel': 'candles', 'instId': 'SOL-USDT', 'bar': '1m'}]}")
+    logger.info("Enviando suscripción a Candles (Negocio): {'op': 'subscribe', 'args': [{'channel': 'candle', 'instId': 'SOL-USDT'}]}")
     await business_ws_client.subscribe([
         {"channel": "candles", "instId": "SOL-USDT", "bar": "1m"}
     ])
