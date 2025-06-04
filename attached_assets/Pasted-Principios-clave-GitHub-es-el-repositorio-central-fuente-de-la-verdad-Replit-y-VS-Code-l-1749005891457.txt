@@ -1,0 +1,46 @@
+Principios clave
+
+    GitHub es el repositorio central (fuente de la verdad).
+    Replit y VS Code local deben hacer push y pull a/desde GitHub.
+    La sincronización "automática" solo es posible cuando todos los cambios pasan por GitHub (no hay una acción de GitHub Actions que haga push a tu VS Code local, pero puedes automatizar notificaciones y pulls).
+    Evita conflictos: Siempre haz git pull antes de trabajar y git push después de hacer cambios, tanto en Replit como en VS Code.
+
+2. ¿Qué puedes automatizar con GitHub Actions?
+
+    Automatizar notificaciones: Cuando hay un push en GitHub, puedes recibir un correo o una notificación (por ejemplo, en Telegram, Slack, etc.).
+    Automatizar sincronización con Replit: Puedes usar el Git integration de Replit, que ya permite hacer pull y push desde la interfaz.
+    Automatizar sincronización con VS Code: No es posible que GitHub Actions haga un pull a tu máquina local por seguridad, pero puedes recibir alertas para que lo hagas manualmente.
+
+3. Ejemplo de workflow para sincronización y notificación
+
+    Esto no hace pull en tu VS Code, pero te avisa si hubo cambios para que lo hagas manualmente.
+
+4. ¿Y la sincronización Replit <-> GitHub <-> VS Code?
+
+    Replit: Usa el panel de Git para pull y push a GitHub.
+    VS Code: Usa terminal integrada o extensiones Git para pull y push a GitHub.
+    GitHub Actions: Notifica cuando hay cambios, pero por motivos de seguridad no puede interactuar directamente con tu máquina local o con Replit.
+
+5. Buen flujo de trabajo recomendado
+
+    Antes de trabajar en Replit o VS Code, haz git pull origin main.
+    Haz tus cambios.
+    Haz git add ., git commit -m "mensaje", y git push origin main.
+    Si trabajas en ambos entornos, asegúrate de hacer pull antes de empezar para evitar conflictos.
+
+6. ¿Sincronización automática real?
+
+    Solo posible entre GitHub y Replit (mediante la interfaz visual).
+    VS Code local requiere acción manual (git pull).
+    GitHub Actions puede avisarte, pero no puede hacer pull por ti en tu máquina local.
+
+7. ¿Cómo usar webhooks para notificarte?
+
+Puedes crear un webhook en GitHub que notifique a un endpoint propio (por ejemplo, una app en Replit, un bot de Telegram, etc.) cada vez que haya un push, para luego hacer el pull manualmente en VS Code.
+Resumen
+
+    No existe una sincronización automática 100% bidireccional sin intervención humana entre GitHub y VS Code local por razones de seguridad.
+    Sí puedes automatizar notificaciones y tener un flujo eficiente usando GitHub, Replit y tu VS Code.
+    Siempre haz pull antes de trabajar y push cuando termines en ambos entornos.
+
+¿Te gustaría que te ayude con un workflow de notificaciones por correo, Telegram o Slack? ¿O prefieres instrucciones para configurar los comandos Git en Replit y VS Code?

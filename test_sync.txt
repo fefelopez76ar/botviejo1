@@ -1,0 +1,5 @@
+Test de sincronización Git desde Replit
+Configuración completada:
+- Usuario: fedelofedelooo  
+- Email: mariolopezabraham1@gmail.com
+- Repositorio: https://github.com/fedelofedelooo/CryptoTradingBot.git
