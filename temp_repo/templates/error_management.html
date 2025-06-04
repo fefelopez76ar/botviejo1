@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Errores | Solana Trading Bot</title>
+    <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            background-color: var(--bs-gray-900);
+            color: var(--bs-light);
+            padding-bottom: 60px;
+        }
+        
+        .navbar {
+            background-color: var(--bs-gray-900);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .error-card {
+            background-color: var(--bs-gray-800);
+            border-radius: 10px;
+            transition: transform 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .error-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .error-card.fixed {
+            border-left: 4px solid var(--bs-success);
+        }
+        
+        .error-card.reported {
+            border-left: 4px solid var(--bs-warning);
+        }
+        
+        .error-card.pending {
+            border-left: 4px solid var(--bs-danger);
+        }
+        
+        .timestamp {
+            font-size: 0.8rem;
+            color: var(--bs-gray-500);
+        }
+        
+        .status-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        
+        .code-block {
+            background-color: var(--bs-gray-900);
+            border-radius: 5px;
+            padding: 1rem;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        
+        .module-badge {
+            font-size: 0.8rem;
+            background-color: var(--bs-gray-700);
+        }
+        
+        .actions-panel {
+            background-color: var(--bs-gray-700);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .sync-status {
+            background-color: var(--bs-primary);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .fix-card {
+            background-color: var(--bs-gray-700);
+            border-left: 4px solid var(--bs-info);
+            border-radius: 5px;
+        }
+        
+        .tab-content {
+            padding: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-robot me-2"></i>Solana Trading Bot
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard">Panel</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/battle-arena">Arena de Batalla</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/error-management">Gestión de Errores</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/settings">Configuración</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <div class="container mt-4">
+        <h1><i class="fas fa-exclamation-triangle text-warning me-3"></i>Gestión de Errores</h1>
+        <p class="lead">Monitoreo y gestión bidireccional de errores del sistema</p>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="actions-panel">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="mb-0"><i class="fas fa-tools me-2"></i>Acciones</h4>
+                        <button id="refresh-btn" class="btn btn-sm btn-secondary">
+                            <i class="fas fa-sync-alt me-2"></i>Actualizar
+                        </button>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-md-6">
+                            <button id="check-fixes-btn" class="btn btn-primary w-100">
+                                <i class="fas fa-search me-2"></i>Verificar soluciones
+                            </button>
+                        </div>
+                        <div class="col-md-6">
+                            <button id="apply-all-fixes-btn" class="btn btn-success w-100">
+                                <i class="fas fa-wrench me-2"></i>Aplicar todas las soluciones
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="sync-status">
+                    <h4 class="mb-3"><i class="fas fa-cloud-upload-alt me-2"></i>Estado de sincronización</h4>
+                    <div class="d-flex align-items-center mb-2">
+                        <span class="text-nowrap me-3">Servidor:</span>
+                        <span id="sync-status" class="badge bg-success">Conectado</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="text-nowrap me-3">Última sincronización:</span>
+                        <span id="last-sync">Hace 3 horas</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Errores y Soluciones -->
+        <ul class="nav nav-tabs" id="errorTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="recent-tab" data-bs-toggle="tab" data-bs-target="#recent-errors" type="button" role="tab" aria-controls="recent-errors" aria-selected="true">
+                    <i class="fas fa-clock me-2"></i>Errores recientes
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="fixes-tab" data-bs-toggle="tab" data-bs-target="#available-fixes" type="button" role="tab" aria-controls="available-fixes" aria-selected="false">
+                    <i class="fas fa-wrench me-2"></i>Soluciones disponibles
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="fixed-tab" data-bs-toggle="tab" data-bs-target="#fixed-errors" type="button" role="tab" aria-controls="fixed-errors" aria-selected="false">
+                    <i class="fas fa-check-circle me-2"></i>Errores resueltos
+                </button>
+            </li>
+        </ul>
+        
+        <div class="tab-content" id="errorTabsContent">
+            <!-- Errores recientes -->
+            <div class="tab-pane fade show active" id="recent-errors" role="tabpanel" aria-labelledby="recent-tab">
+                <div class="row g-4" id="recent-errors-container">
+                    <!-- Estos elementos se generarán dinámicamente con JavaScript -->
+                    {% for error in recent_errors %}
+                    <div class="col-md-6">
+                        <div class="error-card p-3 {{ error.status }}">
+                            <div class="status-badge">
+                                {% if error.status == 'fixed' %}
+                                <span class="badge bg-success">Resuelto</span>
+                                {% elif error.status == 'reported' %}
+                                <span class="badge bg-warning">Reportado</span>
+                                {% else %}
+                                <span class="badge bg-danger">Pendiente</span>
+                                {% endif %}
+                            </div>
+                            <h5>{{ error.error_type }}</h5>
+                            <p>{{ error.error_message }}</p>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="badge module-badge">{{ error.module }}</span>
+                                <span class="timestamp">{{ error.timestamp }}</span>
+                            </div>
+                            <div class="d-flex gap-2 mt-3">
+                                <button class="btn btn-sm btn-outline-primary view-details-btn" data-error-id="{{ error.error_id }}">
+                                    <i class="fas fa-search me-1"></i>Detalles
+                                </button>
+                                {% if error.status == 'pending' %}
+                                <button class="btn btn-sm btn-warning report-error-btn" data-error-id="{{ error.error_id }}">
+                                    <i class="fas fa-paper-plane me-1"></i>Reportar
+                                </button>
+                                {% elif error.status == 'fixed' %}
+                                <button class="btn btn-sm btn-success apply-fix-btn" data-error-id="{{ error.error_id }}">
+                                    <i class="fas fa-wrench me-1"></i>Aplicar solución
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Soluciones disponibles -->
+            <div class="tab-pane fade" id="available-fixes" role="tabpanel" aria-labelledby="fixes-tab">
+                <div class="row g-4" id="available-fixes-container">
+                    <!-- Estos elementos se generarán dinámicamente con JavaScript -->
+                    {% for fix in available_fixes %}
+                    <div class="col-md-6">
+                        <div class="error-card p-3">
+                            <h5>Solución para: {{ fix.error_type }}</h5>
+                            <p><strong>Tipo de solución:</strong> {{ fix.fix_type }}</p>
+                            <p>{{ fix.description }}</p>
+                            <div class="d-flex gap-2 mt-3">
+                                <button class="btn btn-sm btn-success apply-fix-btn" data-error-id="{{ fix.error_id }}">
+                                    <i class="fas fa-wrench me-1"></i>Aplicar solución
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Errores resueltos -->
+            <div class="tab-pane fade" id="fixed-errors" role="tabpanel" aria-labelledby="fixed-tab">
+                <div class="row g-4" id="fixed-errors-container">
+                    <!-- Estos elementos se generarán dinámicamente con JavaScript -->
+                    {% for error in fixed_errors %}
+                    <div class="col-md-6">
+                        <div class="error-card p-3 fixed">
+                            <div class="status-badge">
+                                <span class="badge bg-success">Resuelto</span>
+                            </div>
+                            <h5>{{ error.error_type }}</h5>
+                            <p>{{ error.error_message }}</p>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="badge module-badge">{{ error.module }}</span>
+                                <span class="timestamp">{{ error.timestamp }}</span>
+                            </div>
+                            <div class="d-flex gap-2 mt-3">
+                                <button class="btn btn-sm btn-outline-primary view-details-btn" data-error-id="{{ error.error_id }}">
+                                    <i class="fas fa-search me-1"></i>Detalles
+                                </button>
+                                <button class="btn btn-sm btn-outline-success view-fix-btn" data-error-id="{{ error.error_id }}">
+                                    <i class="fas fa-clipboard-check me-1"></i>Ver solución
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de detalles de error -->
+    <div class="modal fade" id="errorDetailsModal" tabindex="-1" aria-labelledby="errorDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="errorDetailsModalLabel">Detalles del error</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>Mensaje de error</h6>
+                    <p id="error-message" class="mb-4"></p>
+                    
+                    <h6>Información del sistema</h6>
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <p><strong>Plataforma:</strong> <span id="error-platform"></span></p>
+                            <p><strong>Módulo:</strong> <span id="error-module"></span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Versión Python:</strong> <span id="error-python-version"></span></p>
+                            <p><strong>Versión Bot:</strong> <span id="error-bot-version"></span></p>
+                        </div>
+                    </div>
+                    
+                    <h6>Traceback</h6>
+                    <div class="code-block" id="error-traceback"></div>
+                    
+                    <div id="error-fix-info" class="mt-4 d-none">
+                        <h6>Información de la solución</h6>
+                        <div class="fix-card p-3">
+                            <p><strong>Tipo de solución:</strong> <span id="fix-type"></span></p>
+                            <p id="fix-description"></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" id="report-modal-btn" class="btn btn-warning d-none">
+                        <i class="fas fa-paper-plane me-2"></i>Reportar error
+                    </button>
+                    <button type="button" id="apply-fix-modal-btn" class="btn btn-success d-none">
+                        <i class="fas fa-wrench me-2"></i>Aplicar solución
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de reporte de error -->
+    <div class="modal fade" id="reportErrorModal" tabindex="-1" aria-labelledby="reportErrorModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="reportErrorModalLabel">Reportar error</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Reportar este error al servidor central para recibir una solución.</p>
+                    
+                    <form id="report-error-form">
+                        <input type="hidden" id="report-error-id">
+                        <div class="mb-3">
+                            <label for="report-comments" class="form-label">Comentarios adicionales</label>
+                            <textarea class="form-control" id="report-comments" rows="5" placeholder="Información adicional que pueda ayudar a solucionar el error..."></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" id="send-report-btn" class="btn btn-warning">
+                        <i class="fas fa-paper-plane me-2"></i>Enviar reporte
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Funciones para interactuar con la API
+        const api = {
+            // Obtener errores recientes
+            getRecentErrors: async () => {
+                const response = await fetch('/api/errors/recent');
+                return await response.json();
+            },
+            
+            // Obtener detalles de un error
+            getErrorDetails: async (errorId) => {
+                const response = await fetch(`/api/errors/${errorId}`);
+                return await response.json();
+            },
+            
+            // Reportar un error
+            reportError: async (errorId, comments) => {
+                const response = await fetch('/api/errors/report', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ error_id: errorId, comments })
+                });
+                return await response.json();
+            },
+            
+            // Verificar soluciones disponibles
+            checkFixes: async () => {
+                const response = await fetch('/api/errors/check-fixes');
+                return await response.json();
+            },
+            
+            // Aplicar una solución
+            applyFix: async (errorId) => {
+                const response = await fetch('/api/errors/apply-fix', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ error_id: errorId })
+                });
+                return await response.json();
+            },
+            
+            // Aplicar todas las soluciones
+            applyAllFixes: async () => {
+                const response = await fetch('/api/errors/apply-all-fixes');
+                return await response.json();
+            },
+            
+            // Obtener estado de sincronización
+            getSyncStatus: async () => {
+                const response = await fetch('/api/sync/status');
+                return await response.json();
+            }
+        };
+        
+        // Manejadores de eventos
+        document.addEventListener('DOMContentLoaded', () => {
+            // Botón de actualizar
+            document.getElementById('refresh-btn').addEventListener('click', () => {
+                location.reload();
+            });
+            
+            // Botón de verificar soluciones
+            document.getElementById('check-fixes-btn').addEventListener('click', async () => {
+                try {
+                    const result = await api.checkFixes();
+                    alert(`Verificación completada: ${result.fixes_available} soluciones disponibles`);
+                    location.reload();
+                } catch (error) {
+                    console.error('Error al verificar soluciones:', error);
+                    alert('Error al verificar soluciones');
+                }
+            });
+            
+            // Botón de aplicar todas las soluciones
+            document.getElementById('apply-all-fixes-btn').addEventListener('click', async () => {
+                if (confirm('¿Estás seguro de que deseas aplicar todas las soluciones disponibles?')) {
+                    try {
+                        const result = await api.applyAllFixes();
+                        alert(`Soluciones aplicadas: ${result.applied_fixes} de ${result.total_fixes}`);
+                        location.reload();
+                    } catch (error) {
+                        console.error('Error al aplicar soluciones:', error);
+                        alert('Error al aplicar soluciones');
+                    }
+                }
+            });
+            
+            // Botones de ver detalles
+            document.querySelectorAll('.view-details-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const errorId = btn.dataset.errorId;
+                    try {
+                        const error = await api.getErrorDetails(errorId);
+                        
+                        // Llenar modal con detalles
+                        document.getElementById('error-message').textContent = error.error_message;
+                        document.getElementById('error-platform').textContent = error.system_info.platform;
+                        document.getElementById('error-module').textContent = error.module;
+                        document.getElementById('error-python-version').textContent = error.system_info.python_version;
+                        document.getElementById('error-bot-version').textContent = error.system_info.bot_version;
+                        document.getElementById('error-traceback').textContent = error.traceback;
+                        
+                        // Mostrar/ocultar botones según el estado
+                        const reportBtn = document.getElementById('report-modal-btn');
+                        const applyFixBtn = document.getElementById('apply-fix-modal-btn');
+                        
+                        if (error.status === 'pending') {
+                            reportBtn.classList.remove('d-none');
+                            reportBtn.dataset.errorId = errorId;
+                            applyFixBtn.classList.add('d-none');
+                        } else if (error.status === 'fixed') {
+                            reportBtn.classList.add('d-none');
+                            applyFixBtn.classList.remove('d-none');
+                            applyFixBtn.dataset.errorId = errorId;
+                            
+                            // Mostrar información de la solución
+                            const fixInfoDiv = document.getElementById('error-fix-info');
+                            fixInfoDiv.classList.remove('d-none');
+                            document.getElementById('fix-type').textContent = error.fix_info.fix_type;
+                            document.getElementById('fix-description').textContent = error.fix_info.description || 'No hay descripción disponible';
+                        } else {
+                            reportBtn.classList.add('d-none');
+                            applyFixBtn.classList.add('d-none');
+                            document.getElementById('error-fix-info').classList.add('d-none');
+                        }
+                        
+                        // Mostrar modal
+                        const modal = new bootstrap.Modal(document.getElementById('errorDetailsModal'));
+                        modal.show();
+                    } catch (error) {
+                        console.error('Error al obtener detalles:', error);
+                        alert('Error al obtener detalles del error');
+                    }
+                });
+            });
+            
+            // Botones de reportar error
+            document.querySelectorAll('.report-error-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const errorId = btn.dataset.errorId;
+                    document.getElementById('report-error-id').value = errorId;
+                    
+                    const modal = new bootstrap.Modal(document.getElementById('reportErrorModal'));
+                    modal.show();
+                });
+            });
+            
+            // Botón de reportar desde modal de detalles
+            document.getElementById('report-modal-btn').addEventListener('click', () => {
+                const errorId = document.getElementById('report-modal-btn').dataset.errorId;
+                document.getElementById('report-error-id').value = errorId;
+                
+                const detailsModal = bootstrap.Modal.getInstance(document.getElementById('errorDetailsModal'));
+                detailsModal.hide();
+                
+                const reportModal = new bootstrap.Modal(document.getElementById('reportErrorModal'));
+                reportModal.show();
+            });
+            
+            // Botón de enviar reporte
+            document.getElementById('send-report-btn').addEventListener('click', async () => {
+                const errorId = document.getElementById('report-error-id').value;
+                const comments = document.getElementById('report-comments').value;
+                
+                try {
+                    const result = await api.reportError(errorId, comments);
+                    if (result.status === 'success') {
+                        alert('Error reportado correctamente');
+                        location.reload();
+                    } else {
+                        alert(`Error al reportar: ${result.message}`);
+                    }
+                } catch (error) {
+                    console.error('Error al reportar:', error);
+                    alert('Error al enviar reporte');
+                }
+            });
+            
+            // Botones de aplicar solución
+            document.querySelectorAll('.apply-fix-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const errorId = btn.dataset.errorId;
+                    
+                    if (confirm('¿Estás seguro de que deseas aplicar esta solución?')) {
+                        try {
+                            const result = await api.applyFix(errorId);
+                            if (result.status === 'success') {
+                                alert('Solución aplicada correctamente');
+                                location.reload();
+                            } else {
+                                alert(`Error al aplicar solución: ${result.message}`);
+                            }
+                        } catch (error) {
+                            console.error('Error al aplicar solución:', error);
+                            alert('Error al aplicar solución');
+                        }
+                    }
+                });
+            });
+            
+            // Botón de aplicar solución desde modal
+            document.getElementById('apply-fix-modal-btn').addEventListener('click', async () => {
+                const errorId = document.getElementById('apply-fix-modal-btn').dataset.errorId;
+                
+                if (confirm('¿Estás seguro de que deseas aplicar esta solución?')) {
+                    try {
+                        const result = await api.applyFix(errorId);
+                        if (result.status === 'success') {
+                            alert('Solución aplicada correctamente');
+                            location.reload();
+                        } else {
+                            alert(`Error al aplicar solución: ${result.message}`);
+                        }
+                    } catch (error) {
+                        console.error('Error al aplicar solución:', error);
+                        alert('Error al aplicar solución');
+                    }
+                }
+            });
+            
+            // Actualizar estado de sincronización al cargar
+            (async () => {
+                try {
+                    const status = await api.getSyncStatus();
+                    const syncStatusElem = document.getElementById('sync-status');
+                    const lastSyncElem = document.getElementById('last-sync');
+                    
+                    if (status.connected) {
+                        syncStatusElem.className = 'badge bg-success';
+                        syncStatusElem.textContent = 'Conectado';
+                    } else {
+                        syncStatusElem.className = 'badge bg-danger';
+                        syncStatusElem.textContent = 'Desconectado';
+                    }
+                    
+                    if (status.last_sync) {
+                        // Formatear la fecha
+                        const date = new Date(status.last_sync);
+                        lastSyncElem.textContent = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+                    } else {
+                        lastSyncElem.textContent = 'Nunca';
+                    }
+                } catch (error) {
+                    console.error('Error al obtener estado de sincronización:', error);
+                }
+            })();
+        });
+    </script>
+</body>
+</html>

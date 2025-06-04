@@ -1,0 +1,16 @@
+### Cambios realizados el 27 de mayo de 2025
+
+1. **Corrección del error `task_done()` en `main1.py`:**
+   - Se agregó una verificación para asegurarse de que `task_done()` solo se llame cuando la cola no esté vacía.
+   - Archivos afectados: `main1.py`.
+
+2. **Eliminación de la suscripción al canal `trades` en `modulo2.py`:**
+   - Se filtró el canal `trades` en el método `subscribe` para evitar suscripciones innecesarias.
+   - Archivos afectados: `modulo2.py`.
+
+3. **Pruebas exitosas:**
+   - El bot se ejecutó correctamente después de los cambios, procesando datos sin errores relacionados con `task_done()`.
+
+---
+
+Estos cambios mejoran la estabilidad y funcionalidad del bot, asegurando un manejo adecuado de las colas y optimizando las suscripciones a los canales necesarios.

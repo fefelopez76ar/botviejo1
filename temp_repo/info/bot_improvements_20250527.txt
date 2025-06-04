@@ -1,0 +1,137 @@
+### Mejoras del Bot - 27 de mayo de 2025
+
+#### Cambios y Mejoras Implementadas:
+1. **Corrección del manejo de colas:**
+   - Se corrigió el manejo de la cola `user_input_queue` en `main1.py` para evitar errores al llamar a `task_done()` innecesariamente.
+   - Se agregó un bloque `try-except` para manejar posibles excepciones y registrar advertencias en caso de errores.
+
+2. **Habilitación de registros detallados:**
+   - En `modulo2.py`, se activaron los registros para los datos procesados que se colocan en la cola `data_queue`.
+   - Esto permite rastrear el tipo de datos y el instrumento asociado, mejorando la capacidad de depuración.
+
+3. **Estructura de carpetas y archivos:**
+   - **Carpeta `info`:**
+     - Se utiliza para almacenar reportes, registros y documentación relevante del bot.
+     - Archivos creados:
+       - `execution_report_20250527.txt`: Detalla los cambios realizados y la ubicación de los registros.
+       - `bot_improvements_20250527.txt`: Lista las mejoras implementadas y su impacto.
+   - **Carpeta `data`:**
+     - Contiene datos procesados y otros archivos relacionados con la ejecución del bot.
+     - Archivo creado:
+       - `changelog_20250527.txt`: Registro de cambios realizados el 27 de mayo de 2025.
+
+#### Impacto de las Mejoras:
+- **Estabilidad:**
+  - El bot ahora maneja las colas de manera más robusta, evitando errores críticos durante la ejecución.
+- **Depuración:**
+  - Los registros detallados permiten identificar y solucionar problemas más rápidamente.
+- **Organización:**
+  - La estructura de carpetas facilita el acceso a la información y la documentación del bot.
+
+#### Próximos Pasos:
+- Continuar monitoreando el rendimiento del bot y realizar ajustes según sea necesario.
+- Documentar cualquier nueva funcionalidad o cambio en los archivos correspondientes
+
+29/5/2025   21 49 hs . ultimo ultimo
+
+Tarea Pendiente para [Nombre del proyecto] - [Fecha límite]
+
+Archivo: verificar_db.py
+
+Ubicación del archivo a modificar: C:\proyectos\mibot2\CryptoTradingBot\verificar_db.py
+
+Descripción:
+El script verificar_db.py necesita ser actualizado para que busque la base de datos en la ruta correcta (info/market_data.db) y para que verifique los nombres de las tablas que el bot está creando (tickers y order_book_l2).
+
+Acción:
+
+    Abre el archivo verificar_db.py en la ruta indicada.
+    Borra todo su contenido actual.
+    Pega el siguiente código completo en el archivo verificar_db.py y luego guárdalo.
+
+Python
+
+# CÓDIGO COMPLETO PARA PEGAR EN VERIFICAR_DB.PY
+
+import sqlite3
+import os
+import sys
+
+# La ruta de la base de datos, asumiendo que este script (verificar_db.py)
+# está en la raíz del proyecto y que la DB está dentro de la carpeta 'info'.
+DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'info', 'market_data.db')
+
+def verificar_tickers():
+    print("\n--- Verificando Tabla 'tickers' ---")
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+
+        # Comprobar si la tabla 'tickers' existe
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='tickers';")
+        if cursor.fetchone():
+            print("Tabla 'tickers' encontrada.")
+            cursor.execute("SELECT COUNT(*) FROM tickers")
+            count = cursor.fetchone()[0]
+            print(f"Número de registros en 'tickers': {count}")
+
+            if count > 0:
+                print("\nÚltimos 5 registros en 'tickers':")
+                # Asegúrate de que los nombres de las columnas coincidan con las de tu tabla 'tickers'
+                cursor.execute("SELECT instId, last, askPx, bidPx, ts FROM tickers ORDER BY ts DESC LIMIT 5")
+                for entry in cursor.fetchall():
+                    print(entry)
+            else:
+                print("No hay registros en la tabla 'tickers'.")
+        else:
+            print("¡ERROR: Tabla 'tickers' NO encontrada en la base de datos!")
+
+    except sqlite3.Error as e:
+        print(f"Error de SQLite al verificar 'tickers': {e}")
+    except Exception as e:
+        print(f"Error inesperado al verificar 'tickers': {e}")
+    finally:
+        if conn:
+            conn.close()
+
+def verificar_order_book_l2():
+    print("\n--- Verificando Tabla 'order_book_l2' ---")
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+
+        # Comprobar si la tabla 'order_book_l2' existe
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='order_book_l2';")
+        if cursor.fetchone():
+            print("Tabla 'order_book_l2' encontrada.")
+            cursor.execute("SELECT COUNT(*) FROM order_book_l2")
+            count = cursor.fetchone()[0]
+            print(f"Número de registros en 'order_book_l2': {count}")
+
+            if count > 0:
+                print("\nÚltimos 5 registros en 'order_book_l2':")
+                # Asegúrate de que los nombres de las columnas coincidan con las de tu tabla 'order_book_l2'
+                cursor.execute("SELECT instId, bidPx, bidSz, askPx, askSz, ts FROM order_book_l2 ORDER BY ts DESC LIMIT 5")
+                for entry in cursor.fetchall():
+                    print(entry)
+            else:
+                print("No hay registros en la tabla 'order_book_l2'.")
+        else:
+            print("¡ERROR: Tabla 'order_book_l2' NO encontrada en la base de datos!")
+
+    except sqlite3.Error as e:
+        print(f"Error de SQLite al verificar 'order_book_l2': {e}")
+    except Exception as e:
+        print(f"Error inesperado al verificar 'order_book_l2': {e}")
+    finally:
+        if conn:
+            conn.close()
+
+if __name__ == "__main__":
+    print(f"Intentando conectar a la base de datos en: {DB_PATH}")
+    if not os.path.exists(DB_PATH):
+        print(f"¡ADVERTENCIA: El archivo de base de datos '{DB_PATH}' no existe aún. Asegúrate de ejecutar main_simulacion.py primero para crearlo y llenarlo de datos!")
+    else:
+        verificar_tickers()
+        verificar_order_book_l2()
+.

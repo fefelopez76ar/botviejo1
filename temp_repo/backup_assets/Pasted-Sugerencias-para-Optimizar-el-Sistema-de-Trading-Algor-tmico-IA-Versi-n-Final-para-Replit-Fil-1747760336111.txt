@@ -1,0 +1,83 @@
+Sugerencias para Optimizar el Sistema de Trading Algorítmico IA – Versión Final para Replit
+
+    Filtro de Sesión y Día de la Semana
+    Agrega lógica condicional para restringir operaciones en momentos de bajo volumen o baja efectividad estadística. Esto reduce operaciones durante sesiones asiáticas o fines de semana si no hay edge claro:
+
+import datetime
+
+def is_valid_session():
+    now = datetime.datetime.utcnow()
+    weekday = now.weekday()  # lunes = 0, domingo = 6
+    hour = now.hour
+    if weekday in [5, 6]:  # sábado o domingo
+        return False
+    if hour < 13 or hour > 21:  # fuera del horario US (13-21 UTC)
+        return False
+    return True
+
+Filtro de Confirmación con Order Flow
+Refuerza entradas filtrando con señales mínimas de order flow. Evita operar solo por técnica sin acompañamiento de volumen real:
+
+if market_condition not in [MarketCondition.EXTREME_VOLATILITY] and \
+   orderflow_signals.get('delta_positive') and \
+   orderflow_signals.get('imbalance_buy'):
+    allow_entry = True
+else:
+    allow_entry = False
+
+Registro de Sesgo y Estadísticas por Tipo de Operación
+Mejora tu stats_tracker.py para agrupar estadísticas según el tipo de señal o patrón (ej. engulfing, breakout, absorción):
+
+def log_trade(self, trade_data):
+    # Ya registras win/loss y PnL, pero ahora agrega agrupación
+    pattern_type = trade_data.get('pattern')
+    self.pattern_stats[pattern_type].update(trade_data['pnl'])
+
+Simulación Monte Carlo (estructura base)
+Integra un script para simular cientos de secuencias de operaciones aleatorias con tus datos históricos:
+
+import numpy as np
+
+def monte_carlo_sim(pnls, n_simulations=1000):
+    results = []
+    for _ in range(n_simulations):
+        sim = np.random.choice(pnls, size=len(pnls), replace=True)
+        results.append(np.sum(sim))
+    return {
+        "mean": np.mean(results),
+        "std": np.std(results),
+        "5%_percentile": np.percentile(results, 5),
+        "max_drawdown": max([abs(min(np.cumsum(sim))) for sim in results])
+    }
+
+Cooldown Temporal Real
+Refuerza el cooldown después de circuit breakers con tiempo real, no solo por número de operaciones:
+
+import time
+
+last_break_time = None
+COOLDOWN_PERIOD_HOURS = 6
+
+def is_in_cooldown():
+    if last_break_time is None:
+        return False
+    elapsed = (time.time() - last_break_time) / 3600
+    return elapsed < COOLDOWN_PERIOD_HOURS
+
+Módulo de Control de Riesgo con Reducción Dinámica
+En position_limits.py, agrega esta lógica para reducir posición tras pérdida:
+
+def calculate_position_size(account_equity, market_volatility, loss_streak):
+    base_risk_pct = 0.02
+    adjusted_risk = base_risk_pct * max(0.5, 1 - (loss_streak * 0.2))
+    size = account_equity * adjusted_risk / market_volatility
+    return min(size, account_equity * 0.2)
+
+Logs Críticos con Alerta
+Si usas Telegram o Discord, activa alertas cuando se dispare un circuit breaker:
+
+    def send_critical_alert(message):
+        # Integrar con API Telegram o Discord
+        print(f"[ALERTA CRÍTICA] {message}")
+
+Estas mejoras son directamente integrables, mejoran la resiliencia, explicabilidad y adaptabilidad del sistema. Te llevarán del nivel "experto técnico" al nivel "bot institucional con disciplina de risk-off y visión estratégica".

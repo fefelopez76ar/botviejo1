@@ -1,0 +1,1639 @@
+{
+    "arena_stats": {
+        "creation_date": "2025-05-11T14:32:14.175677",
+        "last_evaluation": "2025-05-11T14:34:02.363169",
+        "next_evaluation": "2025-05-14T14:34:02.363171",
+        "total_battles": 3,
+        "total_warriors": 58,
+        "total_defeated": 5,
+        "total_generations": 4,
+        "best_roi_ever": 0.0,
+        "worst_roi_ever": 0.0,
+        "hall_of_fame": [
+            {
+                "warrior_id": "breakout_scalping_1m_1746973934",
+                "strategy_name": "breakout_scalping",
+                "timeframe": "1m",
+                "generation": 1,
+                "roi": 0.0,
+                "win_rate": 0.0,
+                "total_trades": 0,
+                "recorded_at": "2025-05-11T14:32:14.187809"
+            },
+            {
+                "warrior_id": "breakout_scalping_1m_gen2_1746973934",
+                "strategy_name": "breakout_scalping",
+                "timeframe": "1m",
+                "generation": 2,
+                "roi": 0.0,
+                "win_rate": 0.0,
+                "total_trades": 0,
+                "recorded_at": "2025-05-11T14:33:08.683879"
+            },
+            {
+                "warrior_id": "breakout_scalping_1m_1746973988",
+                "strategy_name": "breakout_scalping",
+                "timeframe": "1m",
+                "generation": 1,
+                "roi": 0.0,
+                "win_rate": 0.0,
+                "total_trades": 0,
+                "recorded_at": "2025-05-11T14:33:08.683886"
+            },
+            {
+                "warrior_id": "breakout_scalping_1m_gen3_1746973988",
+                "strategy_name": "breakout_scalping",
+                "timeframe": "1m",
+                "generation": 3,
+                "roi": 0.0,
+                "win_rate": 0.0,
+                "total_trades": 0,
+                "recorded_at": "2025-05-11T14:34:02.363178"
+            },
+            {
+                "warrior_id": "breakout_scalping_1m_1746974042",
+                "strategy_name": "breakout_scalping",
+                "timeframe": "1m",
+                "generation": 1,
+                "roi": 0.0,
+                "win_rate": 0.0,
+                "total_trades": 0,
+                "recorded_at": "2025-05-11T14:34:02.363202"
+            }
+        ],
+        "hall_of_shame": [
+            {
+                "warrior_id": "breakout_scalping_1m_1746973934",
+                "strategy_name": "breakout_scalping",
+                "timeframe": "1m",
+                "generation": 1,
+                "roi": 0.0,
+                "win_rate": 0.0,
+                "total_trades": 0,
+                "eliminated_at": "2025-05-11T14:32:14.187171"
+            },
+            {
+                "warrior_id": "breakout_scalping_1m_gen2_1746973934",
+                "strategy_name": "breakout_scalping",
+                "timeframe": "1m",
+                "generation": 2,
+                "roi": 0.0,
+                "win_rate": 0.0,
+                "total_trades": 0,
+                "eliminated_at": "2025-05-11T14:33:08.682999"
+            },
+            {
+                "warrior_id": "breakout_scalping_1m_1746973988",
+                "strategy_name": "breakout_scalping",
+                "timeframe": "1m",
+                "generation": 1,
+                "roi": 0.0,
+                "win_rate": 0.0,
+                "total_trades": 0,
+                "eliminated_at": "2025-05-11T14:33:08.683012"
+            },
+            {
+                "warrior_id": "breakout_scalping_1m_gen3_1746973988",
+                "strategy_name": "breakout_scalping",
+                "timeframe": "1m",
+                "generation": 3,
+                "roi": 0.0,
+                "win_rate": 0.0,
+                "total_trades": 0,
+                "eliminated_at": "2025-05-11T14:34:02.362228"
+            },
+            {
+                "warrior_id": "breakout_scalping_1m_1746974042",
+                "strategy_name": "breakout_scalping",
+                "timeframe": "1m",
+                "generation": 1,
+                "roi": 0.0,
+                "win_rate": 0.0,
+                "total_trades": 0,
+                "eliminated_at": "2025-05-11T14:34:02.362239"
+            }
+        ]
+    },
+    "evaluation_history": [
+        {
+            "timestamp": "2025-05-11T14:32:14.187815",
+            "total_warriors": 1,
+            "eliminated": [
+                "breakout_scalping_1m_1746973934"
+            ],
+            "new_warriors": [
+                "breakout_scalping_1m_gen2_1746973934",
+                "breakout_scalping_1m_gen2_1746973934",
+                "breakout_scalping_1m_gen2_1746973934",
+                "breakout_scalping_1m_gen2_1746973934",
+                "breakout_scalping_1m_gen2_1746973934",
+                "breakout_scalping_1m_gen2_1746973934",
+                "breakout_scalping_1m_gen2_1746973934",
+                "breakout_scalping_1m_gen2_1746973934",
+                "breakout_scalping_1m_gen2_1746973934",
+                "breakout_scalping_1m_gen2_1746973934",
+                "breakout_scalping_1m_gen2_1746973934",
+                "breakout_scalping_1m_gen2_1746973934",
+                "breakout_scalping_1m_gen2_1746973934",
+                "breakout_scalping_1m_gen2_1746973934",
+                "breakout_scalping_1m_gen2_1746973934",
+                "breakout_scalping_1m_gen2_1746973934",
+                "breakout_scalping_1m_gen2_1746973934",
+                "breakout_scalping_1m_gen2_1746973934",
+                "breakout_scalping_1m_gen2_1746973934"
+            ],
+            "best_roi": 0.0,
+            "worst_roi": 0.0,
+            "average_roi": 0.0
+        },
+        {
+            "timestamp": "2025-05-11T14:33:08.683891",
+            "total_warriors": 2,
+            "eliminated": [
+                "breakout_scalping_1m_gen2_1746973934",
+                "breakout_scalping_1m_1746973988"
+            ],
+            "new_warriors": [
+                "breakout_scalping_1m_gen3_1746973988",
+                "breakout_scalping_1m_gen3_1746973988",
+                "breakout_scalping_1m_gen3_1746973988",
+                "breakout_scalping_1m_gen3_1746973988",
+                "breakout_scalping_1m_gen3_1746973988",
+                "breakout_scalping_1m_gen3_1746973988",
+                "breakout_scalping_1m_gen3_1746973988",
+                "breakout_scalping_1m_gen3_1746973988",
+                "breakout_scalping_1m_gen3_1746973988",
+                "breakout_scalping_1m_gen3_1746973988",
+                "breakout_scalping_1m_gen3_1746973988",
+                "breakout_scalping_1m_gen3_1746973988",
+                "breakout_scalping_1m_gen3_1746973988",
+                "breakout_scalping_1m_gen3_1746973988",
+                "breakout_scalping_1m_gen3_1746973988",
+                "breakout_scalping_1m_gen3_1746973988",
+                "breakout_scalping_1m_gen3_1746973988",
+                "breakout_scalping_1m_gen3_1746973988"
+            ],
+            "best_roi": 0.0,
+            "worst_roi": 0.0,
+            "average_roi": 0.0
+        },
+        {
+            "timestamp": "2025-05-11T14:34:02.363207",
+            "total_warriors": 2,
+            "eliminated": [
+                "breakout_scalping_1m_gen3_1746973988",
+                "breakout_scalping_1m_1746974042"
+            ],
+            "new_warriors": [
+                "breakout_scalping_1m_gen4_1746974042",
+                "breakout_scalping_1m_gen4_1746974042",
+                "breakout_scalping_1m_gen4_1746974042",
+                "breakout_scalping_1m_gen4_1746974042",
+                "breakout_scalping_1m_gen4_1746974042",
+                "breakout_scalping_1m_gen4_1746974042",
+                "breakout_scalping_1m_gen4_1746974042",
+                "breakout_scalping_1m_gen4_1746974042",
+                "breakout_scalping_1m_gen4_1746974042",
+                "breakout_scalping_1m_gen4_1746974042",
+                "breakout_scalping_1m_gen4_1746974042",
+                "breakout_scalping_1m_gen4_1746974042",
+                "breakout_scalping_1m_gen4_1746974042",
+                "breakout_scalping_1m_gen4_1746974042",
+                "breakout_scalping_1m_gen4_1746974042",
+                "breakout_scalping_1m_gen4_1746974042",
+                "breakout_scalping_1m_gen4_1746974042",
+                "breakout_scalping_1m_gen4_1746974042"
+            ],
+            "best_roi": 0.0,
+            "worst_roi": 0.0,
+            "average_roi": 0.0
+        }
+    ],
+    "evolution_log": [
+        {
+            "timestamp": "2025-05-11T14:32:14.187252",
+            "generation": 2,
+            "new_warrior_id": "breakout_scalping_1m_gen2_1746973934",
+            "parent_ids": [
+                "breakout_scalping_1m_1746973934"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "take_profit_pct": 0.8,
+                "stop_loss_pct": 0.5,
+                "trailing_stop_pct": 0.3,
+                "max_position_size_pct": 58.025895888884115,
+                "min_volume_threshold": 1.5,
+                "min_rr_ratio": 1.5,
+                "max_fee_impact_pct": 0.15
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:32:14.187296",
+            "generation": 2,
+            "new_warrior_id": "breakout_scalping_1m_gen2_1746973934",
+            "parent_ids": [
+                "breakout_scalping_1m_1746973934"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "take_profit_pct": 0.8,
+                "stop_loss_pct": 0.5,
+                "trailing_stop_pct": 0.3,
+                "max_position_size_pct": 50.0,
+                "min_volume_threshold": 1.768760650466995,
+                "min_rr_ratio": 1.3345946493108571,
+                "max_fee_impact_pct": 0.13156883321392038
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:32:14.187327",
+            "generation": 2,
+            "new_warrior_id": "breakout_scalping_1m_gen2_1746973934",
+            "parent_ids": [
+                "breakout_scalping_1m_1746973934"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "take_profit_pct": 0.8279348468708406,
+                "stop_loss_pct": 0.5,
+                "trailing_stop_pct": 0.3,
+                "max_position_size_pct": 50.0,
+                "min_volume_threshold": 1.5,
+                "min_rr_ratio": 1.5,
+                "max_fee_impact_pct": 0.15
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:32:14.187376",
+            "generation": 2,
+            "new_warrior_id": "breakout_scalping_1m_gen2_1746973934",
+            "parent_ids": [
+                "breakout_scalping_1m_1746973934"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "take_profit_pct": 0.8,
+                "stop_loss_pct": 0.5,
+                "trailing_stop_pct": 0.3,
+                "max_position_size_pct": 50.0,
+                "min_volume_threshold": 1.5,
+                "min_rr_ratio": 1.6709848765138111,
+                "max_fee_impact_pct": 0.15
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:32:14.187408",
+            "generation": 2,
+            "new_warrior_id": "breakout_scalping_1m_gen2_1746973934",
+            "parent_ids": [
+                "breakout_scalping_1m_1746973934"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "take_profit_pct": 0.8,
+                "stop_loss_pct": 0.5,
+                "trailing_stop_pct": 0.3,
+                "max_position_size_pct": 50.0,
+                "min_volume_threshold": 1.246930966496222,
+                "min_rr_ratio": 1.6821257617283,
+                "max_fee_impact_pct": 0.15
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:32:14.187434",
+            "generation": 2,
+            "new_warrior_id": "breakout_scalping_1m_gen2_1746973934",
+            "parent_ids": [
+                "breakout_scalping_1m_1746973934"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "take_profit_pct": 0.8,
+                "stop_loss_pct": 0.5,
+                "trailing_stop_pct": 0.29854068581418786,
+                "max_position_size_pct": 50.0,
+                "min_volume_threshold": 1.5,
+                "min_rr_ratio": 1.5,
+                "max_fee_impact_pct": 0.15
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:32:14.187472",
+            "generation": 2,
+            "new_warrior_id": "breakout_scalping_1m_gen2_1746973934",
+            "parent_ids": [
+                "breakout_scalping_1m_1746973934"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "take_profit_pct": 0.8,
+                "stop_loss_pct": 0.5207467606658809,
+                "trailing_stop_pct": 0.3,
+                "max_position_size_pct": 50.0,
+                "min_volume_threshold": 1.5,
+                "min_rr_ratio": 1.5,
+                "max_fee_impact_pct": 0.15
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:32:14.187503",
+            "generation": 2,
+            "new_warrior_id": "breakout_scalping_1m_gen2_1746973934",
+            "parent_ids": [
+                "breakout_scalping_1m_1746973934"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "take_profit_pct": 0.8,
+                "stop_loss_pct": 0.5,
+                "trailing_stop_pct": 0.26616782953957574,
+                "max_position_size_pct": 50.0,
+                "min_volume_threshold": 1.5,
+                "min_rr_ratio": 1.5,
+                "max_fee_impact_pct": 0.15
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:32:14.187528",
+            "generation": 2,
+            "new_warrior_id": "breakout_scalping_1m_gen2_1746973934",
+            "parent_ids": [
+                "breakout_scalping_1m_1746973934"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "take_profit_pct": 0.8,
+                "stop_loss_pct": 0.5,
+                "trailing_stop_pct": 0.3,
+                "max_position_size_pct": 50.0,
+                "min_volume_threshold": 1.5,
+                "min_rr_ratio": 1.5,
+                "max_fee_impact_pct": 0.15
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:32:14.187554",
+            "generation": 2,
+            "new_warrior_id": "breakout_scalping_1m_gen2_1746973934",
+            "parent_ids": [
+                "breakout_scalping_1m_1746973934"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "take_profit_pct": 0.8,
+                "stop_loss_pct": 0.5,
+                "trailing_stop_pct": 0.3,
+                "max_position_size_pct": 48.33859332606322,
+                "min_volume_threshold": 1.5,
+                "min_rr_ratio": 1.5,
+                "max_fee_impact_pct": 0.15
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:32:14.187577",
+            "generation": 2,
+            "new_warrior_id": "breakout_scalping_1m_gen2_1746973934",
+            "parent_ids": [
+                "breakout_scalping_1m_1746973934"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "take_profit_pct": 0.8,
+                "stop_loss_pct": 0.5,
+                "trailing_stop_pct": 0.3,
+                "max_position_size_pct": 50.0,
+                "min_volume_threshold": 1.5,
+                "min_rr_ratio": 1.5,
+                "max_fee_impact_pct": 0.15
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:32:14.187609",
+            "generation": 2,
+            "new_warrior_id": "breakout_scalping_1m_gen2_1746973934",
+            "parent_ids": [
+                "breakout_scalping_1m_1746973934"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "take_profit_pct": 0.8,
+                "stop_loss_pct": 0.5,
+                "trailing_stop_pct": 0.3,
+                "max_position_size_pct": 50.0,
+                "min_volume_threshold": 1.5,
+                "min_rr_ratio": 1.5,
+                "max_fee_impact_pct": 0.15
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:32:14.187640",
+            "generation": 2,
+            "new_warrior_id": "breakout_scalping_1m_gen2_1746973934",
+            "parent_ids": [
+                "breakout_scalping_1m_1746973934"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "take_profit_pct": 0.8,
+                "stop_loss_pct": 0.4265189065990374,
+                "trailing_stop_pct": 0.3,
+                "max_position_size_pct": 50.0,
+                "min_volume_threshold": 1.5,
+                "min_rr_ratio": 1.5,
+                "max_fee_impact_pct": 0.15
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:32:14.187666",
+            "generation": 2,
+            "new_warrior_id": "breakout_scalping_1m_gen2_1746973934",
+            "parent_ids": [
+                "breakout_scalping_1m_1746973934"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "take_profit_pct": 0.8,
+                "stop_loss_pct": 0.5,
+                "trailing_stop_pct": 0.3,
+                "max_position_size_pct": 50.0,
+                "min_volume_threshold": 1.5,
+                "min_rr_ratio": 1.2306551139205335,
+                "max_fee_impact_pct": 0.14840324305653393
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:32:14.187693",
+            "generation": 2,
+            "new_warrior_id": "breakout_scalping_1m_gen2_1746973934",
+            "parent_ids": [
+                "breakout_scalping_1m_1746973934"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "take_profit_pct": 0.8,
+                "stop_loss_pct": 0.5,
+                "trailing_stop_pct": 0.3,
+                "max_position_size_pct": 47.49367107601618,
+                "min_volume_threshold": 1.5,
+                "min_rr_ratio": 1.5,
+                "max_fee_impact_pct": 0.1772552689059186
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:32:14.187717",
+            "generation": 2,
+            "new_warrior_id": "breakout_scalping_1m_gen2_1746973934",
+            "parent_ids": [
+                "breakout_scalping_1m_1746973934"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "take_profit_pct": 0.8,
+                "stop_loss_pct": 0.5,
+                "trailing_stop_pct": 0.3,
+                "max_position_size_pct": 50.0,
+                "min_volume_threshold": 1.5,
+                "min_rr_ratio": 1.6114404824182607,
+                "max_fee_impact_pct": 0.15
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:32:14.187745",
+            "generation": 2,
+            "new_warrior_id": "breakout_scalping_1m_gen2_1746973934",
+            "parent_ids": [
+                "breakout_scalping_1m_1746973934"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "take_profit_pct": 0.8,
+                "stop_loss_pct": 0.5,
+                "trailing_stop_pct": 0.3,
+                "max_position_size_pct": 50.0,
+                "min_volume_threshold": 1.5,
+                "min_rr_ratio": 1.5,
+                "max_fee_impact_pct": 0.1382025763130408
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:32:14.187770",
+            "generation": 2,
+            "new_warrior_id": "breakout_scalping_1m_gen2_1746973934",
+            "parent_ids": [
+                "breakout_scalping_1m_1746973934"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "take_profit_pct": 0.8,
+                "stop_loss_pct": 0.5,
+                "trailing_stop_pct": 0.3,
+                "max_position_size_pct": 50.0,
+                "min_volume_threshold": 1.3305350759123338,
+                "min_rr_ratio": 1.5,
+                "max_fee_impact_pct": 0.13570339436314585
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:32:14.187794",
+            "generation": 2,
+            "new_warrior_id": "breakout_scalping_1m_gen2_1746973934",
+            "parent_ids": [
+                "breakout_scalping_1m_1746973934"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "take_profit_pct": 0.8113132801957367,
+                "stop_loss_pct": 0.5,
+                "trailing_stop_pct": 0.3,
+                "max_position_size_pct": 46.57031158751601,
+                "min_volume_threshold": 1.5,
+                "min_rr_ratio": 1.5,
+                "max_fee_impact_pct": 0.15
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:33:08.683171",
+            "generation": 3,
+            "new_warrior_id": "breakout_scalping_1m_gen3_1746973988",
+            "parent_ids": [
+                "breakout_scalping_1m_gen2_1746973934",
+                "breakout_scalping_1m_1746973988"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "stop_loss_pct": 0.5,
+                "take_profit_pct": 0.8,
+                "min_rr_ratio": 1.572078377302846,
+                "max_position_size_pct": 46.57031158751601,
+                "max_fee_impact_pct": 0.15,
+                "min_volume_threshold": 1.5,
+                "trailing_stop_pct": 0.3
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:33:08.683237",
+            "generation": 3,
+            "new_warrior_id": "breakout_scalping_1m_gen3_1746973988",
+            "parent_ids": [
+                "breakout_scalping_1m_gen2_1746973934",
+                "breakout_scalping_1m_1746973988"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "stop_loss_pct": 0.5,
+                "take_profit_pct": 0.8113132801957367,
+                "min_rr_ratio": 1.5,
+                "max_position_size_pct": 50.0,
+                "max_fee_impact_pct": 0.15,
+                "min_volume_threshold": 1.5,
+                "trailing_stop_pct": 0.3
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:33:08.683297",
+            "generation": 3,
+            "new_warrior_id": "breakout_scalping_1m_gen3_1746973988",
+            "parent_ids": [
+                "breakout_scalping_1m_gen2_1746973934",
+                "breakout_scalping_1m_1746973988"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "stop_loss_pct": 0.49069357156681637,
+                "take_profit_pct": 0.8113132801957367,
+                "min_rr_ratio": 1.5,
+                "max_position_size_pct": 46.57031158751601,
+                "max_fee_impact_pct": 0.15837833035313653,
+                "min_volume_threshold": 1.5201581020077788,
+                "trailing_stop_pct": 0.3
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:33:08.683338",
+            "generation": 3,
+            "new_warrior_id": "breakout_scalping_1m_gen3_1746973988",
+            "parent_ids": [
+                "breakout_scalping_1m_1746973988",
+                "breakout_scalping_1m_gen2_1746973934"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "stop_loss_pct": 0.5,
+                "take_profit_pct": 0.8113132801957367,
+                "min_rr_ratio": 1.5,
+                "max_position_size_pct": 51.772213938380496,
+                "max_fee_impact_pct": 0.15,
+                "min_volume_threshold": 1.5,
+                "trailing_stop_pct": 0.3
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:33:08.683377",
+            "generation": 3,
+            "new_warrior_id": "breakout_scalping_1m_gen3_1746973988",
+            "parent_ids": [
+                "breakout_scalping_1m_1746973988",
+                "breakout_scalping_1m_gen2_1746973934"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "stop_loss_pct": 0.5,
+                "take_profit_pct": 0.8,
+                "min_rr_ratio": 1.5,
+                "max_position_size_pct": 50.0,
+                "max_fee_impact_pct": 0.15,
+                "min_volume_threshold": 1.5,
+                "trailing_stop_pct": 0.2911409666508807
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:33:08.683416",
+            "generation": 3,
+            "new_warrior_id": "breakout_scalping_1m_gen3_1746973988",
+            "parent_ids": [
+                "breakout_scalping_1m_gen2_1746973934",
+                "breakout_scalping_1m_1746973988"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "stop_loss_pct": 0.4649786202536809,
+                "take_profit_pct": 0.8113132801957367,
+                "min_rr_ratio": 1.5,
+                "max_position_size_pct": 46.07448639813646,
+                "max_fee_impact_pct": 0.15,
+                "min_volume_threshold": 1.5,
+                "trailing_stop_pct": 0.3
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:33:08.683453",
+            "generation": 3,
+            "new_warrior_id": "breakout_scalping_1m_gen3_1746973988",
+            "parent_ids": [
+                "breakout_scalping_1m_1746973988",
+                "breakout_scalping_1m_gen2_1746973934"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "stop_loss_pct": 0.5,
+                "take_profit_pct": 0.8,
+                "min_rr_ratio": 1.5,
+                "max_position_size_pct": 46.57031158751601,
+                "max_fee_impact_pct": 0.15,
+                "min_volume_threshold": 1.4773480250860875,
+                "trailing_stop_pct": 0.2803364947086732
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:33:08.683484",
+            "generation": 3,
+            "new_warrior_id": "breakout_scalping_1m_gen3_1746973988",
+            "parent_ids": [
+                "breakout_scalping_1m_1746973988"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "take_profit_pct": 0.8,
+                "stop_loss_pct": 0.5847501338300882,
+                "trailing_stop_pct": 0.3,
+                "max_position_size_pct": 50.0,
+                "min_volume_threshold": 1.200292771915085,
+                "min_rr_ratio": 1.5,
+                "max_fee_impact_pct": 0.15
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:33:08.683523",
+            "generation": 3,
+            "new_warrior_id": "breakout_scalping_1m_gen3_1746973988",
+            "parent_ids": [
+                "breakout_scalping_1m_gen2_1746973934",
+                "breakout_scalping_1m_1746973988"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "stop_loss_pct": 0.5,
+                "take_profit_pct": 0.8256744246978238,
+                "min_rr_ratio": 1.5,
+                "max_position_size_pct": 44.222430482719204,
+                "max_fee_impact_pct": 0.15,
+                "min_volume_threshold": 1.5691060307843752,
+                "trailing_stop_pct": 0.3
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:33:08.683550",
+            "generation": 3,
+            "new_warrior_id": "breakout_scalping_1m_gen3_1746973988",
+            "parent_ids": [
+                "breakout_scalping_1m_gen2_1746973934"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "take_profit_pct": 0.8113132801957367,
+                "stop_loss_pct": 0.48065972752576613,
+                "trailing_stop_pct": 0.3,
+                "max_position_size_pct": 46.57031158751601,
+                "min_volume_threshold": 1.5,
+                "min_rr_ratio": 1.5,
+                "max_fee_impact_pct": 0.14252989109760536
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:33:08.683587",
+            "generation": 3,
+            "new_warrior_id": "breakout_scalping_1m_gen3_1746973988",
+            "parent_ids": [
+                "breakout_scalping_1m_gen2_1746973934",
+                "breakout_scalping_1m_1746973988"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "stop_loss_pct": 0.5,
+                "take_profit_pct": 0.8,
+                "min_rr_ratio": 1.5,
+                "max_position_size_pct": 49.9861515188222,
+                "max_fee_impact_pct": 0.15,
+                "min_volume_threshold": 1.5,
+                "trailing_stop_pct": 0.3
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:33:08.683633",
+            "generation": 3,
+            "new_warrior_id": "breakout_scalping_1m_gen3_1746973988",
+            "parent_ids": [
+                "breakout_scalping_1m_gen2_1746973934",
+                "breakout_scalping_1m_1746973988"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "stop_loss_pct": 0.49874065694594777,
+                "take_profit_pct": 0.8113132801957367,
+                "min_rr_ratio": 1.4083154918188547,
+                "max_position_size_pct": 50.0,
+                "max_fee_impact_pct": 0.15,
+                "min_volume_threshold": 1.5,
+                "trailing_stop_pct": 0.32199570843335373
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:33:08.683658",
+            "generation": 3,
+            "new_warrior_id": "breakout_scalping_1m_gen3_1746973988",
+            "parent_ids": [
+                "breakout_scalping_1m_gen2_1746973934"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "take_profit_pct": 0.8113132801957367,
+                "stop_loss_pct": 0.5,
+                "trailing_stop_pct": 0.3,
+                "max_position_size_pct": 46.57031158751601,
+                "min_volume_threshold": 1.5,
+                "min_rr_ratio": 1.5,
+                "max_fee_impact_pct": 0.15
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:33:08.683700",
+            "generation": 3,
+            "new_warrior_id": "breakout_scalping_1m_gen3_1746973988",
+            "parent_ids": [
+                "breakout_scalping_1m_gen2_1746973934"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "take_profit_pct": 0.8113132801957367,
+                "stop_loss_pct": 0.5,
+                "trailing_stop_pct": 0.24806624158314097,
+                "max_position_size_pct": 46.57031158751601,
+                "min_volume_threshold": 1.5,
+                "min_rr_ratio": 1.2829191655951262,
+                "max_fee_impact_pct": 0.15
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:33:08.683737",
+            "generation": 3,
+            "new_warrior_id": "breakout_scalping_1m_gen3_1746973988",
+            "parent_ids": [
+                "breakout_scalping_1m_1746973988",
+                "breakout_scalping_1m_gen2_1746973934"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "stop_loss_pct": 0.5319689795035834,
+                "take_profit_pct": 0.8094517284259309,
+                "min_rr_ratio": 1.6448719503059772,
+                "max_position_size_pct": 46.57031158751601,
+                "max_fee_impact_pct": 0.15,
+                "min_volume_threshold": 1.5,
+                "trailing_stop_pct": 0.3
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:33:08.683772",
+            "generation": 3,
+            "new_warrior_id": "breakout_scalping_1m_gen3_1746973988",
+            "parent_ids": [
+                "breakout_scalping_1m_gen2_1746973934",
+                "breakout_scalping_1m_1746973988"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "stop_loss_pct": 0.5,
+                "take_profit_pct": 0.8,
+                "min_rr_ratio": 1.5,
+                "max_position_size_pct": 50.0,
+                "max_fee_impact_pct": 0.15,
+                "min_volume_threshold": 1.5,
+                "trailing_stop_pct": 0.2884728761396826
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:33:08.683808",
+            "generation": 3,
+            "new_warrior_id": "breakout_scalping_1m_gen3_1746973988",
+            "parent_ids": [
+                "breakout_scalping_1m_1746973988",
+                "breakout_scalping_1m_gen2_1746973934"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "stop_loss_pct": 0.5,
+                "take_profit_pct": 0.8113132801957367,
+                "min_rr_ratio": 1.5,
+                "max_position_size_pct": 47.13685676829542,
+                "max_fee_impact_pct": 0.16200908160921,
+                "min_volume_threshold": 1.5,
+                "trailing_stop_pct": 0.322844655731865
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:33:08.683864",
+            "generation": 3,
+            "new_warrior_id": "breakout_scalping_1m_gen3_1746973988",
+            "parent_ids": [
+                "breakout_scalping_1m_gen2_1746973934",
+                "breakout_scalping_1m_1746973988"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "stop_loss_pct": 0.5,
+                "take_profit_pct": 0.8113132801957367,
+                "min_rr_ratio": 1.5,
+                "max_position_size_pct": 46.57031158751601,
+                "max_fee_impact_pct": 0.15,
+                "min_volume_threshold": 1.5,
+                "trailing_stop_pct": 0.3
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:34:02.362337",
+            "generation": 4,
+            "new_warrior_id": "breakout_scalping_1m_gen4_1746974042",
+            "parent_ids": [
+                "breakout_scalping_1m_gen3_1746973988",
+                "breakout_scalping_1m_1746974042"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "min_rr_ratio": 1.5,
+                "max_position_size_pct": 46.57031158751601,
+                "stop_loss_pct": 0.5,
+                "take_profit_pct": 0.8,
+                "min_volume_threshold": 1.6264641906765243,
+                "trailing_stop_pct": 0.3,
+                "max_fee_impact_pct": 0.15
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:34:02.362405",
+            "generation": 4,
+            "new_warrior_id": "breakout_scalping_1m_gen4_1746974042",
+            "parent_ids": [
+                "breakout_scalping_1m_1746974042"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "take_profit_pct": 0.8,
+                "stop_loss_pct": 0.5,
+                "trailing_stop_pct": 0.3,
+                "max_position_size_pct": 50.0,
+                "min_volume_threshold": 1.5,
+                "min_rr_ratio": 1.5,
+                "max_fee_impact_pct": 0.14347747032843855
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:34:02.362453",
+            "generation": 4,
+            "new_warrior_id": "breakout_scalping_1m_gen4_1746974042",
+            "parent_ids": [
+                "breakout_scalping_1m_1746974042",
+                "breakout_scalping_1m_gen3_1746973988"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "min_rr_ratio": 1.5,
+                "max_position_size_pct": 51.688291253444305,
+                "stop_loss_pct": 0.5,
+                "take_profit_pct": 0.8,
+                "min_volume_threshold": 1.5,
+                "trailing_stop_pct": 0.3,
+                "max_fee_impact_pct": 0.15
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:34:02.362511",
+            "generation": 4,
+            "new_warrior_id": "breakout_scalping_1m_gen4_1746974042",
+            "parent_ids": [
+                "breakout_scalping_1m_1746974042"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "take_profit_pct": 0.663867027739581,
+                "stop_loss_pct": 0.5,
+                "trailing_stop_pct": 0.3,
+                "max_position_size_pct": 50.0,
+                "min_volume_threshold": 1.7816086894188787,
+                "min_rr_ratio": 1.5,
+                "max_fee_impact_pct": 0.15
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:34:02.362534",
+            "generation": 4,
+            "new_warrior_id": "breakout_scalping_1m_gen4_1746974042",
+            "parent_ids": [
+                "breakout_scalping_1m_1746974042"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "take_profit_pct": 0.8,
+                "stop_loss_pct": 0.5,
+                "trailing_stop_pct": 0.3,
+                "max_position_size_pct": 41.83385361428008,
+                "min_volume_threshold": 1.5,
+                "min_rr_ratio": 1.79251152416199,
+                "max_fee_impact_pct": 0.15
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:34:02.362649",
+            "generation": 4,
+            "new_warrior_id": "breakout_scalping_1m_gen4_1746974042",
+            "parent_ids": [
+                "breakout_scalping_1m_1746974042",
+                "breakout_scalping_1m_gen3_1746973988"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "min_rr_ratio": 1.5,
+                "max_position_size_pct": 46.57031158751601,
+                "stop_loss_pct": 0.5198532362757589,
+                "take_profit_pct": 0.8371902994893826,
+                "min_volume_threshold": 1.5,
+                "trailing_stop_pct": 0.3,
+                "max_fee_impact_pct": 0.15
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:34:02.362734",
+            "generation": 4,
+            "new_warrior_id": "breakout_scalping_1m_gen4_1746974042",
+            "parent_ids": [
+                "breakout_scalping_1m_gen3_1746973988",
+                "breakout_scalping_1m_1746974042"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "min_rr_ratio": 1.608167217263773,
+                "max_position_size_pct": 50.0,
+                "stop_loss_pct": 0.5,
+                "take_profit_pct": 0.8,
+                "min_volume_threshold": 1.5,
+                "trailing_stop_pct": 0.3,
+                "max_fee_impact_pct": 0.15
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:34:02.362769",
+            "generation": 4,
+            "new_warrior_id": "breakout_scalping_1m_gen4_1746974042",
+            "parent_ids": [
+                "breakout_scalping_1m_1746974042",
+                "breakout_scalping_1m_gen3_1746973988"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "min_rr_ratio": 1.5,
+                "max_position_size_pct": 50.0,
+                "stop_loss_pct": 0.5243867532653783,
+                "take_profit_pct": 0.8235931268211856,
+                "min_volume_threshold": 1.5,
+                "trailing_stop_pct": 0.3,
+                "max_fee_impact_pct": 0.15
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:34:02.362818",
+            "generation": 4,
+            "new_warrior_id": "breakout_scalping_1m_gen4_1746974042",
+            "parent_ids": [
+                "breakout_scalping_1m_1746974042",
+                "breakout_scalping_1m_gen3_1746973988"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "min_rr_ratio": 1.4158715401468032,
+                "max_position_size_pct": 50.0,
+                "stop_loss_pct": 0.4576003786627145,
+                "take_profit_pct": 0.8098567277761284,
+                "min_volume_threshold": 1.5,
+                "trailing_stop_pct": 0.3,
+                "max_fee_impact_pct": 0.15
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:34:02.362851",
+            "generation": 4,
+            "new_warrior_id": "breakout_scalping_1m_gen4_1746974042",
+            "parent_ids": [
+                "breakout_scalping_1m_gen3_1746973988",
+                "breakout_scalping_1m_1746974042"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "min_rr_ratio": 1.5,
+                "max_position_size_pct": 52.816498012428866,
+                "stop_loss_pct": 0.5,
+                "take_profit_pct": 0.8,
+                "min_volume_threshold": 1.5,
+                "trailing_stop_pct": 0.2767268650051839,
+                "max_fee_impact_pct": 0.15
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:34:02.362871",
+            "generation": 4,
+            "new_warrior_id": "breakout_scalping_1m_gen4_1746974042",
+            "parent_ids": [
+                "breakout_scalping_1m_gen3_1746973988"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "stop_loss_pct": 0.5,
+                "take_profit_pct": 0.8113132801957367,
+                "min_rr_ratio": 1.4153328471564068,
+                "max_position_size_pct": 46.57031158751601,
+                "max_fee_impact_pct": 0.15,
+                "min_volume_threshold": 1.5,
+                "trailing_stop_pct": 0.3
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:34:02.362916",
+            "generation": 4,
+            "new_warrior_id": "breakout_scalping_1m_gen4_1746974042",
+            "parent_ids": [
+                "breakout_scalping_1m_1746974042",
+                "breakout_scalping_1m_gen3_1746973988"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "min_rr_ratio": 1.5,
+                "max_position_size_pct": 50.0,
+                "stop_loss_pct": 0.5,
+                "take_profit_pct": 0.8,
+                "min_volume_threshold": 1.5,
+                "trailing_stop_pct": 0.3,
+                "max_fee_impact_pct": 0.15
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:34:02.362963",
+            "generation": 4,
+            "new_warrior_id": "breakout_scalping_1m_gen4_1746974042",
+            "parent_ids": [
+                "breakout_scalping_1m_gen3_1746973988",
+                "breakout_scalping_1m_1746974042"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "min_rr_ratio": 1.5,
+                "max_position_size_pct": 50.0,
+                "stop_loss_pct": 0.5,
+                "take_profit_pct": 0.8,
+                "min_volume_threshold": 1.5,
+                "trailing_stop_pct": 0.3,
+                "max_fee_impact_pct": 0.15
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:34:02.363012",
+            "generation": 4,
+            "new_warrior_id": "breakout_scalping_1m_gen4_1746974042",
+            "parent_ids": [
+                "breakout_scalping_1m_gen3_1746973988",
+                "breakout_scalping_1m_1746974042"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "min_rr_ratio": 1.5,
+                "max_position_size_pct": 46.57031158751601,
+                "stop_loss_pct": 0.45419059745952367,
+                "take_profit_pct": 0.8,
+                "min_volume_threshold": 1.5,
+                "trailing_stop_pct": 0.3,
+                "max_fee_impact_pct": 0.1595913350620087
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:34:02.363038",
+            "generation": 4,
+            "new_warrior_id": "breakout_scalping_1m_gen4_1746974042",
+            "parent_ids": [
+                "breakout_scalping_1m_gen3_1746973988",
+                "breakout_scalping_1m_1746974042"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "min_rr_ratio": 1.5,
+                "max_position_size_pct": 50.0,
+                "stop_loss_pct": 0.5,
+                "take_profit_pct": 0.8113132801957367,
+                "min_volume_threshold": 1.5,
+                "trailing_stop_pct": 0.3,
+                "max_fee_impact_pct": 0.15
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:34:02.363081",
+            "generation": 4,
+            "new_warrior_id": "breakout_scalping_1m_gen4_1746974042",
+            "parent_ids": [
+                "breakout_scalping_1m_gen3_1746973988",
+                "breakout_scalping_1m_1746974042"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "min_rr_ratio": 1.5,
+                "max_position_size_pct": 50.0,
+                "stop_loss_pct": 0.5,
+                "take_profit_pct": 0.8113132801957367,
+                "min_volume_threshold": 1.5,
+                "trailing_stop_pct": 0.3,
+                "max_fee_impact_pct": 0.15
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:34:02.363134",
+            "generation": 4,
+            "new_warrior_id": "breakout_scalping_1m_gen4_1746974042",
+            "parent_ids": [
+                "breakout_scalping_1m_gen3_1746973988",
+                "breakout_scalping_1m_1746974042"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "min_rr_ratio": 1.5,
+                "max_position_size_pct": 50.0,
+                "stop_loss_pct": 0.45503660365840176,
+                "take_profit_pct": 0.8113132801957367,
+                "min_volume_threshold": 1.5,
+                "trailing_stop_pct": 0.3,
+                "max_fee_impact_pct": 0.15
+            }
+        },
+        {
+            "timestamp": "2025-05-11T14:34:02.363166",
+            "generation": 4,
+            "new_warrior_id": "breakout_scalping_1m_gen4_1746974042",
+            "parent_ids": [
+                "breakout_scalping_1m_gen3_1746973988",
+                "breakout_scalping_1m_1746974042"
+            ],
+            "strategy_name": "breakout_scalping",
+            "timeframe": "1m",
+            "params": {
+                "min_rr_ratio": 1.5,
+                "max_position_size_pct": 46.57031158751601,
+                "stop_loss_pct": 0.5,
+                "take_profit_pct": 0.8,
+                "min_volume_threshold": 1.5,
+                "trailing_stop_pct": 0.2758908410961051,
+                "max_fee_impact_pct": 0.1499241888495379
+            }
+        }
+    ],
+    "warriors": [
+        {
+            "warrior_id": "breakout_scalping_1m_1746973934",
+            "strategy_name": "breakout_scalping",
+            "generation": 1,
+            "symbol": "SOL-USDT",
+            "timeframe": "1m",
+            "initial_balance": 100.0,
+            "current_balance": 100.0,
+            "leverage": 1,
+            "params": {
+                "take_profit_pct": 0.8,
+                "stop_loss_pct": 0.5,
+                "trailing_stop_pct": 0.3,
+                "max_position_size_pct": 50.0,
+                "min_volume_threshold": 1.5,
+                "min_rr_ratio": 1.5,
+                "max_fee_impact_pct": 0.15
+            },
+            "parent_ids": [],
+            "active": false,
+            "defeated": true,
+            "start_time": "2025-05-11T14:32:14.177722",
+            "life_span": "0:00:00",
+            "battle_stats": {
+                "roi": 0.0,
+                "roi_daily": 0.0,
+                "win_rate": 0.0,
+                "total_trades": 0,
+                "profitable_trades": 0,
+                "losing_trades": 0,
+                "total_won": 0.0,
+                "total_lost": 0.0,
+                "win_streak": 0,
+                "lose_streak": 0,
+                "max_win_streak": 0,
+                "max_lose_streak": 0,
+                "battles_won": 0,
+                "battles_lost": 0,
+                "best_day_roi": 0.0,
+                "worst_day_roi": 0.0,
+                "last_update": null
+            },
+            "performance_history": [],
+            "personality": {
+                "name": "Claudia",
+                "archetype": "anal\u00edtico",
+                "quote": "Sigo el plan, ignoro el ruido",
+                "color": "#D31B9B",
+                "strength": "an\u00e1lisis t\u00e9cnico",
+                "weakness": "miedo a perderse movimientos",
+                "aggression": 0.6698885070043182,
+                "patience": 0.6394058596932612,
+                "adaptability": 0.29808182141079254
+            },
+            "best_trades": [],
+            "worst_trades": []
+        },
+        {
+            "warrior_id": "breakout_scalping_1m_gen2_1746973934",
+            "strategy_name": "breakout_scalping",
+            "generation": 2,
+            "symbol": "SOL-USDT",
+            "timeframe": "1m",
+            "initial_balance": 100.0,
+            "current_balance": 100.0,
+            "leverage": 1,
+            "params": {
+                "take_profit_pct": 0.8113132801957367,
+                "stop_loss_pct": 0.5,
+                "trailing_stop_pct": 0.3,
+                "max_position_size_pct": 46.57031158751601,
+                "min_volume_threshold": 1.5,
+                "min_rr_ratio": 1.5,
+                "max_fee_impact_pct": 0.15
+            },
+            "parent_ids": [
+                "breakout_scalping_1m_1746973934"
+            ],
+            "active": false,
+            "defeated": true,
+            "start_time": "2025-05-11T14:32:14.187792",
+            "life_span": "0:00:00",
+            "battle_stats": {
+                "roi": 0.0,
+                "roi_daily": 0.0,
+                "win_rate": 0.0,
+                "total_trades": 0,
+                "profitable_trades": 0,
+                "losing_trades": 0,
+                "total_won": 0.0,
+                "total_lost": 0.0,
+                "win_streak": 0,
+                "lose_streak": 0,
+                "max_win_streak": 0,
+                "max_lose_streak": 0,
+                "battles_won": 0,
+                "battles_lost": 0,
+                "best_day_roi": 0.0,
+                "worst_day_roi": 0.0,
+                "last_update": null
+            },
+            "performance_history": [],
+            "personality": {
+                "name": "Miguel",
+                "archetype": "paciente",
+                "quote": "Datos, no emociones",
+                "color": "#D91FB6",
+                "strength": "identificaci\u00f3n de tendencias",
+                "weakness": "miedo a perderse movimientos",
+                "aggression": 0.5424872622980044,
+                "patience": 0.4550960346202043,
+                "adaptability": 0.19474200195130897
+            },
+            "best_trades": [],
+            "worst_trades": []
+        },
+        {
+            "warrior_id": "breakout_scalping_1m_1746973988",
+            "strategy_name": "breakout_scalping",
+            "generation": 1,
+            "symbol": "SOL-USDT",
+            "timeframe": "1m",
+            "initial_balance": 100.0,
+            "current_balance": 100.0,
+            "leverage": 1,
+            "params": {
+                "take_profit_pct": 0.8,
+                "stop_loss_pct": 0.5,
+                "trailing_stop_pct": 0.3,
+                "max_position_size_pct": 50.0,
+                "min_volume_threshold": 1.5,
+                "min_rr_ratio": 1.5,
+                "max_fee_impact_pct": 0.15
+            },
+            "parent_ids": [],
+            "active": false,
+            "defeated": true,
+            "start_time": "2025-05-11T14:33:08.672717",
+            "life_span": "0:00:00",
+            "battle_stats": {
+                "roi": 0.0,
+                "roi_daily": 0.0,
+                "win_rate": 0.0,
+                "total_trades": 0,
+                "profitable_trades": 0,
+                "losing_trades": 0,
+                "total_won": 0.0,
+                "total_lost": 0.0,
+                "win_streak": 0,
+                "lose_streak": 0,
+                "max_win_streak": 0,
+                "max_lose_streak": 0,
+                "battles_won": 0,
+                "battles_lost": 0,
+                "best_day_roi": 0.0,
+                "worst_day_roi": 0.0,
+                "last_update": null
+            },
+            "performance_history": [],
+            "personality": {
+                "name": "Diego",
+                "archetype": "arriesgado",
+                "quote": "Mi estrategia evolucionar\u00e1 y dominar\u00e1",
+                "color": "#B5C93D",
+                "strength": "optimizaci\u00f3n continua",
+                "weakness": "fallos en tendencias laterales",
+                "aggression": 0.7928118827555035,
+                "patience": 0.1131026530579845,
+                "adaptability": 0.42676972970324334
+            },
+            "best_trades": [],
+            "worst_trades": []
+        },
+        {
+            "warrior_id": "breakout_scalping_1m_gen3_1746973988",
+            "strategy_name": "breakout_scalping",
+            "generation": 3,
+            "symbol": "SOL-USDT",
+            "timeframe": "1m",
+            "initial_balance": 100.0,
+            "current_balance": 100.0,
+            "leverage": 1,
+            "params": {
+                "stop_loss_pct": 0.5,
+                "take_profit_pct": 0.8113132801957367,
+                "min_rr_ratio": 1.5,
+                "max_position_size_pct": 46.57031158751601,
+                "max_fee_impact_pct": 0.15,
+                "min_volume_threshold": 1.5,
+                "trailing_stop_pct": 0.3
+            },
+            "parent_ids": [
+                "breakout_scalping_1m_gen2_1746973934",
+                "breakout_scalping_1m_1746973988"
+            ],
+            "active": false,
+            "defeated": true,
+            "start_time": "2025-05-11T14:33:08.683861",
+            "life_span": "0:00:00",
+            "battle_stats": {
+                "roi": 0.0,
+                "roi_daily": 0.0,
+                "win_rate": 0.0,
+                "total_trades": 0,
+                "profitable_trades": 0,
+                "losing_trades": 0,
+                "total_won": 0.0,
+                "total_lost": 0.0,
+                "win_streak": 0,
+                "lose_streak": 0,
+                "max_win_streak": 0,
+                "max_lose_streak": 0,
+                "battles_won": 0,
+                "battles_lost": 0,
+                "best_day_roi": 0.0,
+                "worst_day_roi": 0.0,
+                "last_update": null
+            },
+            "performance_history": [],
+            "personality": {
+                "name": "Sergio",
+                "archetype": "met\u00f3dico",
+                "quote": "Compro tu miedo, vendo tu codicia",
+                "color": "#2989C3",
+                "strength": "gesti\u00f3n del riesgo",
+                "weakness": "indecisi\u00f3n",
+                "aggression": 0.9820998218103666,
+                "patience": 0.8693469766766605,
+                "adaptability": 0.7103457524854425
+            },
+            "best_trades": [],
+            "worst_trades": []
+        },
+        {
+            "warrior_id": "breakout_scalping_1m_1746974042",
+            "strategy_name": "breakout_scalping",
+            "generation": 1,
+            "symbol": "SOL-USDT",
+            "timeframe": "1m",
+            "initial_balance": 100.0,
+            "current_balance": 100.0,
+            "leverage": 1,
+            "params": {
+                "take_profit_pct": 0.8,
+                "stop_loss_pct": 0.5,
+                "trailing_stop_pct": 0.3,
+                "max_position_size_pct": 50.0,
+                "min_volume_threshold": 1.5,
+                "min_rr_ratio": 1.5,
+                "max_fee_impact_pct": 0.15
+            },
+            "parent_ids": [],
+            "active": false,
+            "defeated": true,
+            "start_time": "2025-05-11T14:34:02.356650",
+            "life_span": "0:00:00",
+            "battle_stats": {
+                "roi": 0.0,
+                "roi_daily": 0.0,
+                "win_rate": 0.0,
+                "total_trades": 0,
+                "profitable_trades": 0,
+                "losing_trades": 0,
+                "total_won": 0.0,
+                "total_lost": 0.0,
+                "win_streak": 0,
+                "lose_streak": 0,
+                "max_win_streak": 0,
+                "max_lose_streak": 0,
+                "battles_won": 0,
+                "battles_lost": 0,
+                "best_day_roi": 0.0,
+                "worst_day_roi": 0.0,
+                "last_update": null
+            },
+            "performance_history": [],
+            "personality": {
+                "name": "Hugo",
+                "archetype": "intuitivo",
+                "quote": "La volatilidad es mi aliada",
+                "color": "#765EF7",
+                "strength": "identificaci\u00f3n de tendencias",
+                "weakness": "cierres prematuros",
+                "aggression": 0.6995017497458813,
+                "patience": 0.4655774886279058,
+                "adaptability": 0.1067364003640362
+            },
+            "best_trades": [],
+            "worst_trades": []
+        },
+        {
+            "warrior_id": "breakout_scalping_1m_gen4_1746974042",
+            "strategy_name": "breakout_scalping",
+            "generation": 4,
+            "symbol": "SOL-USDT",
+            "timeframe": "1m",
+            "initial_balance": 100.0,
+            "current_balance": 100.0,
+            "leverage": 1,
+            "params": {
+                "min_rr_ratio": 1.5,
+                "max_position_size_pct": 46.57031158751601,
+                "stop_loss_pct": 0.5,
+                "take_profit_pct": 0.8,
+                "min_volume_threshold": 1.5,
+                "trailing_stop_pct": 0.2758908410961051,
+                "max_fee_impact_pct": 0.1499241888495379
+            },
+            "parent_ids": [
+                "breakout_scalping_1m_gen3_1746973988",
+                "breakout_scalping_1m_1746974042"
+            ],
+            "active": true,
+            "defeated": false,
+            "start_time": "2025-05-11T14:34:02.363164",
+            "life_span": "0:00:00",
+            "battle_stats": {
+                "roi": 0.0,
+                "roi_daily": 0.0,
+                "win_rate": 0.0,
+                "total_trades": 0,
+                "profitable_trades": 0,
+                "losing_trades": 0,
+                "total_won": 0.0,
+                "total_lost": 0.0,
+                "win_streak": 0,
+                "lose_streak": 0,
+                "max_win_streak": 0,
+                "max_lose_streak": 0,
+                "battles_won": 0,
+                "battles_lost": 0,
+                "best_day_roi": 0.0,
+                "worst_day_roi": 0.0,
+                "last_update": null
+            },
+            "performance_history": [],
+            "personality": {
+                "name": "Carlos",
+                "archetype": "paciente",
+                "quote": "El que sobrevive no es el m\u00e1s fuerte, sino el que mejor se adapta",
+                "color": "#20A88B",
+                "strength": "paciencia sobrehumana",
+                "weakness": "sobreoptimizaci\u00f3n",
+                "aggression": 0.8965244653681199,
+                "patience": 0.2617338411152202,
+                "adaptability": 0.4375621463716851
+            },
+            "best_trades": [],
+            "worst_trades": []
+        }
+    ]
+}

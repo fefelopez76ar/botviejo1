@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot de Trading Solana</title>
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="card bg-dark text-light mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h1 class="display-5">Bot de Trading Solana</h1>
+                        <p class="lead">Sistema de trading automatizado para Solana</p>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-warning">
+                            <strong>Importante:</strong> Este bot opera por defecto en modo simulación (Paper Trading) para proteger tus fondos. No se realizan operaciones reales a menos que se configure explícitamente.
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card mb-4">
+                                    <div class="card-header">Control del Bot</div>
+                                    <div class="card-body">
+                                        <div class="d-grid gap-2">
+                                            <button id="startButton" class="btn btn-success">Iniciar Bot</button>
+                                            <button id="stopButton" class="btn btn-danger">Detener Bot</button>
+                                        </div>
+                                        <div class="mt-3">
+                                            <span>Estado: </span>
+                                            <span id="status" class="badge bg-secondary">Detenido</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">Acceso Rápido</div>
+                                    <div class="card-body">
+                                        <div class="d-grid gap-2">
+                                            <a href="/dashboard" class="btn btn-info">Panel de Control</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/main.js"></script>
+    <script>
+        // Función para actualizar el estado
+        function updateStatus() {
+            fetch('/api/status')
+                .then(response => response.json())
+                .then(data => {
+                    const statusElement = document.getElementById('status');
+                    if (data.active) {
+                        statusElement.textContent = 'Activo';
+                        statusElement.className = 'badge bg-success';
+                    } else {
+                        statusElement.textContent = 'Detenido';
+                        statusElement.className = 'badge bg-secondary';
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Iniciar y detener el bot
+        document.getElementById('startButton').addEventListener('click', function() {
+            fetch('/api/start', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    mode: 'paper'
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                updateStatus();
+            })
+            .catch(error => console.error('Error:', error));
+        });
+
+        document.getElementById('stopButton').addEventListener('click', function() {
+            fetch('/api/stop', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                updateStatus();
+            })
+            .catch(error => console.error('Error:', error));
+        });
+
+        // Actualizar estado al cargar la página
+        document.addEventListener('DOMContentLoaded', updateStatus);
+        // Actualizar estado cada 5 segundos
+        setInterval(updateStatus, 5000);
+    </script>
+</body>
+</html>

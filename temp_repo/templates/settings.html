@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Solana Trading Bot</title>
+    <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <img src="{{ url_for('static', filename='img/solana-logo.svg') }}" alt="Solana Logo" width="30" height="30" class="d-inline-block align-top me-2">
+                Solana Trading Bot
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('settings') }}">Settings</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Settings Header -->
+    <div class="container mt-4">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h1>Settings</h1>
+                <p class="lead">Configure your trading bot's API credentials and parameters</p>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <div class="d-flex align-items-center justify-content-md-end">
+                    <div class="me-3">
+                        <h6 class="mb-0">Bot Status:</h6>
+                        <p class="mb-0">
+                            {% if is_running %}
+                            <span class="text-success fw-bold">
+                                <span class="trading-active-dot pulse me-1"></span>
+                                Running
+                            </span>
+                            {% else %}
+                            <span class="text-secondary fw-bold">
+                                <span class="trading-inactive-dot me-1"></span>
+                                Stopped
+                            </span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div>
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary btn-sm">
+                            <span class="me-1">Dashboard</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Content -->
+    <div class="container mt-4">
+        <div class="row">
+            <!-- API Configuration Card -->
+            <div class="col-lg-7">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">API Configuration</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="apiConfigForm">
+                            <div class="mb-3">
+                                <label for="apiKey" class="form-label">OKX API Key</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="apiKey" name="OKX_API_KEY" value="{{ config.get('OKX_API_KEY', '') }}" placeholder="Enter your OKX API Key">
+                                    <button class="btn btn-outline-secondary toggle-password" type="button" data-target="apiKey">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
+                                            <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
+                                            <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="form-text">Your OKX API Key from the OKX account settings</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="apiSecret" class="form-label">OKX API Secret</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="apiSecret" name="OKX_API_SECRET" value="{{ config.get('OKX_API_SECRET', '') }}" placeholder="Enter your OKX API Secret">
+                                    <button class="btn btn-outline-secondary toggle-password" type="button" data-target="apiSecret">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
+                                            <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
+                                            <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="form-text">Your OKX API Secret from the OKX account settings</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="apiPassphrase" class="form-label">OKX API Passphrase</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="apiPassphrase" name="OKX_PASSPHRASE" value="{{ config.get('OKX_PASSPHRASE', '') }}" placeholder="Enter your OKX API Passphrase">
+                                    <button class="btn btn-outline-secondary toggle-password" type="button" data-target="apiPassphrase">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
+                                            <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
+                                            <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="form-text">Your OKX API Passphrase from the OKX account settings</div>
+                            </div>
+                            <hr>
+                            <h6 class="mb-3">Telegram Notifications (Optional)</h6>
+                            <div class="mb-3">
+                                <label for="telegramToken" class="form-label">Telegram Bot Token</label>
+                                <input type="text" class="form-control" id="telegramToken" name="TELEGRAM_BOT_TOKEN" value="{{ config.get('TELEGRAM_BOT_TOKEN', '') }}" placeholder="Enter your Telegram Bot Token">
+                                <div class="form-text">Create a bot via BotFather on Telegram</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="telegramChatId" class="form-label">Telegram Chat ID</label>
+                                <input type="text" class="form-control" id="telegramChatId" name="TELEGRAM_CHAT_ID" value="{{ config.get('TELEGRAM_CHAT_ID', '') }}" placeholder="Enter your Telegram Chat ID">
+                                <div class="form-text">Get your Chat ID from @userinfobot on Telegram</div>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary" id="saveConfigBtn">Save Configuration</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trading Settings & Info -->
+            <div class="col-lg-5">
+                <!-- Trading Settings Card -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Default Settings</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="defaultSettingsForm">
+                            <div class="mb-3">
+                                <label for="defaultSymbol" class="form-label">Default Symbol</label>
+                                <input type="text" class="form-control" id="defaultSymbol" name="DEFAULT_SYMBOL" value="{{ config.get('DEFAULT_SYMBOL', 'SOL-USDT') }}" placeholder="SOL-USDT">
+                            </div>
+                            <div class="mb-3">
+                                <label for="defaultInterval" class="form-label">Default Interval</label>
+                                <select class="form-select" id="defaultInterval" name="DEFAULT_INTERVAL">
+                                    <option value="5m" {{ 'selected' if config.get('DEFAULT_INTERVAL') == '5m' else '' }}>5 minutes</option>
+                                    <option value="15m" {{ 'selected' if config.get('DEFAULT_INTERVAL', '15m') == '15m' else '' }}>15 minutes</option>
+                                    <option value="30m" {{ 'selected' if config.get('DEFAULT_INTERVAL') == '30m' else '' }}>30 minutes</option>
+                                    <option value="1h" {{ 'selected' if config.get('DEFAULT_INTERVAL') == '1h' else '' }}>1 hour</option>
+                                    <option value="4h" {{ 'selected' if config.get('DEFAULT_INTERVAL') == '4h' else '' }}>4 hours</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="defaultMode" class="form-label">Default Trading Mode</label>
+                                <select class="form-select" id="defaultMode" name="DEFAULT_MODE">
+                                    <option value="paper" {{ 'selected' if config.get('DEFAULT_MODE', 'paper') == 'paper' else '' }}>Paper Trading (Simulation)</option>
+                                    <option value="live" {{ 'selected' if config.get('DEFAULT_MODE') == 'live' else '' }}>Live Trading (Real Money)</option>
+                                </select>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary" id="saveDefaultsBtn">Save Defaults</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Help & Info Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Help & Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <h6>Creating OKX API Keys</h6>
+                        <ol class="mb-3">
+                            <li>Log in to your OKX account</li>
+                            <li>Go to "API Management" in account settings</li>
+                            <li>Click "Create API Key"</li>
+                            <li>Set permissions to "Read" and "Trade"</li>
+                            <li>Copy API Key, Secret Key, and set a Passphrase</li>
+                        </ol>
+                        
+                        <h6>Trading Safety</h6>
+                        <ul class="mb-3">
+                            <li>Always start with Paper Trading mode</li>
+                            <li>For Live Trading, set strict API access permissions</li>
+                            <li>Never share your API credentials with anyone</li>
+                        </ul>
+                        
+                        <h6>Setting Up Telegram Notifications</h6>
+                        <ol>
+                            <li>Message @BotFather on Telegram to create a bot</li>
+                            <li>Follow instructions to create a new bot</li>
+                            <li>Copy the provided token</li>
+                            <li>Message @userinfobot to get your Chat ID</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto py-3 bg-dark">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <p class="mb-0 text-white-50">Solana Trading Bot &copy; 2025</p>
+                </div>
+                <div>
+                    <small class="text-white-50">This bot is for educational purposes only. Trade at your own risk.</small>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Confirmation Modal -->
+    <div class="modal fade" id="configModal" tabindex="-1" aria-labelledby="configModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="configModalLabel">Configuration Saved</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="configModalMessage">Your configuration has been saved successfully.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Container -->
+    <div id="alertContainer" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Toggle password visibility
+            document.querySelectorAll('.toggle-password').forEach(button => {
+                button.addEventListener('click', function() {
+                    const targetId = this.getAttribute('data-target');
+                    const input = document.getElementById(targetId);
+                    
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        this.innerHTML = `
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-slash" viewBox="0 0 16 16">
+                                <path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7.028 7.028 0 0 0-2.79.588l.77.771A5.944 5.944 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.134 13.134 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755-.165.165-.337.328-.517.486l.708.709z"/>
+                                <path d="M11.297 9.176a3.5 3.5 0 0 0-4.474-4.474l.823.823a2.5 2.5 0 0 1 2.829 2.829l.822.822zm-2.943 1.299.822.822a3.5 3.5 0 0 1-4.474-4.474l.823.823a2.5 2.5 0 0 0 2.829 2.829z"/>
+                                <path d="M3.35 5.47c-.18.16-.353.322-.518.487A13.134 13.134 0 0 0 1.172 8l.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.716 0 1.39-.133 2.02-.36l.77.772A7.029 7.029 0 0 1 8 13.5C3 13.5 0 8 0 8s.939-1.721 2.641-3.238l.708.709zm10.296 8.884-12-12 .708-.708 12 12-.708.708z"/>
+                            </svg>
+                        `;
+                    } else {
+                        input.type = 'password';
+                        this.innerHTML = `
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
+                                <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
+                                <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
+                            </svg>
+                        `;
+                    }
+                });
+            });
+            
+            // API Config Form Submission
+            document.getElementById('apiConfigForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const data = {};
+                
+                for (const [key, value] of formData.entries()) {
+                    data[key] = value;
+                }
+                
+                // For demo purposes, just show a success message
+                // In a real application, you would send this to the server
+                showAlert('API configuration saved successfully', 'success');
+                
+                // Show confirmation modal
+                const modal = new bootstrap.Modal(document.getElementById('configModal'));
+                document.getElementById('configModalMessage').textContent = 'API configuration saved successfully. Please restart the bot to apply changes.';
+                modal.show();
+            });
+            
+            // Default Settings Form Submission
+            document.getElementById('defaultSettingsForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const data = {};
+                
+                for (const [key, value] of formData.entries()) {
+                    data[key] = value;
+                }
+                
+                // For demo purposes, just show a success message
+                showAlert('Default settings saved successfully', 'success');
+                
+                // Show confirmation modal
+                const modal = new bootstrap.Modal(document.getElementById('configModal'));
+                document.getElementById('configModalMessage').textContent = 'Default settings saved successfully.';
+                modal.show();
+            });
+        });
+        
+        function showAlert(message, type = 'info') {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertElement = document.createElement('div');
+            alertElement.className = `alert alert-${type} alert-dismissible fade show`;
+            alertElement.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            
+            alertContainer.appendChild(alertElement);
+            
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                alertElement.classList.remove('show');
+                setTimeout(() => {
+                    alertContainer.removeChild(alertElement);
+                }, 500);
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
