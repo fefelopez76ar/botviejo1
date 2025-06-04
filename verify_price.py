@@ -1,46 +1,80 @@
+#!/usr/bin/env python3
 """
-Verificador de precios para Solana desde OKX
+Verificador de datos de mercado en tiempo real
 """
-import ccxt
+import requests
+import json
 import time
+from datetime import datetime
 
-print("Obteniendo precio de Solana desde OKX (API pública)...")
+def check_market_data():
+    """Verifica datos de mercado y estado del bot"""
+    print("Verificando datos de mercado y estado del bot...")
+    print("-" * 50)
+    
+    # Verificar precio actual de SOL
+    try:
+        response = requests.get('https://api.binance.com/api/v3/ticker/price?symbol=SOLUSDT', timeout=5)
+        if response.status_code == 200:
+            price_data = response.json()
+            sol_price = float(price_data['price'])
+            print(f"SOL precio actual: ${sol_price:.4f}")
+        else:
+            print("Error obteniendo precio de mercado")
+    except Exception as e:
+        print(f"Error conectando a datos de mercado: {e}")
+    
+    # Verificar estado del bot
+    try:
+        response = requests.get('http://localhost:5000/stats', timeout=5)
+        if response.status_code == 200:
+            stats = response.json()
+            print(f"Estado del bot:")
+            print(f"  Balance: ${stats['balance']:.2f}")
+            print(f"  Operaciones: {stats['total_trades']}")
+            print(f"  ROI: {stats['roi']:+.2f}%")
+            
+            if stats['total_trades'] > 0:
+                print(f"  Tasa de éxito: {stats['win_rate']:.1f}%")
+                print(f"  Ganancia total: {stats['total_profit']:+.2f} USDT")
+        else:
+            print("Bot API no responde")
+    except Exception as e:
+        print(f"Error conectando al bot: {e}")
+    
+    # Verificar archivo de aprendizaje
+    try:
+        with open('learning_data.json', 'r') as f:
+            learning_data = json.load(f)
+        print(f"Archivo de aprendizaje: {len(learning_data)} registros")
+        
+        if learning_data:
+            last_trade = learning_data[-1]
+            print(f"Última operación: {last_trade['timestamp'][:19]}")
+            print(f"Resultado: {'ÉXITO' if last_trade['success'] else 'PÉRDIDA'}")
+            print(f"Ganancia: {last_trade['profit']:+.2f} USDT")
+    except FileNotFoundError:
+        print("Archivo de aprendizaje: No encontrado")
+    except Exception as e:
+        print(f"Error leyendo archivo de aprendizaje: {e}")
+    
+    print(f"\nVerificación completada: {datetime.now().strftime('%H:%M:%S')}")
 
-# Usar API pública (sin autenticación)
-try:
-    exchange = ccxt.okx({'enableRateLimit': True})
-    ticker = exchange.fetch_ticker('SOL/USDT')
-    
-    print(f"¡Conexión exitosa!")
-    print(f"Precio actual de Solana (SOL/USDT): ${ticker['last']}")
-    print(f"Volumen 24h: {ticker['quoteVolume']}")
-    print(f"Variación 24h: {ticker['percentage']}%")
-    
-except Exception as e:
-    print(f"Error al conectar con OKX: {e}")
+def monitor_continuous():
+    """Monitoreo continuo cada 30 segundos"""
+    try:
+        while True:
+            check_market_data()
+            print("\nEsperando 30 segundos... (Ctrl+C para salir)")
+            time.sleep(30)
+            print("\n" + "="*60)
+    except KeyboardInterrupt:
+        print("\nMonitoreo detenido")
 
-# Intentar ahora con modo de simulación (Demo Trading)
-print("\nIntentando con API key en MODO SIMULACIÓN (Demo Trading)...")
-time.sleep(1)
-
-try:
-    authenticated_exchange = ccxt.okx({
-        'apiKey': "abc0a2f7-4b02-4f60-a4b9-fd575598e4e9",
-        'secret': "2D78D8359A4873449E832B37BABC33E6",
-        'password': "Daeco1212@",
-        'enableRateLimit': True,
-        'options': {
-            'defaultType': 'spot',
-            'warnOnFetchOpenOrdersWithoutSymbol': False,
-            'test': True  # Activar modo Demo Trading
-        }
-    })
-    print("Modo de simulación (Demo Trading) activado")
+if __name__ == "__main__":
+    import sys
     
-    ticker = authenticated_exchange.fetch_ticker('SOL/USDT')
-    print(f"¡Conexión con autenticación exitosa!")
-    print(f"Precio actual de Solana (SOL/USDT): ${ticker['last']}")
-    
-except Exception as e:
-    print(f"Error al conectar con API autenticada: {e}")
-    print("Si ves un error de lista blanca de IP, necesitas agregar la IP de Replit a tu configuración OKX")
+    if len(sys.argv) > 1 and sys.argv[1] == "--monitor":
+        monitor_continuous()
+    else:
+        check_market_data()
