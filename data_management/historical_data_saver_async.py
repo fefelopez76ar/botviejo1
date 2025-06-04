@@ -57,6 +57,22 @@ class HistoricalDataSaver:
                 CONSTRAINT unique_ob_timestamp_instrument UNIQUE (timestamp, instrument_id)
             )
         """)
+        await self.conn.execute("""
+            CREATE TABLE IF NOT EXISTS candlesticks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp INTEGER NOT NULL,
+                instrument_id TEXT NOT NULL,
+                interval TEXT NOT NULL,
+                open_price REAL,
+                high_price REAL,
+                low_price REAL,
+                close_price REAL,
+                volume REAL,
+                volume_currency REAL,
+                timestamp_received INTEGER NOT NULL,
+                CONSTRAINT unique_candle_timestamp_instrument_interval UNIQUE (timestamp, instrument_id, interval)
+            )
+        """)
         await self.conn.commit()
 
     async def save_ticker_data(self, data: Dict[str, Any]):
@@ -123,3 +139,47 @@ class HistoricalDataSaver:
             logger.debug(f"[HistoricalDataSaver]: Order book guardado para {inst_id}")
         except Exception as e:
             logger.error(f"[HistoricalDataSaver ERROR]: Error al guardar order book: {e}")
+
+    async def save_candlestick_data(self, data: Dict[str, Any]):
+        if not self.conn:
+            logger.warning("[HistoricalDataSaver]: Conexión a DB no activa al guardar candlestick. Intentando reconectar...")
+            await self.connect()
+            if not self.conn:
+                logger.error("[HistoricalDataSaver ERROR]: No se pudo reconectar a la DB para guardar candlestick.")
+                return
+
+        try:
+            inst_id = data.get('instrument')
+            interval = data.get('interval')
+            timestamp_received = data.get('timestamp_received')
+
+            candle_data_list = data.get('data', [])
+            if not candle_data_list:
+                logger.warning(f"[HistoricalDataSaver]: Datos de vela vacíos para {inst_id}. Saltando guardado.")
+                return
+
+            candle_data = candle_data_list[0]
+
+            if len(candle_data) < 7:
+                logger.warning(f"[HistoricalDataSaver]: Datos de vela incompletos para {inst_id} ({interval}). Saltando guardado. Datos: {candle_data}")
+                return
+
+            ts = int(candle_data[0])
+            open_price = float(candle_data[1])
+            high_price = float(candle_data[2])
+            low_price = float(candle_data[3])
+            close_price = float(candle_data[4])
+            volume = float(candle_data[5])
+            volume_currency = float(candle_data[6])
+
+            await self.conn.execute(
+                """
+                INSERT OR IGNORE INTO candlesticks (
+                    timestamp, instrument_id, interval, open_price, high_price, low_price, close_price, volume, volume_currency, timestamp_received
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (ts, inst_id, interval, open_price, high_price, low_price, close_price, volume, volume_currency, timestamp_received)
+            )
+            await self.conn.commit()
+        except Exception as e:
+            logger.error(f"[HistoricalDataSaver ERROR]: Error al guardar datos de candlestick: {e}")

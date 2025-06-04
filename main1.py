@@ -24,7 +24,8 @@ import asyncio
 from pathlib import Path
 from dotenv import load_dotenv
 from api_client.modulocola import data_queue
-from api_client.modulo2 import OKXWebSocketClient
+from api_client.modulo2 import OKXWebSocketClient as PublicOKXWebSocketClient
+from api_client.modulo2 import OKXWebSocketClient as BusinessOKXWebSocketClient
 # ---------------------------------------------------
 from data_management.historical_data_saver_async import HistoricalDataSaver
 # Configurar logging
@@ -122,6 +123,16 @@ class ScalpingBot:
                     self.historical_data_saver.save_order_book_data(data) # <--- ¡Aquí está la adición!
                 elif data.get('type') == 'trades':
                     logger.info(f"[ScalpingBot - Trade]: {data.get('instrument')} - Trades recibidos.")
+                elif data.get('type') == 'candle':
+                    candle_data_list = data.get('data', [])
+                    if candle_data_list:
+                        latest_candle_info = candle_data_list[0]
+                        close_price = float(latest_candle_info[4])
+                        interval = data.get('interval')
+                        logger.info(f"[ScalpingBot - Candle]: {inst_id} - Intervalo: {interval} - Cierre: {close_price}")
+                        await self.historical_data_saver.save_candlestick_data(data)
+                    else:
+                        logger.warning(f"[ScalpingBot - Candle]: Datos de vela vacíos para {inst_id}.")
 
                 # Asegurarse de que task_done() se llama para cada elemento 'get'
                 self.data_queue.task_done()
@@ -178,29 +189,33 @@ async def main_cli_interface_async():
     secret_key = os.getenv("OKX_API_SECRET")
     passphrase = os.getenv("OKX_PASSPHRASE")
 
-    okx_client = OKXWebSocketClient(api_key, secret_key, passphrase, data_queue)
+    # Instanciar el cliente WebSocket para CANALES PÚBLICOS (tickers)
+    public_ws_client = PublicOKXWebSocketClient(api_key, secret_key, passphrase, data_queue)
+    public_ws_client.ws_url = "wss://ws.okx.com:8443/ws/v5/public" # Asegurar la URL pública
 
-    logger.info("Conectando y suscribiendo al WebSocket de OKX...")
-    await okx_client.connect()
-    auth_success = await okx_client.authenticate() # Captura el resultado de la autenticación
+    # Instanciar el cliente WebSocket para CANALES DE NEGOCIO (candles)
+    business_ws_client = BusinessOKXWebSocketClient(api_key, secret_key, passphrase, data_queue)
+    business_ws_client.ws_url = "wss://ws.okx.com:8443/ws/v5/business" # Asegurar la URL de negocio
 
-    if not auth_success: # Si la autenticación falló, mostramos mensaje y salimos
-        logger.error("La autenticación con OKX falló. Por favor, revisa tus credenciales.")
-        logger.error("No se pueden iniciar las suscripciones sin autenticación exitosa.")
-        # Intentar cerrar la conexión del websocket si existe
-        # El atributo .closed es de websockets.client.WebSocketClientProtocol
-        # La verificación es necesaria para evitar AttributeError si el objeto no se inicializó bien
-        if okx_client.ws and hasattr(okx_client.ws, 'closed') and not okx_client.ws.closed:
-            await okx_client.ws.close()
-        return # Salir de la función principal
+    logger.info("Conectando y suscribiendo a los WebSockets de OKX (Público y Negocio)...")
 
-    # SUSCRIPCIONES INICIALES
-    # MODIFICADO: ELIMINADA LA SUSCRIPCIÓN A "trades"
-    await okx_client.subscribe([
-        {"channel": "tickers", "instId": "SOL-USDT"},
-        {"channel": "books-l2-tbt", "instId": "SOL-USDT"}
+    # Conectar y suscribir cliente público (para tickers)
+    await public_ws_client.connect()
+    logger.info("Enviando suscripción a Tickers (Público): {'op': 'subscribe', 'args': [{'channel': 'tickers', 'instId': 'SOL-USDT'}]}")
+    await public_ws_client.subscribe([
+        {"channel": "tickers", "instId": "SOL-USDT"}
     ])
-    logger.info("Suscripciones iniciales a tickers y order book enviadas.")
+    logger.info("Suscripción a Tickers SOL-USDT enviada.")
+
+    # Conectar y suscribir cliente de negocio (para candles)
+    await business_ws_client.connect()
+    logger.info("Enviando suscripción a Candles (Negocio): {'op': 'subscribe', 'args': [{'channel': 'candles', 'instId': 'SOL-USDT', 'bar': '1m'}]}")
+    await business_ws_client.subscribe([
+        {"channel": "candles", "instId": "SOL-USDT", "bar": "1m"}
+    ])
+    logger.info("Suscripción a Candles SOL-USDT (1m) enviada.")
+
+    logger.info("Suscripciones iniciales enviadas. Suscripción a Order Book Nivel 2 TBT deshabilitada por restricción VIP.")
 
     # --- NUEVO: Inicializar HistoricalDataSaver ---
     historical_data_saver = HistoricalDataSaver()
@@ -235,7 +250,8 @@ async def main_cli_interface_async():
 
     # --- 5. Ejecutar todas las tareas en paralelo con asyncio.gather ---
     tasks = [
-        okx_client.receive_messages(okx_client.process_message),
+        public_ws_client.receive_messages(public_ws_client.process_message),
+        business_ws_client.receive_messages(business_ws_client.process_message),
         bot.run_data_consumer()
     ]
 
@@ -246,8 +262,10 @@ async def main_cli_interface_async():
                 if cmd == 'q':
                     logger.info("Comando 'q' recibido: Iniciando cierre del bot.")
                     await bot.shutdown()
-                    if okx_client.ws and hasattr(okx_client.ws, 'closed') and not okx_client.ws.closed:
-                        await okx_client.ws.close()
+                    if public_ws_client.ws and hasattr(public_ws_client.ws, 'closed') and not public_ws_client.ws.closed:
+                        await public_ws_client.ws.close()
+                    if business_ws_client.ws and hasattr(business_ws_client.ws, 'closed') and not business_ws_client.ws.closed:
+                        await business_ws_client.ws.close()
                     break
                 elif cmd == 's':
                     bot.stop()
@@ -281,8 +299,10 @@ async def main_cli_interface_async():
         logger.info("Cerrando recursos del bot...")
         await bot.shutdown()
         # También aquí se verifica si ws existe y tiene el atributo .closed
-        if okx_client.ws and hasattr(okx_client.ws, 'closed') and not okx_client.ws.closed:
-            await okx_client.ws.close()
+        if public_ws_client.ws and hasattr(public_ws_client.ws, 'closed') and not public_ws_client.ws.closed:
+            await public_ws_client.ws.close()
+        if business_ws_client.ws and hasattr(business_ws_client.ws, 'closed') and not business_ws_client.ws.closed:
+            await business_ws_client.ws.close()
 
     logger.info("Bot apagado completamente.")
 

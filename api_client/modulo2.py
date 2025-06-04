@@ -66,7 +66,7 @@ class OKXWebSocketClient:
         self.ws = None
         self.is_connected = False
         # Usar la URL pública para tickers/books/trades
-        self.base_url = "wss://ws.okx.com:8443/ws/v5/public"
+        self.base_url = "wss://ws.okx.com:8443/ws/v5/business"
         # Para canales privados (autenticados) como orders, balance, etc., se usaría:
         # self.base_url = "wss://ws.okx.com:8443/ws/v5/private"
 
@@ -254,6 +254,17 @@ class OKXWebSocketClient:
                         "best_ask": float(asks[0][0]) if asks else None,
                         "data": payload_data # Opcional: mantener la data original completa
                     }
+
+                elif channel.startswith('candle'):
+                    inst_id = data["arg"].get('instId')
+                    processed_item = {
+                        'type': 'candle',
+                        'instrument': inst_id,
+                        'interval': channel.replace('candle', ''),
+                        'data': payload_data,
+                        'timestamp_received': int(time.time() * 1000)
+                    }
+                    logging.info(f"Datos '{processed_item['type']}' de '{processed_item['instrument']}' puestos en la cola.")
 
                 # Si hemos procesado algo, lo ponemos en la cola
                 if processed_item:
