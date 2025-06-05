@@ -14,67 +14,62 @@ Pendientes del proyecto:
 4. **Data Validation:**
    - Compress and share the `info/` folder for further analysis of saved data.
 
-2025-06-04 03:13:02,348 - INFO - ==================================================
+2025-06-05 16:00:49,848 - INFO - ==================================================
 SolanaScalper - Bot de Trading v2.0 (MODO ASÍNCRONO)
 ==================================================
 
-2025-06-04 03:13:02,349 - INFO - Iniciando componentes asíncronos y síncronos...
-2025-06-04 03:13:02,350 - INFO - Conectando y suscribiendo a los WebSockets de OKX (Público y Negocio)...
-2025-06-04 03:13:05,685 - INFO - Conexión establecida con la API de OKX WebSocket.
-2025-06-04 03:13:05,685 - INFO - Enviando suscripción a Tickers (Público): {'op': 'subscribe', 'args': [{'channel': 'tickers', 'instId': 'SOL-USDT'}]}
-2025-06-04 03:13:05,686 - INFO - Enviando suscripción: {'op': 'subscribe', 'args': [{'channel': 'candle1m', 'instId': 'SOL-USDT'}]}
-2025-06-04 03:13:06,067 - INFO - Respuesta de suscripción: {'event': 'subscribe', 'arg': {'channel': 'candle1m', 'instId': 'SOL-USDT'}, 'connId': 'b47a73bf'}
-2025-06-04 03:13:06,070 - INFO - Suscripción a Tickers SOL-USDT enviada.
-2025-06-04 03:13:09,627 - INFO - Conexión establecida con la API de OKX WebSocket.
-2025-06-04 03:13:09,634 - INFO - Enviando suscripción a Candles (Negocio): {'op': 'subscribe', 'args': [{'channel': 'candles', 'instId': 'SOL-USDT', 'bar': '1m'}]}
-2025-06-04 03:13:09,636 - INFO - Enviando suscripción: {'op': 'subscribe', 'args': [{'channel': 'candle1m', 'instId': 'SOL-USDT'}]}
-2025-06-04 03:13:10,023 - INFO - Respuesta de suscripción: {'event': 'subscribe', 'arg': {'channel': 'candle1m', 'instId': 'SOL-USDT'}, 'connId': '3d499ad3'}
-2025-06-04 03:13:10,027 - INFO - Suscripción a Candles SOL-USDT (1m) enviada.
-2025-06-04 03:13:10,028 - INFO - Suscripciones iniciales enviadas. Suscripción a Order Book Nivel 2 TBT deshabilitada por restricción VIP.
-2025-06-04 03:13:10,029 - INFO - Inicializando bot en modo PAPER...
-2025-06-04 03:13:10,070 - INFO - [HistoricalDataSaver]: Conectado a DB async 'C:\proyectos\mibot3\botviejo1\data_management\..\data\market_data.db' y tablas verificadas.
-2025-06-04 03:13:10,075 - INFO - Bot inicializado.
-2025-06-04 03:13:10,077 - INFO - Hilo de entrada de usuario iniciado. Presiona 'q' para salir.
-2025-06-04 03:13:10,078 - INFO - Iniciando recepción de mensajes del WebSocket.
-2025-06-04 03:13:10,080 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
-2025-06-04 03:13:10,081 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
-2025-06-04 03:13:10,082 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
-2025-06-04 03:13:10,083 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
-2025-06-04 03:13:10,084 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
-2025-06-04 03:13:10,085 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
-2025-06-04 03:13:10,087 - INFO - Iniciando recepción de mensajes del WebSocket.
-2025-06-04 03:13:10,096 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
-2025-06-04 03:13:10,099 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
-2025-06-04 03:13:10,100 - INFO - [ScalpingBot]: Iniciando consumidor de datos de la cola...
-2025-06-04 03:13:10,532 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
-2025-06-04 03:13:10,534 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
-2025-06-04 03:13:10,535 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
-2025-06-04 03:13:10,535 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
-2025-06-04 03:13:11,562 - ERROR - [ScalpingBot ERROR]: Error al consumir de la cola: 
-2025-06-04 03:13:11,563 - WARNING - task_done() llamado en una cola vacía o demasiadas veces: task_done() called too many times
-2025-06-04 03:13:12,542 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
-2025-06-04 03:13:12,542 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
-2025-06-04 03:13:12,543 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
-2025-06-04 03:13:12,544 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
-2025-06-04 03:13:13,560 - ERROR - [ScalpingBot ERROR]: Error al consumir de la cola: 
-2025-06-04 03:13:13,560 - WARNING - task_done() llamado en una cola vacía o demasiadas veces: task_done() called too many times
-2025-06-04 03:13:14,574 - ERROR - [ScalpingBot ERROR]: Error al consumir de la cola: 
-2025-06-04 03:13:14,574 - WARNING - task_done() llamado en una cola vacía o demasiadas veces: task_done() called too many times
-2025-06-04 03:13:15,551 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
-2025-06-04 03:13:15,551 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
-2025-06-04 03:13:15,558 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
-2025-06-04 03:13:15,559 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
-2025-06-04 03:13:16,564 - ERROR - [ScalpingBot ERROR]: Error al consumir de la cola: 
-2025-06-04 03:13:16,564 - WARNING - task_done() llamado en una cola vacía o demasiadas veces: task_done() called too many times
-2025-06-04 03:13:16,567 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
-2025-06-04 03:13:16,568 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
-2025-06-04 03:13:16,579 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
-2025-06-04 03:13:16,580 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
-2025-06-04 03:13:16,616 - INFO - Manejador de comandos CLI cancelado.
-2025-06-04 03:13:16,618 - INFO - Tareas principales canceladas.
-2025-06-04 03:13:16,619 - INFO - Cerrando recursos del bot...
-2025-06-04 03:13:16,621 - INFO - Apagando el bot...
-2025-06-04 03:13:16,624 - WARNING - El bot no está activo.
-2025-06-04 03:13:16,625 - INFO - [HistoricalDataSaver]: Desconectado de la base de datos 'C:\proyectos\mibot3\botviejo1\data_management\..\data\market_data.db'.
-2025-06-04 03:13:16,626 - INFO - Bot apagado y recursos liberados.
-2025-06-04 03:13:16,627 - INFO - Bot apagado completamente.
+2025-06-05 16:00:49,852 - INFO - Iniciando componentes asíncronos y síncronos...
+2025-06-05 16:00:49,852 - INFO - Conectando y suscribiendo a los WebSockets de OKX (Público y Negocio)...
+2025-06-05 16:00:51,671 - INFO - Conexión establecida con la API de OKX WebSocket.
+2025-06-05 16:00:51,671 - INFO - Enviando suscripción a Tickers (Público): {'op': 'subscribe', 'args': [{'channel': 'tickers', 'instId': 'SOL-USDT'}]}
+2025-06-05 16:00:51,671 - INFO - Enviando suscripción: {'op': 'subscribe', 'args': [{'channel': 'candle1m', 'instId': 'SOL-USDT'}]}
+2025-06-05 16:00:52,039 - INFO - Respuesta de suscripción: {'event': 'subscribe', 'arg': {'channel': 'candle1m', 'instId': 'SOL-USDT'}, 'connId': '0434872b'}
+2025-06-05 16:00:52,043 - INFO - Suscripción a Tickers SOL-USDT enviada.
+2025-06-05 16:00:54,570 - INFO - Conexión establecida con la API de OKX WebSocket.
+2025-06-05 16:00:54,572 - INFO - Enviando suscripción a Candles (Negocio): {'op': 'subscribe', 'args': [{'channel': 'candles', 'instId': 'SOL-USDT', 'bar': '1m'}]}
+2025-06-05 16:00:54,574 - INFO - Enviando suscripción: {'op': 'subscribe', 'args': [{'channel': 'candle1m', 'instId': 'SOL-USDT'}]}
+2025-06-05 16:00:54,990 - INFO - Respuesta de suscripción: {'event': 'subscribe', 'arg': {'channel': 'candle1m', 'instId': 'SOL-USDT'}, 'connId': 'c56202c6'}
+2025-06-05 16:00:54,990 - INFO - Suscripción a Candles SOL-USDT (1m) enviada.
+2025-06-05 16:00:54,990 - INFO - Suscripciones iniciales enviadas. Suscripción a Order Book Nivel 2 TBT deshabilitada por restricción VIP.
+2025-06-05 16:00:55,006 - INFO - Conectado a la base de datos: market_data.db
+2025-06-05 16:00:55,026 - INFO - Tabla 'tickers' verificada/creada con esquema completo.
+2025-06-05 16:00:55,033 - INFO - Tabla 'order_book_l2' verificada/creada.
+2025-06-05 16:00:55,035 - INFO - Tabla 'candles' verificada/creada.
+2025-06-05 16:00:55,036 - INFO - Todas las tablas de la base de datos han sido verificadas/creadas.
+2025-06-05 16:00:55,039 - INFO - Inicializando bot en modo PAPER...
+2025-06-05 16:00:55,040 - INFO - Bot inicializado.
+2025-06-05 16:00:55,056 - INFO - Hilo de entrada de usuario iniciado. Presiona 'q' para salir.
+2025-06-05 16:00:55,060 - INFO - Iniciando recepción de mensajes del WebSocket.
+2025-06-05 16:00:55,072 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
+2025-06-05 16:00:55,072 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
+2025-06-05 16:00:55,075 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
+2025-06-05 16:00:55,075 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
+2025-06-05 16:00:55,075 - INFO - Iniciando recepción de mensajes del WebSocket.
+2025-06-05 16:00:55,086 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
+2025-06-05 16:00:55,088 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
+2025-06-05 16:00:55,090 - INFO - [ScalpingBot]: Iniciando consumidor de datos de la cola...
+2025-06-05 16:00:57,152 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
+2025-06-05 16:00:57,219 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
+2025-06-05 16:00:57,507 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
+2025-06-05 16:00:57,618 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
+2025-06-05 16:00:58,153 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
+2025-06-05 16:00:58,157 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
+2025-06-05 16:00:58,169 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
+2025-06-05 16:00:58,172 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
+2025-06-05 16:01:00,170 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
+2025-06-05 16:01:00,170 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
+2025-06-05 16:01:00,174 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
+2025-06-05 16:01:00,174 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
+2025-06-05 16:01:01,195 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
+2025-06-05 16:01:01,285 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
+2025-06-05 16:01:01,288 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
+2025-06-05 16:01:01,290 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
+2025-06-05 16:01:01,295 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
+2025-06-05 16:01:01,526 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
+2025-06-05 16:01:01,606 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
+2025-06-05 16:01:01,649 - INFO - Datos 'candle' de 'SOL-USDT' puestos en la cola.
+2025-06-05 16:01:02,574 - INFO - Manejador de comandos CLI cancelado.
+2025-06-05 16:01:02,603 - INFO - Tareas principales canceladas.
+2025-06-05 16:01:02,606 - INFO - Cerrando recursos del bot...
+2025-06-05 16:01:02,609 - INFO - Apagando el bot...
+2025-06-05 16:01:02,612 - WARNING - El bot no está activo.

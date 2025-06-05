@@ -47,7 +47,7 @@ load_dotenv(dotenv_path=config_path)
 class ScalpingBot:
     """Bot de scalping para trading de Solana en OKX"""
 
-    def __init__(self, historical_data_saver: HistoricalDataSaver): # MODIFICADO: Ahora recibe el saver
+    def __init__(self, historical_data_saver: HistoricalDataSaver, db_handler): # MODIFICADO: Ahora recibe el saver
         self.active = False
         self.exchange = None
         self.symbol = "SOL/USDT"
@@ -67,14 +67,17 @@ class ScalpingBot:
         self.data_queue = data_queue # Referencia a la cola global de modulocola.py
         # --- NUEVO: Atributo para HistoricalDataSaver ---
         self.historical_data_saver = historical_data_saver
+        # --- NUEVO: Atributo para el manejador de base de datos ---
+        self.db_handler = db_handler
         # ------------------------------------------------------
 
     async def initialize_historical_data_saver(self):
-        await self.historical_data_saver.connect()
+        # Removed redundant connect call
+        pass
 
     async def initialize(self):
         logger.info(f"Inicializando bot en modo {self.mode.upper()}...")
-        await self.historical_data_saver.connect()
+        # Removed redundant connect call
         logger.info("Bot inicializado.")
 
     def start(self):
@@ -99,7 +102,9 @@ class ScalpingBot:
         logger.info("Apagando el bot...")
         self.stop()
         # Cierra la conexión de la base de datos al apagar
-        await self.historical_data_saver.disconnect()
+        if self.db_handler:
+            self.db_handler.close()
+            logger.info("Conexión a la base de datos cerrada.")
         logger.info("Bot apagado y recursos liberados.")
 
     async def run_data_consumer(self):
@@ -223,7 +228,7 @@ async def main_cli_interface_async():
 
     # --- 3. Inicializar tu ScalpingBot (síncrono) ---
     # MODIFICADO: Pasar la instancia de historical_data_saver al ScalpingBot
-    bot = ScalpingBot(historical_data_saver)
+    bot = ScalpingBot(historical_data_saver, db_handler)
     await bot.initialize()
 
     # --- 4. Crear un hilo para manejar la entrada del usuario de forma síncrona ---

@@ -1,0 +1,100 @@
+# Estructura del Bot de Trading
+
+.
+├── adaptive_weighting.py
+├── app.py
+├── apply_main1_fix.py
+├── backtesting.py
+├── bot_20250604.log
+├── bot_20250605.log
+├── bot_cli.py
+├── BOT_MANUAL.md
+├── BOT_STRUCTURE.md
+├── bot.log
+├── check_balance.py
+├── check_connection.py
+├── config.env
+├── config.example.env
+├── copy_trading_modules.py
+├── export_local_setup.py
+├── generated-icon.png
+├── indicator_weighting.py
+├── initialize_db.py
+├── log_viewer.py
+├── main_simulacion.py
+├── main.py
+├── main1.py
+├── market_data.db
+├── modulo.py
+├── modulo1_copy.py
+├── modulo1.py
+├── modulo2.py
+├── modulocola.py
+├── pair_selector.py
+├── pattern_recognition.py
+├── pendientes_modo_real.txt
+├── pyproject.toml
+├── python
+├── README.md
+├── run_scalping_demo.py
+├── scalping_strategies.py
+├── simulation.py
+├── start_bot.py
+├── stats_tracker.py
+├── strategies.py
+├── test_bot.py
+├── test_db_integration.py
+├── test_okx_data_flow.py
+├── test_okx.py
+├── trading_bot.log
+├── trading_bot.py
+├── trading_mode.py
+├── update_schema.py
+├── uv.lock
+├── verify_price.py
+├── websocket_client.py
+├── __pycache__/
+│   ├── bot_cli.cpython-311.pyc
+├── adaptive_system/
+│   ├── __init__.py
+│   ├── bot_battle_arena.py
+│   ├── brain_transfer.py
+│   ├── weighting.py
+├── api_client/
+│   ├── __init__.py
+│   ├── modulo2.py
+│   ├── modulocola.py
+│   ├── __pycache__/
+├── attached_assets/
+│   ├── Pasted-Entiendo-que-quieres-hablar-sobre-la-configuraci-n-de-la-API-y-asegurarte-de-que-el-bot-se-conecte-a-1748146377997.txt
+├── backtesting/
+│   ├── __init__.py
+│   ├── advanced_optimizer.py
+│   ├── engine.py
+│   ├── engine/
+├── backup_assets/
+│   ├── Pasted--An-lisis-General-del-Dise-o-Fortalezas-Clave-Arquitectura-Modular-y-Escalable-Bien--1747759138336.txt
+│   ├── Pasted--Asistente-de-programaci-n-Excelente-Integrar-inteligencia-y-autoaprendizaje-a-tu-bot-para-operar-1746682714016.txt
+│   ├── Pasted--Asistente-de-programaci-n-Excelente-Me-alegra-mucho-saber-que-tienes-la-estructura-de-tu-bot-lis-1746679634115.txt
+│   ├── Pasted--Bot-de-Trading-para-Solana-Versi-n-Aut-noma-Este-script-est-dise-ado-para-ejecutarse-como-un-1746673986154.txt
+│   ├── ...
+├── brain_exports/
+├── core/
+│   ├── bot_manager/
+├── data/
+├── data_management/
+├── db/
+├── indicators/
+├── info/
+├── interface/
+├── models/
+├── my_trading_modules_20250527_050548/
+├── my_trading_modules_20250604_045025/
+├── notifications/
+├── risk_management/
+├── static/
+├── strategies/
+├── temp_repo/
+├── templates/
+├── trading_modules_export/
+├── utils/

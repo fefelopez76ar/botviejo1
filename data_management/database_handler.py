@@ -1,7 +1,7 @@
 import logging
 import json
-import time # Necesario para time.sleep
-import math # Necesario para math.pow
+import time
+import math
 import sqlite3
 from pathlib import Path
 
@@ -14,6 +14,11 @@ class DatabaseHandler:
         self.MAX_RETRIES = 5 # Número máximo de veces que intentará una operación
         self.INITIAL_BACKOFF_SECONDS = 0.1 # Tiempo de espera inicial antes del primer reintento
         self.MAX_BACKOFF_SECONDS = 5 # Limite superior para el tiempo de espera exponencial
+
+        if self.connect():
+            self.create_tables()
+        else:
+            self.logger.critical(f"No se pudo establecer la conexión a la base de datos después de {self.MAX_RETRIES} reintentos.")
 
     def connect(self):
         """
@@ -34,8 +39,10 @@ class DatabaseHandler:
                     sleep_time = min(self.MAX_BACKOFF_SECONDS, self.INITIAL_BACKOFF_SECONDS * math.pow(2, retries - 1))
                     self.logger.warning(f"Reintentando conexión en {sleep_time:.2f} segundos...")
                     time.sleep(sleep_time)
-        self.logger.critical(f"Falló la conexión a la base de datos después de {self.MAX_RETRIES} reintentos. El bot no podrá guardar datos.")
-        self.conn = None
+                else:
+                    self.logger.critical(f"Falló la conexión a la base de datos después de {self.MAX_RETRIES} reintentos. Revise permisos o si el archivo está en uso.")
+                    self.conn = None
+                    return False
         return False
 
     def create_tables(self):
@@ -43,47 +50,75 @@ class DatabaseHandler:
         Crea las tablas 'tickers' y 'order_book' si no existen, con reintentos.
         """
         if not self.conn:
-            self.logger.error("No hay conexión a la base de datos para crear tablas. Conéctese primero.")
-            return False
+            self.logger.error("No hay conexión a la base de datos para crear tablas.")
+            return
 
-        cursor = self.conn.cursor()
-        retries = 0
-        while retries < self.MAX_RETRIES:
-            try:
-                cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS tickers (
-                        instId TEXT NOT NULL,
-                        last REAL,
-                        askPx REAL,
-                        bidPx REAL,
-                        ts INTEGER NOT NULL,
-                        PRIMARY KEY (instId, ts)
-                    )
-                ''')
-                cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS order_book (
-                        instId TEXT NOT NULL,
-                        asks TEXT, -- Almacenará la lista de asks como JSON
-                        bids TEXT, -- Almacenará la lista de bids como JSON
-                        ts INTEGER NOT NULL,
-                        PRIMARY KEY (instId, ts)
-                    )
-                ''')
-                self.conn.commit()
-                self.logger.info("Tablas de la base de datos creadas o ya existentes.")
-                return True
-            except sqlite3.OperationalError as e: # Errores como DB bloqueada, permisos, etc.
-                self.logger.error(f"Error operacional al crear tablas (Intento {retries + 1}/{self.MAX_RETRIES}): {e}")
-                retries += 1
-                if retries < self.MAX_RETRIES:
-                    sleep_time = min(self.MAX_BACKOFF_SECONDS, self.INITIAL_BACKOFF_SECONDS * math.pow(2, retries - 1))
-                    self.logger.warning(f"Reintentando creación de tablas en {sleep_time:.2f} segundos...")
-                    time.sleep(sleep_time)
-            except sqlite3.Error as e: # Otros errores de SQLite más generales
-                self.logger.error(f"Error general al crear tablas: {e}")
-                return False # Otros errores no operacionales podrían ser fatales y no reintentables aquí
-        self.logger.critical(f"Falló la creación de tablas después de {self.MAX_RETRIES} reintentos.")
-        return False
+        try:
+            cursor = self.conn.cursor()
+
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS tickers (
+                    instId TEXT NOT NULL,
+                    idxPx REAL,
+                    markPx REAL,
+                    lastId TEXT,
+                    lastPx REAL,
+                    sodUtc0 REAL,
+                    sodUtc8 REAL,
+                    open24h REAL,
+                    high24h REAL,
+                    low24h REAL,
+                    volCcy24h REAL,
+                    vol24h REAL,
+                    ts INTEGER,
+                    bidPx REAL,
+                    bidSz REAL,
+                    askPx REAL,
+                    askSz REAL,
+                    PRIMARY KEY (instId, ts)
+                )
+            """)
+            self.logger.info("Tabla 'tickers' verificada/creada con esquema completo.")
+
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS order_book_l2 (
+                    instId TEXT NOT NULL,
+                    channel TEXT,
+                    bids TEXT,
+                    asks TEXT,
+                    ts INTEGER,
+                    seqId INTEGER,
+                    PRIMARY KEY (instId, ts, seqId)
+                )
+            """)
+            self.logger.info("Tabla 'order_book_l2' verificada/creada.")
+
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS candles (
+                    instId TEXT NOT NULL,
+                    channel TEXT,
+                    ts INTEGER,
+                    open REAL,
+                    high REAL,
+                    low REAL,
+                    close REAL,
+                    vol REAL,
+                    volCcy REAL,
+                    confirm INTEGER,
+                    PRIMARY KEY (instId, ts)
+                )
+            """)
+            self.logger.info("Tabla 'candles' verificada/creada.")
+
+            self.conn.commit()
+            self.logger.info("Todas las tablas de la base de datos han sido verificadas/creadas.")
+
+        except sqlite3.Error as e:
+            self.logger.critical(f"Error de SQLite al crear tablas: {e}", exc_info=True)
+            if self.conn:
+                self.conn.rollback()
+        except Exception as e:
+            self.logger.critical(f"Error inesperado al crear tablas: {e}", exc_info=True)
 
     def insert_many_ticker_data(self, data_list):
         """

@@ -18,9 +18,10 @@ from datetime import datetime
 from typing import Dict, List, Optional, Union, Any
 from tabulate import tabulate
 import signal
+import asyncio
+from asyncio import Queue
 
 # --- NUEVAS IMPORTACIONES PARA EL CLIENTE WEBSOCKET ---
-import asyncio
 from pathlib import Path
 from dotenv import load_dotenv
 from api_client.modulocola import data_queue
@@ -28,6 +29,7 @@ from api_client.modulo2 import OKXWebSocketClient as PublicOKXWebSocketClient
 from api_client.modulo2 import OKXWebSocketClient as BusinessOKXWebSocketClient
 # ---------------------------------------------------
 from data_management.historical_data_saver_async import HistoricalDataSaver
+from data_management.database_handler import DatabaseHandler
 # Configurar logging
 logging.basicConfig(
     level=logging.INFO,
@@ -47,7 +49,7 @@ load_dotenv(dotenv_path=config_path)
 class ScalpingBot:
     """Bot de scalping para trading de Solana en OKX"""
 
-    def __init__(self, historical_data_saver: HistoricalDataSaver): # MODIFICADO: Ahora recibe el saver
+    def __init__(self, historical_data_saver: HistoricalDataSaver, db_handler: DatabaseHandler): # MODIFICADO: Ahora recibe el saver
         self.active = False
         self.exchange = None
         self.symbol = "SOL/USDT"
@@ -67,14 +69,16 @@ class ScalpingBot:
         self.data_queue = data_queue # Referencia a la cola global de modulocola.py
         # --- NUEVO: Atributo para HistoricalDataSaver ---
         self.historical_data_saver = historical_data_saver
+        self.db_handler = db_handler  # NUEVO: Inicialización de db_handler
         # ------------------------------------------------------
 
     async def initialize_historical_data_saver(self):
-        await self.historical_data_saver.connect()
+        # Removed redundant connect call
+        pass
 
     async def initialize(self):
         logger.info(f"Inicializando bot en modo {self.mode.upper()}...")
-        await self.historical_data_saver.connect()
+        # Removed redundant connect call
         logger.info("Bot inicializado.")
 
     def start(self):
@@ -99,49 +103,44 @@ class ScalpingBot:
         logger.info("Apagando el bot...")
         self.stop()
         # Cierra la conexión de la base de datos al apagar
-        await self.historical_data_saver.disconnect()
+        if self.db_handler:
+            self.db_handler.close()
+            logger.info("Conexión a la base de datos cerrada.")
         logger.info("Bot apagado y recursos liberados.")
 
     async def run_data_consumer(self):
         logger.info("[ScalpingBot]: Iniciando consumidor de datos de la cola...")
         while not self.stop_event.is_set():
+            data = None
             try:
+                # Intentar obtener un elemento de la cola con un timeout
                 data = await asyncio.wait_for(self.data_queue.get(), timeout=1.0)
 
-                # Inicializar inst_id de forma segura
-                inst_id = None
-
-                if data.get('type') == 'ticker':
-                    if 'instrument' in data:  # Verificar si 'instrument' está presente
-                        inst_id = data['instrument']
-                        price_data = data.get('data')
-                        if price_data:
-                            last_price = price_data[0].get('last')
-                            logger.info(f"[ScalpingBot - Ticker]: {inst_id} - Último precio: {last_price}")
-                            # Guardar datos de ticker
-                            await self.historical_data_saver.save_ticker_data(data)
-                        else:
-                            logger.warning(f"Ticker sin datos de precio: {data}")
+                # Procesar datos según el tipo
+                if data and data.get('type') == 'ticker':
+                    inst_id = data.get('instrument')
+                    price_data = data.get('data')
+                    if price_data:
+                        last_price = price_data[0].get('last')
+                        logger.info(f"[ScalpingBot - Ticker]: {inst_id} - Último precio: {last_price}")
+                        await self.historical_data_saver.save_ticker_data(data)
                     else:
-                        logger.warning(f"Mensaje de ticker sin 'instrument': {data}")
+                        logger.warning(f"Ticker sin datos de precio: {data}")
 
-                elif data.get('type') == 'books-l2-tbt':
-                    if 'instrument' in data:  # Verificar si 'instrument' está presente
-                        inst_id = data['instrument']
-                        logger.info(f"[ScalpingBot - OrderBook]: {inst_id} - Bid: {data.get('best_bid')}, Ask: {data.get('best_ask')}")
-                    else:
-                        logger.warning(f"Mensaje de order book sin 'instrument': {data}")
+                elif data and data.get('type') == 'books-l2-tbt':
+                    inst_id = data.get('instrument')
+                    logger.info(f"[ScalpingBot - OrderBook]: {inst_id} - Bid: {data.get('best_bid')}, Ask: {data.get('best_ask')}")
 
-                # Asegúrate de llamar task_done() después de procesar cada elemento
+                # Marcar la tarea como completada
                 self.data_queue.task_done()
 
+            except asyncio.TimeoutError:
+                # Timeout normal, no hacer nada
+                pass
             except Exception as e:
-                logger.error(f"[ScalpingBot ERROR]: Error al consumir de la cola: {e}")
-                # Intentar marcar la tarea como hecha incluso en caso de error
-                try:
+                logger.error(f"[run_data_consumer ERROR]: Error al procesar datos de la cola: {e}")
+                if data:
                     self.data_queue.task_done()
-                except ValueError as ve:
-                    logger.warning(f"task_done() llamado en una cola vacía o demasiadas veces: {ve}")
 
         logger.info("[ScalpingBot]: Consumidor de datos de la cola detenido.")
 
@@ -160,6 +159,26 @@ class ScalpingBot:
         print(f"Posición Actual: {self.current_position if self.current_position else 'Ninguna'}")
         print(f"Total de Trades: {self.total_trades} | Rentables: {self.profitable_trades} ({self.profitable_trades/self.total_trades*100:.2f}% profitable)" if self.total_trades > 0 else "Total de Trades: 0")
         print("="*60 + "\n")
+
+async def data_consumer(data_queue: Queue, historical_saver: HistoricalDataSaver):
+    while True:
+        try:
+            data_entry = await data_queue.get()
+            data_type = data_entry.get('type')
+            instId = data_entry.get('instId')
+            data = data_entry.get('data')
+
+            if data_type and instId and data:
+                await historical_saver.save_data(data_type, instId, data)
+            else:
+                logger.warning(f"Datos incompletos en la cola: {data_entry}")
+            data_queue.task_done()
+        except asyncio.CancelledError:
+            logger.info("Consumidor de datos cancelado.")
+            break
+        except Exception as e:
+            logger.error(f"Error al consumir o guardar datos de la cola: {e}", exc_info=True)
+            data_queue.task_done()
 
 async def main_cli_interface_async():
     logger.info(f"{'='*50}\n{'SolanaScalper - Bot de Trading v2.0 (MODO ASÍNCRONO)':^50}\n{'='*50}\n")
@@ -205,19 +224,23 @@ async def main_cli_interface_async():
     logger.info("Enviando suscripción a Candles (Negocio): {'op': 'subscribe', 'args': [{'channel': 'candles', 'instId': 'SOL-USDT', 'bar': '1m'}]}")
     await business_ws_client.subscribe([
         {"channel": "candles", "instId": "SOL-USDT", "bar": "1m"}
-    ])
+    ]
+    )
     logger.info("Suscripción a Candles SOL-USDT (1m) enviada.")
 
     logger.info("Suscripciones iniciales enviadas. Suscripción a Order Book Nivel 2 TBT deshabilitada por restricción VIP.")
 
     # --- NUEVO: Inicializar HistoricalDataSaver ---
-    historical_data_saver = HistoricalDataSaver()
-    # --------------------------------------------
+    # Initialize DatabaseHandler
+    db_handler = DatabaseHandler(db_path="market_data.db")
 
-    # --- 3. Inicializar tu ScalpingBot (síncrono) ---
-    # MODIFICADO: Pasar la instancia de historical_data_saver al ScalpingBot
-    bot = ScalpingBot(historical_data_saver)
+    # Initialize HistoricalDataSaver with DatabaseHandler
+    historical_data_saver = HistoricalDataSaver(db_handler)
+
+    # Initialize ScalpingBot with HistoricalDataSaver
+    bot = ScalpingBot(historical_data_saver, db_handler)
     await bot.initialize()
+    # --------------------------------------------
 
     # --- 4. Crear un hilo para manejar la entrada del usuario de forma síncrona ---
     user_input_queue = asyncio.Queue()
@@ -239,7 +262,6 @@ async def main_cli_interface_async():
     input_thread = threading.Thread(target=_get_user_input_thread, args=(asyncio.get_event_loop(),), daemon=True) # Pasar el loop
     input_thread.start()
     logger.info("Hilo de entrada de usuario iniciado. Presiona 'q' para salir.")
-
 
     # --- 5. Ejecutar todas las tareas en paralelo con asyncio.gather ---
     tasks = [
@@ -302,4 +324,6 @@ async def main_cli_interface_async():
 
 # --- Punto de entrada principal ---
 if __name__ == "__main__":
+    if os.name == 'nt':
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
     asyncio.run(main_cli_interface_async())
