@@ -1,0 +1,435 @@
+ # Con posición, evaluamos salir
+            if position_side == "buy" and signal in ["strong_sell", "sell"]:
+                action = "close_long"
+                reason = f"Señal de venta {signal} con posición larga"
+            elif position_side == "sell" and signal in ["strong_buy", "buy"]:
+                action = "close_short"
+                reason = f"Señal de compra {signal} con posición corta"
+            
+            # Evaluar también Take Profit y Stop Loss
+            if position_side == "buy":
+                # Calcular P&L actual
+                pnl_pct = (current_price - entry_price) / entry_price * 100
+                
+                # Take Profit (10%)
+                if pnl_pct >= 10.0:
+                    action = "close_long"
+                    reason = f"Take Profit alcanzado: {pnl_pct:.2f}%"
+                
+                # Stop Loss (-5%)
+                elif pnl_pct <= -5.0:
+                    action = "close_long"
+                    reason = f"Stop Loss alcanzado: {pnl_pct:.2f}%"
+            
+            elif position_side == "sell":
+                # Para posiciones cortas, el P&L es inverso
+                pnl_pct = (entry_price - current_price) / entry_price * 100
+                
+                # Take Profit (10%)
+                if pnl_pct >= 10.0:
+                    action = "close_short"
+                    reason = f"Take Profit alcanzado: {pnl_pct:.2f}%"
+                
+                # Stop Loss (-5%)
+                elif pnl_pct <= -5.0:
+                    action = "close_short"
+                    reason = f"Stop Loss alcanzado: {pnl_pct:.2f}%"
+        
+        # Ejecutar acción
+        result = {"status": "success", "action": action, "reason": reason, "price": current_price}
+        
+        if action == "buy":
+            # Calcular tamaño de orden (10% del balance)
+            account_info = self.get_account_balance()
+            
+            if account_info:
+                # Para trading real
+                if self.mode == 'live':
+                    available_balance = float(account_info.get('details', [{}])[0].get('availBal', 0))
+                    order_size = available_balance * 0.1 / current_price
+                else:
+                    # Para paper trading
+                    order_size = self.balance * 0.1 / current_price
+                    logger.info(f"🔄 MODO PAPER: Calculando orden con balance simulado: {self.balance:.2f} USDT")
+                
+                order_size = round(order_size, 4)  # Redondear a 4 decimales
+                
+                # Colocar orden
+                order_result = self.place_order(symbol, "buy", order_size)
+                result["order_result"] = order_result
+                
+                # Actualizar estado en paper trading
+                if self.mode == 'paper' and order_result.get('code') == '0':
+                    cost = order_size * current_price
+                    self.balance -= cost
+                    logger.info(f"🔄 MODO PAPER: Compra simulada: {order_size:.4f} SOL a ${current_price:.2f}")
+                    logger.info(f"🔄 MODO PAPER: Reducido balance en {cost:.2f} USDT. Nuevo balance: {self.balance:.2f} USDT")
+                
+                # Notificar
+                notification_msg = f"🟢 COMPRA: {order_size:.4f} {symbol} a ${current_price:.2f}\nRazón: {reason}"
+                self.send_notification(notification_msg)
+            else:
+                result["status"] = "error"
+                result["message"] = "No se pudo obtener información de la cuenta"
+        
+        elif action == "sell":
+            # Calcular tamaño de orden (10% del balance)
+            account_info = self.get_account_balance()
+            
+            if account_info:
+                # Para trading real
+                if self.mode == 'live':
+                    available_balance = float(account_info.get('details', [{}])[0].get('availBal', 0))
+                    order_size = available_balance * 0.1 / current_price
+                else:
+                    # Para paper trading
+                    order_size = self.balance * 0.1 / current_price
+                    logger.info(f"🔄 MODO PAPER: Calculando orden con balance simulado: {self.balance:.2f} USDT")
+                
+                order_size = round(order_size, 4)  # Redondear a 4 decimales
+                
+                # Colocar orden
+                order_result = self.place_order(symbol, "sell", order_size)
+                result["order_result"] = order_result
+                
+                # Actualizar estado en paper trading (las ventas no reducen el balance hasta que se cierra la posición)
+                if self.mode == 'paper' and order_result.get('code') == '0':
+                    logger.info(f"🔄 MODO PAPER: Venta simulada: {order_size:.4f} SOL a ${current_price:.2f}")
+                    logger.info(f"🔄 MODO PAPER: Posición corta abierta. Balance actual: {self.balance:.2f} USDT")
+                
+                # Notificar
+                notification_msg = f"🔴 VENTA: {order_size:.4f} {symbol} a ${current_price:.2f}\nRazón: {reason}"
+                self.send_notification(notification_msg)
+            else:
+                result["status"] = "error"
+                result["message"] = "No se pudo obtener información de la cuenta"
+        
+        elif action == "close_long":
+            # Cerrar posición larga
+            if has_position and position_side == "buy":
+                order_result = self.place_order(symbol, "sell", position_size)
+                result["order_result"] = order_result
+                
+                # Calcular P&L
+                pnl = (current_price - entry_price) * position_size
+                pnl_pct = (current_price - entry_price) / entry_price * 100
+                
+                # Actualizar estadísticas
+                self.trading_data['trade_count'] += 1
+                if pnl > 0:
+                    self.trading_data['wins'] += 1
+                else:
+                    self.trading_data['losses'] += 1
+                
+                # Notificar
+                notification_msg = f"🔵 CIERRE LARGO: {position_size:.4f} {symbol} a ${current_price:.2f}\nP&L: ${pnl:.2f} ({pnl_pct:.2f}%)\nRazón: {reason}"
+                self.send_notification(notification_msg)
+            else:
+                result["status"] = "error"
+                result["message"] = "No hay posición larga para cerrar"
+        
+        elif action == "close_short":
+            # Cerrar posición corta
+            if has_position and position_side == "sell":
+                order_result = self.place_order(symbol, "buy", position_size)
+                result["order_result"] = order_result
+                
+                # Calcular P&L (inverso para cortos)
+                pnl = (entry_price - current_price) * position_size
+                pnl_pct = (entry_price - current_price) / entry_price * 100
+                
+                # Actualizar estadísticas
+                self.trading_data['trade_count'] += 1
+                if pnl > 0:
+                    self.trading_data['wins'] += 1
+                else:
+                    self.trading_data['losses'] += 1
+                
+                # Notificar
+                notification_msg = f"🟣 CIERRE CORTO: {position_size:.4f} {symbol} a ${current_price:.2f}\nP&L: ${pnl:.2f} ({pnl_pct:.2f}%)\nRazón: {reason}"
+                self.send_notification(notification_msg)
+            else:
+                result["status"] = "error"
+                result["message"] = "No hay posición corta para cerrar"
+        
+        # Log de la acción
+        logger.info(f"Acción ejecutada: {action} - {reason} - Precio: {current_price}")
+        
+        # Guardar el resultado de la estrategia
+        self.save_state()
+        
+        return result
+    
+    def save_state(self) -> None:
+        """
+        Guarda el estado actual del bot
+        """
+        # Actualizar balance y ROI en paper trading
+        if self.mode == 'paper':
+            self.trading_data['current_balance'] = self.balance
+            self.trading_data['roi'] = (self.balance - DEFAULT_INITIAL_BALANCE) / DEFAULT_INITIAL_BALANCE * 100
+        
+        # Guardar estado en archivo
+        try:
+            with open(STATE_FILE, 'w') as f:
+                json.dump(self.trading_data, f, indent=2)
+            logger.debug("Estado guardado correctamente")
+        except Exception as e:
+            logger.error(f"Error al guardar estado: {str(e)}")
+    
+    def load_state(self) -> None:
+        """
+        Carga el estado anterior del bot
+        """
+        try:
+            if os.path.exists(STATE_FILE):
+                with open(STATE_FILE, 'r') as f:
+                    self.trading_data = json.load(f)
+                logger.info("Estado anterior cargado correctamente")
+                
+                # Restaurar balance en paper trading
+                if self.mode == 'paper':
+                    self.balance = self.trading_data.get('current_balance', DEFAULT_INITIAL_BALANCE)
+        except Exception as e:
+            logger.error(f"Error al cargar estado anterior: {str(e)}")
+    
+    def send_notification(self, message: str) -> None:
+        """
+        Envía notificación vía Telegram
+        
+        Args:
+            message (str): Mensaje a enviar
+        """
+        if not TELEGRAM_AVAILABLE:
+            logger.debug("Librería Telebot no disponible, no se enviarán notificaciones")
+            return
+        
+        try:
+            # Cargar configuración
+            config = load_config()
+            bot_token = config.get('TELEGRAM_BOT_TOKEN')
+            chat_id = config.get('TELEGRAM_CHAT_ID')
+            
+            if not bot_token or not chat_id:
+                logger.debug("Token de Telegram o Chat ID no configurados")
+                return
+            
+            # Enviar mensaje
+            bot = telebot.TeleBot(bot_token)
+            bot.send_message(chat_id, message, parse_mode='Markdown')
+            logger.debug("Notificación enviada correctamente")
+        except Exception as e:
+            logger.error(f"Error al enviar notificación: {str(e)}")
+    
+    def run(self, symbol: str = DEFAULT_SYMBOL, interval: str = DEFAULT_INTERVAL, 
+          notify: bool = False, continuous: bool = False) -> None:
+        """
+        Ejecuta el bot de trading
+        
+        Args:
+            symbol (str): Símbolo del instrumento
+            interval (str): Intervalo de tiempo
+            notify (bool): Activar notificaciones
+            continuous (bool): Ejecutar en modo continuo
+        """
+        logger.info(f"Iniciando bot para {symbol} en intervalo {interval} (Modo: {self.mode})")
+        
+        # Validar credenciales
+        if not self.api_key or not self.api_secret or not self.passphrase:
+            logger.error("Credenciales API incompletas")
+            if notify:
+                self.send_notification("⚠️ Error: Credenciales API incompletas")
+            return
+        
+        # Cargar estado anterior
+        self.load_state()
+        
+        # Enviar notificación de inicio
+        if notify:
+            mode_str = "PAPER TRADING" if self.mode == 'paper' else "TRADING REAL"
+            start_msg = f"""🤖 *BOT DE TRADING SOLANA - INICIADO* 🤖
+            
+⏰ Hora: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+💰 Modo: {mode_str}
+📊 Par: {symbol}
+⏱️ Intervalo: {interval}
+
+*Estado: ACTIVO y monitoreando mercado* ✅
+
+_El bot enviará notificaciones de operaciones..._"""
+            self.send_notification(start_msg)
+        
+        # Ciclo principal
+        try:
+            if continuous:
+                # Modo continuo con intervalo adaptativo
+                while True:
+                    start_time = time.time()
+                    
+                    try:
+                        # Ejecutar estrategia
+                        self.execute_strategy(symbol, interval)
+                    except Exception as e:
+                        logger.error(f"Error en ciclo de ejecución: {str(e)}", exc_info=True)
+                        if notify:
+                            self.send_notification(f"⚠️ Error en bot: {str(e)}")
+                    
+                    # Calcular tiempo de espera según intervalo
+                    wait_time = self._get_wait_time(interval)
+                    elapsed = time.time() - start_time
+                    sleep_time = max(5, wait_time - elapsed)  # Al menos 5 segundos
+                    
+                    logger.info(f"Esperando {sleep_time:.1f} segundos hasta próxima ejecución...")
+                    time.sleep(sleep_time)
+            else:
+                # Modo única ejecución
+                self.execute_strategy(symbol, interval)
+                logger.info("Ejecución única completada")
+        
+        except KeyboardInterrupt:
+            logger.info("Bot detenido manualmente")
+            if notify:
+                self.send_notification("🛑 Bot detenido manualmente")
+        
+        except Exception as e:
+            logger.error(f"Error crítico en el bot: {str(e)}", exc_info=True)
+            if notify:
+                self.send_notification(f"❌ Error crítico: {str(e)}")
+    
+    def _get_wait_time(self, interval: str) -> int:
+        """
+        Calcula tiempo de espera según intervalo
+        
+        Args:
+            interval (str): Intervalo de tiempo
+            
+        Returns:
+            int: Tiempo de espera en segundos
+        """
+        # Mapear intervalos a segundos
+        interval_map = {
+            '1m': 60,
+            '5m': 300,
+            '15m': 900,
+            '30m': 1800,
+            '1h': 3600,
+            '4h': 14400,
+            '1d': 86400
+        }
+        
+        # Usar tiempo predeterminado si el intervalo no es válido
+        return interval_map.get(interval, 900)
+
+def load_config(config_file: str = CONFIG_FILE) -> Dict[str, str]:
+    """
+    Carga configuración desde archivo .env
+    
+    Args:
+        config_file (str): Ruta al archivo de configuración
+        
+    Returns:
+        Dict[str, str]: Configuración cargada
+    """
+    config = {}
+    
+    try:
+        if os.path.exists(config_file):
+            with open(config_file, 'r') as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith('#'):
+                        key, value = line.split('=', 1)
+                        config[key.strip()] = value.strip().strip('"\'')
+            logger.info(f"Configuración cargada desde {config_file}")
+        else:
+            logger.warning(f"Archivo de configuración {config_file} no encontrado")
+    except Exception as e:
+        logger.error(f"Error al cargar configuración: {str(e)}")
+    
+    return config
+
+def parse_args():
+    """
+    Parsea argumentos de línea de comandos
+    
+    Returns:
+        argparse.Namespace: Argumentos parseados
+    """
+    parser = argparse.ArgumentParser(description='Bot de Trading de Solana')
+    parser.add_argument('--mode', type=str, default=DEFAULT_MODE, 
+                      choices=['paper', 'live'], 
+                      help='Modo de trading (paper o live)')
+    parser.add_argument('--symbol', type=str, default=DEFAULT_SYMBOL,
+                      help='Símbolo de trading (e.j., SOL-USDT)')
+    parser.add_argument('--interval', type=str, default=DEFAULT_INTERVAL,
+                      choices=['1m', '5m', '15m', '30m', '1h', '4h', '1d'],
+                      help='Intervalo de tiempo para el análisis')
+    parser.add_argument('--notify', action='store_true',
+                      help='Activar notificaciones')
+    parser.add_argument('--continuous', action='store_true',
+                      help='Ejecutar en modo continuo')
+    parser.add_argument('--interactive', action='store_true',
+                      help='Iniciar en modo interactivo')
+    
+    return parser.parse_args()
+
+def interactive_mode():
+    """
+    Inicia el bot en modo interactivo con menú
+    """
+    try:
+        from enhanced_bot import main_menu
+        main_menu()
+    except ImportError:
+        try:
+            from bot_interactivo import main_menu
+            main_menu()
+        except ImportError:
+            logger.error("No se encontró módulo para modo interactivo")
+            print("Error: No se encontró módulo para modo interactivo")
+            print("Por favor, asegúrate de tener enhanced_bot.py o bot_interactivo.py")
+
+def main():
+    """
+    Función principal
+    """
+    # Parsear argumentos
+    args = parse_args()
+    
+    # Si está en modo interactivo, abrir ese modo
+    if args.interactive:
+        interactive_mode()
+        return
+    
+    # Cargar configuración
+    config = load_config()
+    
+    # Verificar credenciales
+    api_key = config.get('OKX_API_KEY', '')
+    api_secret = config.get('OKX_API_SECRET', '')
+    passphrase = config.get('OKX_PASSPHRASE', '')
+    
+    if not api_key or not api_secret or not passphrase:
+        logger.error("Credenciales de API no encontradas en config.env")
+        print("Error: Credenciales de API no encontradas en config.env")
+        print("Por favor, configura OKX_API_KEY, OKX_API_SECRET y OKX_PASSPHRASE")
+        return
+    
+    # Inicializar bot
+    bot = TradingBot(
+        api_key=api_key,
+        api_secret=api_secret,
+        passphrase=passphrase,
+        mode=args.mode
+    )
+    
+    # Ejecutar bot
+    bot.run(
+        symbol=args.symbol,
+        interval=args.interval,
+        notify=args.notify,
+        continuous=args.continuous
+    )
+
+if __name__ == "__main__":
+    main()

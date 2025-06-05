@@ -1,0 +1,62 @@
+Pendientes del proyecto:
+
+1. **Final Testing:**
+   - Run the bot to confirm that it initializes correctly, processes data, and saves it to the database without errors.
+   - Verify that the database (`market_data.db`) contains the expected data using `verificar_db.py`.
+
+2. **Error Handling:**
+   - Ensure robust error handling for any remaining edge cases during bot execution.
+
+3. **Folder and File Verification:**
+   - Confirm that the `info/` folder exists and contains the necessary logs.
+   - Verify that the new `market_data.db` file is created with the correct schema.
+
+4. **Data Validation:**
+   - Compress and share the `info/` folder for further analysis of saved data.
+
+2025-06-03 22:03:01,910 - INFO - ==================================================
+SolanaScalper - Bot de Trading v2.0 (MODO ASÍNCRONO)
+==================================================
+
+2025-06-03 22:03:01,919 - INFO - Iniciando componentes asíncronos y síncronos...
+2025-06-03 22:03:01,920 - INFO - Conectando y suscribiendo al WebSocket de OKX...
+2025-06-03 22:03:05,835 - INFO - Conexión establecida con la API de OKX WebSocket.
+2025-06-03 22:03:05,843 - INFO - Enviando solicitud de autenticación a OKX WebSocket...
+2025-06-03 22:03:06,232 - INFO - Respuesta de autenticación: {'event': 'login', 'msg': '', 'code': '0', 'connId': 'c22d7d98'}
+2025-06-03 22:03:06,236 - INFO - Autenticación con OKX WebSocket exitosa.
+2025-06-03 22:03:06,236 - INFO - Enviando suscripción: {'op': 'subscribe', 'args': [{'channel': 'tickers', 'instId': 'SOL-USDT'}, {'channel': 'candle1m', 'instId': 'BTC-USDT'}]}
+2025-06-03 22:03:06,630 - INFO - Respuesta de suscripción: {'event': 'error', 'msg': "Wrong URL or channel:tickers,instId:SOL-USDT doesn't exist. Please use the correct URL, channel and parameters referring to API document.", 'code': '60018', 'connId': 'c22d7d98'}
+2025-06-03 22:03:06,650 - ERROR - Error al suscribirse: Wrong URL or channel:tickers,instId:SOL-USDT doesn't exist. Please use the correct URL, channel and parameters referring to API document.
+2025-06-03 22:03:06,656 - INFO - Suscripciones iniciales a tickers y candles enviadas. Suscripción a Order Book Nivel 2 TBT deshabilitada por restricción VIP.
+2025-06-03 22:03:06,660 - INFO - Inicializando bot en modo PAPER...
+2025-06-03 22:03:06,891 - INFO - [HistoricalDataSaver]: Conectado a DB async 'C:\proyectos\mibot2\CryptoTradingBot\data_management\..\data\market_data.db' y tablas verificadas.
+2025-06-03 22:03:06,906 - INFO - Bot inicializado.
+2025-06-03 22:03:06,920 - INFO - Hilo de entrada de usuario iniciado. Presiona 'q' para salir.
+2025-06-03 22:03:06,923 - INFO - Iniciando recepción de mensajes del WebSocket.
+2025-06-03 22:03:06,925 - INFO - Datos 'candle' de 'BTC-USDT' puestos en la cola.
+2025-06-03 22:03:06,927 - INFO - Datos 'candle' de 'BTC-USDT' puestos en la cola.
+2025-06-03 22:03:06,930 - INFO - [ScalpingBot]: Iniciando consumidor de datos de la cola...
+2025-06-03 22:03:06,930 - ERROR - [ScalpingBot ERROR]: Error al consumir de la cola: cannot access local variable 'inst_id' where it is not associated with a value
+2025-06-03 22:03:07,704 - INFO - Datos 'candle' de 'BTC-USDT' puestos en la cola.
+2025-06-03 22:03:07,712 - INFO - Datos 'candle' de 'BTC-USDT' puestos en la cola.
+2025-06-03 22:03:07,937 - ERROR - [ScalpingBot ERROR]: Error al consumir de la cola: cannot access local variable 'inst_id' where it is not associated with a value
+2025-06-03 22:03:08,738 - INFO - Datos 'candle' de 'BTC-USDT' puestos en la cola.
+2025-06-03 22:03:08,758 - INFO - Datos 'candle' de 'BTC-USDT' puestos en la cola.
+2025-06-03 22:03:08,944 - ERROR - [ScalpingBot ERROR]: Error al consumir de la cola: cannot access local variable 'inst_id' where it is not associated with a value
+2025-06-03 22:03:10,129 - INFO - Datos 'candle' de 'BTC-USDT' puestos en la cola.
+2025-06-03 22:03:10,129 - INFO - Datos 'candle' de 'BTC-USDT' puestos en la cola.
+2025-06-03 22:03:10,129 - ERROR - [ScalpingBot ERROR]: Error al consumir de la cola: cannot access local variable 'inst_id' where it is not associated with a value
+2025-06-03 22:03:10,730 - INFO - Datos 'candle' de 'BTC-USDT' puestos en la cola.
+2025-06-03 22:03:10,760 - INFO - Datos 'candle' de 'BTC-USDT' puestos en la cola.
+2025-06-03 22:03:11,144 - ERROR - [ScalpingBot ERROR]: Error al consumir de la cola: cannot access local variable 'inst_id' where it is not associated with a value
+2025-06-03 22:03:11,754 - INFO - Datos 'candle' de 'BTC-USDT' puestos en la cola.
+2025-06-03 22:03:11,759 - INFO - Datos 'candle' de 'BTC-USDT' puestos en la cola.
+2025-06-03 22:03:12,173 - ERROR - [ScalpingBot ERROR]: Error al consumir de la cola: cannot access local variable 'inst_id' where it is not associated with a value
+2025-06-03 22:03:12,908 - INFO - Manejador de comandos CLI cancelado.
+2025-06-03 22:03:12,935 - INFO - Tareas principales canceladas.
+2025-06-03 22:03:12,972 - INFO - Cerrando recursos del bot...
+2025-06-03 22:03:12,977 - INFO - Apagando el bot...
+2025-06-03 22:03:13,020 - WARNING - El bot no está activo.
+2025-06-03 22:03:13,067 - INFO - [HistoricalDataSaver]: Desconectado de la base de datos 'C:\proyectos\mibot2\CryptoTradingBot\data_management\..\data\market_data.db'.
+2025-06-03 22:03:13,078 - INFO - Bot apagado y recursos liberados.
+2025-06-03 22:03:13,081 - INFO - Bot apagado completamente.

@@ -1,0 +1,2 @@
+2025-06-04 02:47:07,368 - SolanaTraderBotStarter - ERROR - Error importando módulos necesarios: cannot import name 'main_menu' from 'bot_cli' (C:\proyectos\mibot3\botviejo1\bot_cli.py)
+2025-06-04 23:31:37,832 - SolanaTraderBotStarter - ERROR - Error importando módulos necesarios: cannot import name 'cli_main_loop' from 'bot_cli' (C:\proyectos\mibot3\botviejo1\bot_cli.py)

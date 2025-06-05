@@ -1,2 +1,0 @@
-2025-05-25 02:17:25,837 - SolanaTraderBotStarter - ERROR - Error importando módulos necesarios: cannot import name 'main_menu' from 'bot_cli' (/home/runner/workspace/bot_cli.py)
-2025-05-25 05:11:33,559 - SolanaTraderBotStarter - ERROR - Error importando módulos necesarios: cannot import name 'main_menu' from 'bot_cli' (/home/runner/workspace/bot_cli.py)

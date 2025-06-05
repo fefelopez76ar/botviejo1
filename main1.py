@@ -107,48 +107,41 @@ class ScalpingBot:
         while not self.stop_event.is_set():
             try:
                 data = await asyncio.wait_for(self.data_queue.get(), timeout=1.0)
-                # logger.debug(f"[ScalpingBot]: Datos recibidos de la cola: {data.get('type', 'N/A')}")
+
+                # Inicializar inst_id de forma segura
+                inst_id = None
 
                 if data.get('type') == 'ticker':
-                    inst_id = data.get('instrument')
-                    price_data = data.get('data')
-                    if price_data:
-                        last_price = price_data[0].get('last')
-                        logger.info(f"[ScalpingBot - Ticker]: {inst_id} - Último precio: {last_price}")
-                        # NUEVO: Guardar datos de ticker
-                        await self.historical_data_saver.save_ticker_data(data) # <--- ¡Aquí está la adición!
-                elif data.get('type') == 'books-l2-tbt':
-                    logger.info(f"[ScalpingBot - OrderBook]: {data.get('instrument')} - Bid: {data.get('best_bid')}, Ask: {data.get('best_ask')}")
-                    # NUEVO: Guardar datos de order book
-                    self.historical_data_saver.save_order_book_data(data) # <--- ¡Aquí está la adición!
-                elif data.get('type') == 'trades':
-                    logger.info(f"[ScalpingBot - Trade]: {data.get('instrument')} - Trades recibidos.")
-                elif data.get('type') == 'candle':
-                    candle_data_list = data.get('data', [])
-                    if candle_data_list:
-                        latest_candle_info = candle_data_list[0]
-                        close_price = float(latest_candle_info[4])
-                        interval = data.get('interval')
-                        logger.info(f"[ScalpingBot - Candle]: {inst_id} - Intervalo: {interval} - Cierre: {close_price}")
-                        await self.historical_data_saver.save_candlestick_data(data)
+                    if 'instrument' in data:  # Verificar si 'instrument' está presente
+                        inst_id = data['instrument']
+                        price_data = data.get('data')
+                        if price_data:
+                            last_price = price_data[0].get('last')
+                            logger.info(f"[ScalpingBot - Ticker]: {inst_id} - Último precio: {last_price}")
+                            # Guardar datos de ticker
+                            await self.historical_data_saver.save_ticker_data(data)
+                        else:
+                            logger.warning(f"Ticker sin datos de precio: {data}")
                     else:
-                        logger.warning(f"[ScalpingBot - Candle]: Datos de vela vacíos para {inst_id}.")
+                        logger.warning(f"Mensaje de ticker sin 'instrument': {data}")
 
-                # Asegurarse de que task_done() se llama para cada elemento 'get'
+                elif data.get('type') == 'books-l2-tbt':
+                    if 'instrument' in data:  # Verificar si 'instrument' está presente
+                        inst_id = data['instrument']
+                        logger.info(f"[ScalpingBot - OrderBook]: {inst_id} - Bid: {data.get('best_bid')}, Ask: {data.get('best_ask')}")
+                    else:
+                        logger.warning(f"Mensaje de order book sin 'instrument': {data}")
+
+                # Asegúrate de llamar task_done() después de procesar cada elemento
                 self.data_queue.task_done()
-            except asyncio.TimeoutError:
-                pass
-            except asyncio.CancelledError:
-                logger.info("[ScalpingBot]: Consumidor de cola cancelado.")
-                break
+
             except Exception as e:
                 logger.error(f"[ScalpingBot ERROR]: Error al consumir de la cola: {e}")
-                if not self.data_queue.empty():
-                    try:
-                        self.data_queue.task_done()
-                    except ValueError:
-                        pass
-                await asyncio.sleep(1)
+                # Intentar marcar la tarea como hecha incluso en caso de error
+                try:
+                    self.data_queue.task_done()
+                except ValueError as ve:
+                    logger.warning(f"task_done() llamado en una cola vacía o demasiadas veces: {ve}")
 
         logger.info("[ScalpingBot]: Consumidor de datos de la cola detenido.")
 

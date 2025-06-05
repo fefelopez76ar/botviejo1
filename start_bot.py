@@ -47,23 +47,20 @@ def main():
     
     try:
         # Intentar importar el módulo del menú CLI
-        from bot_cli import main_menu, running
+        from bot_cli import cli_main_loop
         
         print("\nIniciando interfaz de línea de comandos...")
         time.sleep(1)
         
-        # Iniciar el bucle principal
-        while running:
-            try:
-                main_menu()
-            except KeyboardInterrupt:
-                print("\n\nBot detenido por el usuario. ¡Hasta pronto!")
-                break
-            except Exception as e:
-                logger.error(f"Error en bucle principal: {e}")
-                print(f"\nError: {e}")
-                print("Reiniciando menú en 3 segundos...")
-                time.sleep(3)
+        # Iniciar el bucle principal del CLI
+        try:
+            cli_main_loop()
+        except KeyboardInterrupt:
+            print("\n\nBot detenido por el usuario. ¡Hasta pronto!")
+        except Exception as e:
+            logger.error(f"Error en bucle principal del CLI: {e}")
+            print(f"\nError: {e}")
+            print("El CLI ha terminado debido a un error.")
         
     except ImportError as e:
         logger.error(f"Error importando módulos necesarios: {e}")

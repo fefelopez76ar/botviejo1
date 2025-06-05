@@ -153,9 +153,10 @@ class OKXWebSocketClient:
             logging.error("No se puede suscribir: el WebSocket no está conectado.")
             return
 
-        # Filtrar el canal 'trades' de la lista de canales
-        channels = [channel for channel in channels if channel.get("channel") != "trades"]
-
+        # channels = [channel for channel in channels if channel.get("channel") != "trades"]
+        channels = [
+            {"channel": "candle1m", "instId": "SOL-USDT"}
+        ]
         subscribe_message = {
             "op": "subscribe",
             "args": channels
@@ -228,18 +229,8 @@ class OKXWebSocketClient:
 
                 processed_item = None
                 if channel == "tickers" and payload_data:
-                    ticker_info = payload_data[0]
-                    # Simplificamos la estructura para la cola
-                    processed_item = {
-                        "type": "ticker",
-                        "instrument": inst_id,
-                        "timestamp": ticker_info.get('ts'),
-                        "last_price": float(ticker_info.get('last')),
-                        "best_bid": float(ticker_info.get('bidPx')),
-                        "best_ask": float(ticker_info.get('askPx')),
-                        "data": payload_data # Opcional: mantener la data original completa
-                    }
-                    # logging.info(f"Mejor Bid: {processed_item['best_bid']}, Tamaño: {ticker_info.get('bidSz')} | Mejor Ask: {processed_item['best_ask']}, Tamaño: {ticker_info.get('askSz')}")
+                    # Comentamos el procesamiento de datos del canal 'tickers'
+                    pass
 
                 elif channel == "books-l2-tbt" and payload_data:
                     book_info = payload_data[0]

@@ -1,0 +1,15 @@
+Considerando la estructura de archivos proporcionada, y enfocándonos en los archivos `trading_bot.py` y `main.py`, necesito que me guíes en los siguientes pasos para adaptar mi bot de trading de Solana en Replit para operaciones simuladas exclusivas desde la terminal, con el objetivo de minimizar el consumo de recursos y tener control total sobre las acciones:
+
+1.  **Desactivación de la "Batalla de los Bots":** Identifica y proporciona las instrucciones específicas (por ejemplo, qué líneas comentar o eliminar) dentro de `main.py` o cualquier otro archivo relevante para deshabilitar completamente la funcionalidad relacionada con `bot_battle_arena.py`. Explica el propósito de las líneas que se deben modificar.
+
+2.  **Configuración Predeterminada para Trading Simulado:** Asegúrate de que el bot se inicie por defecto en modo de "paper trading". Indica qué variables de configuración o secciones de código en `trading_bot.py` o `main.py` deben revisarse o modificarse para garantizar esto.
+
+3.  **Inicio desde la Terminal:** Modifica el script `main.py` para que pueda ser ejecutado directamente desde la terminal de Replit e inicie el bot en modo simulado sin dependencias de la interfaz web u otros componentes no esenciales en este momento. Proporciona el código modificado de `main.py` (si es necesario) y explica cómo ejecutarlo desde la terminal.
+
+4.  **Operaciones Simuladas Activas:** Verifica que la lógica para realizar operaciones simuladas (dentro de `trading_bot.py` o las estrategias correspondientes) esté activa y funcional. Indica qué partes del código debo revisar para confirmar esto.
+
+5.  **Minimización de Recursos:** Aconseja sobre cualquier paso adicional que pueda tomar para minimizar el consumo de recursos de Replit en este modo de operación simulada exclusivo desde la terminal. Esto podría incluir evitar la inicialización de componentes de la interfaz web, sistemas de notificaciones complejas (por ahora), etc.
+
+6.  **Confirmación del Usuario:** Implementa un mecanismo en `main.py` (o en la interacción inicial desde la terminal) para que antes de iniciar cualquier simulación de operación, el bot me pregunte si deseo proceder. No debe realizar ninguna operación simulada sin mi confirmación explícita a través de la terminal. Proporciona el código necesario para esta confirmación.
+
+Quiero que la solución se centre en **modificar el código existente** en `trading_bot.py` y `main.py` principalmente, evitando la creación de nuevos scripts. Explica cada paso claramente y proporciona el código necesario (si hay modificaciones) de manera que pueda copiarlo y pegarlo fácilmente en Replit. Asegúrate de preguntar por mi confirmación antes de indicarme cualquier modificación de código.

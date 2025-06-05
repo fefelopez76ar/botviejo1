@@ -140,3 +140,56 @@ Manifiesto de Colaboración: Desarrollo Robusto de Bots de Trading
     Robustez del Código Generado: Aunque la interfaz sea simple, el código Python que se genere será robusto, incluyendo manejo básico de errores (try-except) cuando se interactúa con datos externos o la base de datos.
     Seguridad: Recordaré la importancia de la gestión segura de claves API (mediante variables de entorno) y evitaré la exposición de información sensible en los logs o en el código que te proporcione.
 
+# Contexto del Proyecto de Bot de Trading (Usuario: FedeLofeDelooo)
+
+## 1. Nombre del Proyecto:
+* SolanaScalper - Bot de Trading v2.0
+
+## 2. Objetivo General:
+* Bot de trading algorítmico de scalping/day trading para el par SOL/USDT.
+* Enfoque en alta frecuencia y aprovechamiento de movimientos rápidos de precio.
+
+## 3. Plataforma / Exchange:
+* OKX.
+
+## 4. Modo de Operación Actual:
+* **PAPER Mode (Simulado)**: El bot está inicializado para operar sin capital real.
+
+## 5. Arquitectura y Componentes Clave:
+* **Programación Asíncrona:** Utiliza `asyncio` y `websockets` para manejar la concurrencia y la conexión con la API.
+* **Conexión OKX:** Establece conexiones WebSocket para datos públicos y de negocio.
+* **Manejo de Datos:**
+    * `HistoricalDataSaver`: Conectado a una base de datos `sqlite3` (`market_data.db`) para almacenar datos históricos.
+    * Los datos de `candle` se están poniendo en cola para ser guardados.
+* **CLI:** Hilo de entrada de usuario básico (`q` para salir).
+
+## 6. Suscripciones a Datos de Mercado (OKX):
+* **Exitosas:**
+    * `tickers` para `SOL-USDT`.
+    * `candle1m` (velas de 1 minuto) para `SOL-USDT`.
+* **Deshabilitadas/Restringidas:**
+    * `Order Book Nivel 2 TBT` (Trade-By-Trade) **deshabilitado por restricción VIP** de OKX.
+
+## 7. Módulos de Estrategias Identificados:
+* **`scalping_strategies.py` (Clase `ScalpingStrategies`)**:
+    * **Funciones Principales / Lógica:**
+        * `calculate_vwap`: Cálculo de Precio Promedio Ponderado por Volumen (VWAP).
+        * `is_breakout`: Detección de rupturas (breakouts) de precio.
+        * `determine_liquidity_zones`: Análisis de libro de órdenes para zonas de liquidez (***AFECTADO POR LA RESTRICCIÓN VIP***).
+        * `arbitrage_opportunity`: Identificación de oportunidades de arbitraje (actualmente conceptual, bot conectado a 1 exchange).
+        * `simulate_trade_execution`: Simulación de ejecución de trades.
+        * `evaluate_trade_performance`: Evaluación del rendimiento de trades simulados.
+    * **Parámetros:** Configuración de take-profit, stop-loss, tamaño de posición, volumen mínimo, ratio riesgo/recompensa, impacto de comisiones.
+
+## 8. Problema Actual Identificado:
+* El bot funcionaba en Replit, pero **no funciona en Visual Studio Code (VSC)**.
+* **Causas más Probables (a verificar):**
+    * Falta de un entorno virtual (`venv`) activado y/o instalación de dependencias (`requirements.txt`).
+    * Problemas con la carga de variables de entorno (API keys).
+    * Diferencias en las rutas de archivos.
+    * Versiones de Python incompatibles.
+
+## 9. Próximos Pasos (Pendientes):
+1.  **Diagnóstico del Problema en VSC:** Necesito el `traceback` completo o el mensaje de error específico de VSC para identificar la causa raíz.
+2.  **Integración de Estrategias:** Una vez resuelto el entorno, integrar la llamada a las funciones de `ScalpingStrategies` utilizando los datos de `candle1m` y `tickers`.
+3.  **Manejo de la Restricción VIP:** Decidir cómo adaptar o si modificar la función `determine_liquidity_zones` dado que el Order Book TBT no está disponible.

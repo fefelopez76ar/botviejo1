@@ -1,0 +1,159 @@
+/**
+ * Custom styles for Solana Trading Bot
+ */
+
+/* General Styles */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.footer {
+    margin-top: auto;
+}
+
+/* Custom Card Styling */
+.card {
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+/* Dashboard Styling */
+#priceChart {
+    min-height: 300px;
+}
+
+.stats-card {
+    border-left: 4px solid var(--bs-primary);
+}
+
+/* Signal Indicators */
+.signal-badge {
+    font-size: 0.8rem;
+    padding: 0.35rem 0.65rem;
+}
+
+/* Symbol Display */
+.crypto-symbol {
+    font-weight: 600;
+    color: var(--bs-info);
+}
+
+/* Trading Status */
+.trading-active-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: var(--bs-success);
+}
+
+.trading-inactive-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: var(--bs-danger);
+}
+
+/* Pulse Animation for Active Trading */
+.pulse {
+    animation: pulse-animation 2s infinite;
+}
+
+@keyframes pulse-animation {
+    0% {
+        box-shadow: 0 0 0 0 rgba(25, 135, 84, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(25, 135, 84, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(25, 135, 84, 0);
+    }
+}
+
+/* ROI Display */
+.positive-roi {
+    color: var(--bs-success);
+}
+
+.negative-roi {
+    color: var(--bs-danger);
+}
+
+/* Settings Page */
+pre {
+    background-color: var(--bs-dark);
+    color: var(--bs-light);
+    padding: 1rem;
+    border-radius: 0.25rem;
+    overflow-x: auto;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card-title {
+        font-size: 1.1rem;
+    }
+    
+    h3 {
+        font-size: 1.5rem;
+    }
+    
+    .table-sm td {
+        padding: 0.25rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* Custom modal styling */
+.modal-content {
+    border: none;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.5);
+}
+
+.modal-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Trade history styling */
+.trade-history-item {
+    border-left: 3px solid transparent;
+    padding-left: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.trade-history-item.win {
+    border-left-color: var(--bs-success);
+}
+
+.trade-history-item.loss {
+    border-left-color: var(--bs-danger);
+}
+
+/* Alert animation */
+@keyframes fadeInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+#alertContainer .alert {
+    animation: fadeInRight 0.5s ease-out;
+}

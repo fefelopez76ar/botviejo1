@@ -1,0 +1,16 @@
+# Pendientes - 30 de Mayo de 2025
+
+## Problemas Detectados
+1. **Error en `verificar_db.py`:**
+   - Mensaje: `sqlite3.OperationalError: no such table: tickers`.
+   - Acción requerida: Crear la tabla `tickers` en la base de datos `market_data.db` o verificar si la base de datos está configurada correctamente.
+
+## Próximas Tareas
+1. Revisar el esquema de la base de datos `market_data.db`.
+2. Implementar un script para inicializar las tablas necesarias si no existen.
+3. Validar que las tablas `tickers` y `order_book` contengan datos válidos.
+4. Probar nuevamente el script `verificar_db.py` después de solucionar el problema.
+
+## Notas Adicionales
+- Asegurarse de que la base de datos esté en la ubicación correcta y accesible.
+- Documentar cualquier cambio realizado en el esquema de la base de datos en `info/roadmap_features.md`.
