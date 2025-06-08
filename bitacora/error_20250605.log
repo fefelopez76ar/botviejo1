@@ -1,0 +1,13 @@
+[2025-06-05 15:00:00] Errores detectados:
+
+1. NameError: name 'db_handler' is not defined:
+   Este es el error principal que está deteniendo la ejecución del bot. Significa que la variable db_handler no ha sido creada o no está disponible en el ámbito donde se intenta usar (en la línea 231 de main1.py cuando se inicializa ScalpingBot). Es un problema de alcance o inicialización de variables.
+
+2. Errores de suscripción a OKX (Código 60018):
+   Los mensajes "Wrong URL or channel:tickers,instId:SOL-USDT doesn't exist. Please use the correct URL, channel and parameters referring to API document." para tickers y candles indican que los parámetros de suscripción que estás enviando al WebSocket de OKX no son correctos o los canales/instrumentos no son reconocidos como los estás pidiendo.
+
+Acciones necesarias:
+
+- Revisar el código de main1.py: Compartir la sección de main1.py donde se encuentra la función main_cli_interface_async y, específicamente, las líneas alrededor de la línea 231, donde se inicializa ScalpingBot (para entender cómo se están pasando historical_data_saver y db_handler).
+
+- Buscar la documentación oficial de OKX para verificar los parámetros de suscripción correctos para los canales de tickers y candles en sus WebSockets.

@@ -1,0 +1,20 @@
+2025-06-05 01:27:19,092 - SolanaTraderBotStarter - ERROR - Error importando m�dulos necesarios: cannot import name 'running' from 'bot_cli' (C:\proyectos\mibot3\botviejo1\bot_cli.py)
+2025-06-05 01:30:48,230 - BotCLI - WARNING - Opci�n de men� no v�lida ingresada: 'python start_bot.py'
+2025-06-05 01:35:22,766 - BotCLI - INFO - Mostrando estado del sistema...
+2025-06-05 01:35:39,051 - BotCLI - INFO - Mostrando datos de mercado...
+2025-06-05 01:36:42,233 - BotCLI - INFO - Mostrando balances de billetera...
+2025-06-05 01:36:55,404 - BotCLI - INFO - Mostrando posiciones abiertas...
+2025-06-05 01:37:05,225 - BotCLI - INFO - Mostrando historial de trades...
+2025-06-05 01:37:17,193 - BotCLI - INFO - Usuario selecciono 'q'. Saliendo del CLI.
+2025-06-05 13:55:28,386 - BotCLI - INFO - Mostrando estado del sistema...
+2025-06-05 14:23:16,557 - BotCLI - INFO - Usuario selecciono 'q'. Saliendo del CLI.
+[2025-06-05 14:30:00] Últimos cambios realizados:
+- Modificación en `run_data_consumer` para manejo robusto de errores y asegurar uso correcto de `task_done()`.
+- Corrección en la inicialización de `ScalpingBot` en `temp_repo/main1.py` para incluir el argumento `db_handler`.
+
+[2025-06-05 14:35:00] Nuevos errores detectados:
+- `AttributeError: 'ScalpingBot' object has no attribute 'db_handler'` persiste en la ejecución de `temp_repo/main1.py`.
+
+Acciones pendientes:
+- Revisar inicialización de `ScalpingBot` en todos los archivos relevantes.
+- Confirmar que los cambios realizados se reflejan correctamente en la ejecución.
